@@ -1,0 +1,41 @@
+# Project Context: Twitter Bulk Scheduler (Serverless)
+
+## Core Stack
+- **Runtime:** Cloudflare Workers (Platform: Bun/Node compat)
+- **Language:** TypeScript
+- **Framework:** Hono (Lightweight web framework)
+- **Database:** Neon (Serverless Postgres)
+- **ORM:** Drizzle ORM
+- **Scheduler:** Upstash QStash
+
+## Critical Architecture Rules
+1.  **Database Driver:** You MUST use `@neondatabase/serverless` for all database connections.
+    - NEVER use the standard `postgres` or `pg` driver.
+    - NEVER use `drizzle-orm/postgres-js`.
+    - ALWAYS use `drizzle-orm/neon-http` for queries.
+    - REASON: We need HTTP connection pooling to handle QStash concurrency spikes.
+
+2.  **Transactions:**
+    - Avoid `db.transaction()` interactive blocks.
+    - Use `db.batch()` if multiple write operations are needed in one go.
+    - If interactive transactions are absolutely necessary, switch to `drizzle-orm/neon-serverless` (WebSocket), but prefer HTTP.
+
+3.  **Deployment:**
+    - Target: Cloudflare Workers.
+    - Region: `ap-south-1` (Mumbai) via Smart Placement.
+    - Config File: `wrangler.toml`.
+
+4.  **No Node.js Native APIs:**
+    - Do not use `fs` (File System) or native `child_process`.
+    - Use `fetch` for all network requests.
+
+## Coding Style
+- Use `const` over `let`.
+- Use `async/await` for all DB/Network calls.
+- Schema definitions in `src/db/schema.ts`.
+- Environment variables accessed via `env` (Hono Context), not `process.env`.
+
+## Common Commands
+- Run Dev: `bun run dev` (or `wrangler dev`)
+- Generate Migrations: `bun run drizzle-kit generate`
+- Deploy: `bun run deploy`

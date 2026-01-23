@@ -5,7 +5,7 @@ import * as schema from './schema';
 export * from 'drizzle-orm';
 export * from './schema';
 
-export function createDb() {
-    const sql = neon(process.env.DATABASE_URL || "");
+export function createDb(databaseUrl: string) {
+    const sql = neon(databaseUrl);
     return drizzle(sql, { schema });
 }

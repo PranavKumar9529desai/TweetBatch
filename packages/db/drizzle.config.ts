@@ -1,6 +1,7 @@
 import { defineConfig } from 'drizzle-kit';
 import { existsSync } from 'fs';
 
+// TOOD : This is not ideal Solution we should handle in this way
 if (existsSync('.env.local')) {
     process.loadEnvFile('.env.local');
 } else if (existsSync('../../.env.local')) {

@@ -1,10 +1,15 @@
 import { Hono } from 'hono'
-import { auth } from '@repo/auth'
+import { getAuth } from '@repo/auth'
 
-const app = new Hono()
-
-// Mount Better Auth handler
-app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
+const app = new Hono<{
+    Bindings: {
+        DATABASE_URL: string;
+        BETTER_AUTH_SECRET: string;
+        BETTER_AUTH_URL: string;
+        TWITTER_CLIENT_ID: string;
+        TWITTER_CLIENT_SECRET: string;
+    }
+}>()
 
 const routes = app.get('/', (c) => {
     return c.json({

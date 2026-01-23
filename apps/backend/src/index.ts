@@ -1,15 +1,24 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { getAuth } from '@repo/auth'
 
 const app = new Hono<{
-    Bindings: {
-        DATABASE_URL: string;
-        BETTER_AUTH_SECRET: string;
-        BETTER_AUTH_URL: string;
-        TWITTER_CLIENT_ID: string;
-        TWITTER_CLIENT_SECRET: string;
-    }
+    Bindings: CloudflareBindings
 }>()
+
+console.log("Backend process starting...");
+
+app.use('*', async (c, next) => {
+    const corsMiddleware = cors({
+        origin: c.env.FRONTEND_URL || "http://localhost:5173",
+        allowHeaders: ["Content-Type", "Authorization", "Upgrade-Insecure-Requests"],
+        allowMethods: ["POST", "GET", "OPTIONS"],
+        exposeHeaders: ["Content-Length"],
+        maxAge: 600,
+        credentials: true,
+    });
+    return corsMiddleware(c, next);
+});
 
 // Root route
 app.get('/', (c) => {

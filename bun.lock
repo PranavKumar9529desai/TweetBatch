@@ -12,8 +12,8 @@
     "apps/backend": {
       "name": "@repo/backend",
       "dependencies": {
-        "@repo/api": "*",
-        "@repo/db": "*",
+        "@repo/auth": "workspace:*",
+        "@repo/db": "workspace:*",
         "hono": "^4.11.5",
       },
       "devDependencies": {

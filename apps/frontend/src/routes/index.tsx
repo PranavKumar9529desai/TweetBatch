@@ -9,7 +9,7 @@ export const Route = createFileRoute('/')({
 function handleClick() {
   const response = authClient.signIn.social({
     provider: "twitter",
-    callbackURL: "/"
+    callbackURL: "http://localhost:5173"
   });
   console.log(response)
 }

@@ -8,6 +8,7 @@ export const getAuth = (env: {
     BETTER_AUTH_URL: string;
     TWITTER_CLIENT_ID: string;
     TWITTER_CLIENT_SECRET: string;
+    FRONTEND_URL: string;
 }) => betterAuth({
     database: drizzleAdapter(schema.createDb(env.DATABASE_URL), {
         provider: "pg",
@@ -20,6 +21,7 @@ export const getAuth = (env: {
     }),
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_URL,
+    trustedOrigins: [env.FRONTEND_URL],
     socialProviders: {
         twitter: {
             clientId: env.TWITTER_CLIENT_ID,

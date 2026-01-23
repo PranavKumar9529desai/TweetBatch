@@ -4,7 +4,7 @@ import * as schema from "@repo/db";
 
 // This is for the CLI and as a default instance
 export const auth = betterAuth({
-    database: drizzleAdapter(schema.createDb(process.env.DATABASE_URL || ""), {
+    database: drizzleAdapter(schema.createDb(), {
         provider: "pg",
         schema: {
             user: schema.user,
@@ -13,6 +13,8 @@ export const auth = betterAuth({
             verification: schema.verification,
         }
     }),
+    secret: process.env.BETTER_AUTH_SECRET,
+    baseURL: process.env.BETTER_AUTH_URL,
     socialProviders: {
         twitter: {
             clientId: process.env.TWITTER_CLIENT_ID || "",

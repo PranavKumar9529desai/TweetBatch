@@ -1,6 +1,10 @@
 import { Hono } from 'hono'
+import { auth } from '@repo/auth'
 
 const app = new Hono()
+
+// Mount Better Auth handler
+app.on(["POST", "GET"], "/api/auth/**", (c) => auth.handler(c.req.raw))
 
 const routes = app.get('/', (c) => {
     return c.json({

@@ -8,5 +8,6 @@ const routes = app.get('/', (c) => {
     })
 })
 
+
 export type AppType = typeof routes
 export default app

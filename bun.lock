@@ -12,11 +12,23 @@
     "apps/backend": {
       "name": "@repo/backend",
       "dependencies": {
+        "@repo/api": "*",
         "@repo/db": "*",
         "hono": "^4.11.5",
       },
       "devDependencies": {
         "wrangler": "^4.4.0",
+      },
+    },
+    "packages/api": {
+      "name": "@repo/api",
+      "version": "0.0.0",
+      "dependencies": {
+        "hono": "^4.6.14",
+      },
+      "devDependencies": {
+        "@repo/typescript-config": "*",
+        "typescript": "5.9.2",
       },
     },
     "packages/db": {
@@ -246,6 +258,8 @@
     "@poppinss/dumper": ["@poppinss/dumper@0.6.5", "", { "dependencies": { "@poppinss/colors": "^4.1.5", "@sindresorhus/is": "^7.0.2", "supports-color": "^10.0.0" } }, "sha512-NBdYIb90J7LfOI32dOewKI1r7wnkiH6m920puQ3qHUeZkxNkQiFnXVWoE6YtFSv6QOiPPf7ys6i+HWWecDz7sw=="],
 
     "@poppinss/exception": ["@poppinss/exception@1.2.3", "", {}, "sha512-dCED+QRChTVatE9ibtoaxc+WkdzOSjYTKi/+uacHWIsfodVfpsueo3+DKpgU5Px8qXjgmXkSvhXvSCz3fnP9lw=="],
+
+    "@repo/api": ["@repo/api@workspace:packages/api"],
 
     "@repo/backend": ["@repo/backend@workspace:apps/backend"],
 

@@ -135,37 +135,37 @@
 
 ## Phase 8: API Endpoints (CRUD)
 
-- [ ] `POST /api/posts` - Create single scheduled post
-- [ ] `GET /api/posts` - List user's scheduled posts (with filters)
-- [ ] `GET /api/posts/:id` - Get single post details
-- [ ] `PATCH /api/posts/:id` - Update post content/time
-  - [ ] If already synced to QStash, cancel old message
-  - [ ] Re-sync with new time
-- [ ] `DELETE /api/posts/:id` - Cancel/delete post
-  - [ ] If synced to QStash, cancel message
+- [x] `POST /api/posts` - Create single scheduled post
+- [x] `GET /api/posts` - List user's scheduled posts (with filters)
+- [x] `GET /api/posts/:id` - Get single post details
+- [x] `PATCH /api/posts/:id` - Update post content/time
+  - [x] If already synced to QStash, cancel old message
+  - [x] Re-sync with new time
+- [x] `DELETE /api/posts/:id` - Cancel/delete post
+  - [x] If synced to QStash, cancel message
 
 ---
 
 ## Phase 9: User Notifications
 
-- [ ] Design notification system
-  - [ ] In-app notifications table
+- [x] Design notification system
+  - [x] In-app notifications table
   - [ ] Email integration **(Deferred to Phase 9.5)**
-- [ ] Implement notification triggers
-  - [ ] On permanent failure
-  - [ ] On account disconnection
-  - [ ] On successful post (optional)
-- [ ] Create notification templates
+- [x] Implement notification triggers
+  - [x] On permanent failure
+  - [x] On account disconnection
+  - [x] On successful post (optional)
+- [x] Create notification templates
 
 ---
 
 ## Phase 10: Frontend Integration
 
-- [ ] Scheduler UI components
-  - [ ] Date/time picker for scheduling
-  - [ ] Content editor with character count
-  - [ ] Preview component
-- [ ] Scheduled posts list view
+- [x] Scheduler UI components
+  - [x] Date/time picker for scheduling
+  - [x] Content editor with character count
+  - [x] Preview component
+- [/] Scheduled posts list view
   - [ ] Filter by status
   - [ ] Sort by scheduled time
   - [ ] Bulk actions
@@ -173,8 +173,8 @@
   - [ ] JSON file upload
   - [ ] Preview before import
   - [ ] Import results display
-- [ ] Post status indicators
-  - [ ] Pending, Queued, Posted, Failed, Cancelled
+- [x] Post status indicators
+  - [x] Pending, Queued, Posted, Failed, Cancelled
 
 ---
 

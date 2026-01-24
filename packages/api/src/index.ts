@@ -8,11 +8,13 @@ const app = new Hono<{
 
 app.post("/tweet", postTweet);
 
-const routes = app.get("/", (c) => {
+const routes = app.get("/dev-worker/hello", (c) => {
   return c.json({
     message: "Hello from shared API!",
   });
 });
+
+
 
 export type AppType = typeof routes;
 export default app;

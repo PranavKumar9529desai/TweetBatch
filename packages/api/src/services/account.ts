@@ -1,5 +1,6 @@
 import { createDb, eq, and } from "@repo/db";
 import * as schema from "@repo/db";
+import { NotificationService } from "./notification";
 
 type DbClient = ReturnType<typeof createDb>;
 
@@ -47,6 +48,15 @@ export class AccountService {
      * This is called when we detect permanent auth failures.
      */
     async markAsDisconnected(userId: string, providerId: string, reason: string) {
+        // Create notification first to alert user
+        const notificationService = new NotificationService(this.db);
+        await notificationService.createNotification({
+            userId,
+            type: "account_disconnected",
+            message: `Your ${providerId} account was disconnected. Reason: ${reason}. Please reconnect to resume scheduling.`,
+            data: { providerId, reason },
+        });
+
         const [updated] = await this.db
             .update(schema.account)
             .set({

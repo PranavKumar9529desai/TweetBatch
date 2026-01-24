@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getAuth } from '@repo/auth'
-import { qstashWebhookRoute, bulkImportRoute, postsRoute, syncPostsToQStash } from '@repo/api'
+import { qstashWebhookRoute, bulkImportRoute, postsRoute, notificationsRoute, syncPostsToQStash } from '@repo/api'
 
 const app = new Hono<{
     Bindings: CloudflareBindings
@@ -43,6 +43,9 @@ app.route('/api/qstash', qstashWebhookRoute);
 
 // Posts routes (bulk import, CRUD, etc.)
 app.route('/api/posts', postsRoute);
+
+// Notifications routes
+app.route('/api/notifications', notificationsRoute);
 
 export const handle = app.fetch
 

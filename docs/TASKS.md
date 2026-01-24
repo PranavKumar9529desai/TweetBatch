@@ -150,7 +150,7 @@
 
 - [ ] Design notification system
   - [ ] In-app notifications table
-  - [ ] Email integration (optional)
+  - [ ] Email integration **(Deferred to Phase 9.5)**
 - [ ] Implement notification triggers
   - [ ] On permanent failure
   - [ ] On account disconnection
@@ -223,7 +223,7 @@
 | Phase 6: Failure Handling | ✅ Complete | Error classification + account disconnection |
 | Phase 7: Bulk Import | ✅ Complete | Rate limits: 3/day, 20/week, 50/import |
 | Phase 8: API Endpoints | ✅ Complete | CRUD endpoints created & verified |
-| Phase 9: Notifications | ⬜ Not Started | |
+| Phase 9: Notifications | ✅ Complete | In-app system implemented (Email deferred) |
 | Phase 10: Frontend | ⬜ Not Started | |
 | Phase 11: Testing | ⬜ Not Started | |
 | Phase 12: Monitoring | ⬜ Not Started | |

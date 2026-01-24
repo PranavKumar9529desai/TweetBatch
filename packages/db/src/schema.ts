@@ -115,6 +115,7 @@ export const userRelations = relations(user, ({ many }) => ({
     sessions: many(session),
     accounts: many(account),
     scheduledPosts: many(scheduledPost),
+    notifications: many(notification),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -134,6 +135,32 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const scheduledPostRelations = relations(scheduledPost, ({ one }) => ({
     user: one(user, {
         fields: [scheduledPost.userId],
+        references: [user.id],
+    }),
+}));
+
+export const notification = pgTable(
+    "notification",
+    {
+        id: text("id").primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        type: text("type").notNull(), // 'post_failed', 'account_disconnected', 'system'
+        message: text("message").notNull(),
+        data: text("data"), // JSON stringified data
+        isRead: boolean("is_read").default(false).notNull(),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+    },
+    (table) => [
+        index("notification_userId_idx").on(table.userId),
+        index("notification_isRead_idx").on(table.isRead),
+    ],
+);
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+    user: one(user, {
+        fields: [notification.userId],
         references: [user.id],
     }),
 }));

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, boolean, index, integer } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 export const user = pgTable("user", {
@@ -73,9 +73,44 @@ export const verification = pgTable(
     (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
+export const scheduledPost = pgTable(
+    "scheduled_post",
+    {
+        id: text("id").primaryKey(),
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id, { onDelete: "cascade" }),
+        content: text("content").notNull(),
+        scheduledAt: timestamp("scheduled_at").notNull(),
+
+        // Status: pending → queued → posted/failed/cancelled
+        status: text("status").default("pending").notNull(),
+
+        // QStash tracking
+        syncedToQStash: boolean("synced_to_qstash").default(false).notNull(),
+        qstashMessageId: text("qstash_message_id"),
+
+        // Result tracking
+        tweetId: text("tweet_id"),
+        errorMessage: text("error_message"),
+        retryCount: integer("retry_count").default(0).notNull(),
+
+        // Timestamps
+        createdAt: timestamp("created_at").defaultNow().notNull(),
+        postedAt: timestamp("posted_at"),
+        failedAt: timestamp("failed_at"),
+    },
+    (table) => [
+        index("scheduled_post_userId_idx").on(table.userId),
+        index("scheduled_post_status_idx").on(table.status),
+        index("scheduled_post_scheduledAt_idx").on(table.scheduledAt),
+    ],
+);
+
 export const userRelations = relations(user, ({ many }) => ({
     sessions: many(session),
     accounts: many(account),
+    scheduledPosts: many(scheduledPost),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -91,3 +126,11 @@ export const accountRelations = relations(account, ({ one }) => ({
         references: [user.id],
     }),
 }));
+
+export const scheduledPostRelations = relations(scheduledPost, ({ one }) => ({
+    user: one(user, {
+        fields: [scheduledPost.userId],
+        references: [user.id],
+    }),
+}));
+

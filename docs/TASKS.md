@@ -205,7 +205,7 @@
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Database | ⬜ Not Started | |
+| Phase 1: Database | ✅ Complete | `scheduled_post` table created |
 | Phase 2: QStash Setup | ⬜ Not Started | |
 | Phase 3: Core Logic | ⬜ Not Started | |
 | Phase 4: Cron Jobs | ⬜ Not Started | |

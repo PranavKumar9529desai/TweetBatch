@@ -5,7 +5,7 @@
  */
 
 import { createDb, scheduledPost, eq } from "@repo/db";
-import { QStashService } from "./services/qstash";
+import { QStashService } from "../services/qstash.service";
 import dotenv from "dotenv";
 import path from "path";
 

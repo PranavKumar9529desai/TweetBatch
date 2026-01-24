@@ -10,7 +10,7 @@
  */
 
 import { createDb, scheduledPost, eq } from "@repo/db";
-import { QStashService } from "./services/qstash";
+import { QStashService } from "../services/qstash";
 import dotenv from "dotenv";
 import path from "path";
 import { randomUUID } from "crypto";

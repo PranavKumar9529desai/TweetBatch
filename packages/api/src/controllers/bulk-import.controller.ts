@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { createDb } from "@repo/db";
-import { ScheduledPostService } from "../services/scheduled-post";
-import { RateLimitService, RATE_LIMITS } from "../services/rate-limit";
+import { ScheduledPostService } from "../services/scheduled-post.service";
+import { RateLimitService, RATE_LIMITS } from "../services/rate-limit.service";
 import type { Bindings } from "../types";
 
 /**

@@ -1,10 +1,10 @@
 import { Hono } from "hono";
 import { createDb } from "@repo/db";
-import { QStashService } from "../services/qstash";
-import { ScheduledPostService } from "../services/scheduled-post";
-import { TwitterService } from "../services/twitter";
-import { AccountService } from "../services/account";
-import { classifyTwitterError, TwitterErrorType } from "../services/error-handler";
+import { QStashService } from "../services/qstash.service";
+import { ScheduledPostService } from "../services/scheduled-post.service";
+import { TwitterService } from "../services/twitter.service";
+import { AccountService } from "../services/account.service";
+import { classifyTwitterError, TwitterErrorType } from "../services/error-handler.service";
 import type { Bindings } from "../types";
 
 /**

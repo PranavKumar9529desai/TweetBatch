@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { createDb } from "@repo/db";
-import { NotificationService } from "../services/notification";
+import { NotificationService } from "../services/notification.service";
 import type { Bindings } from "../types";
 
 export const notificationsRoute = new Hono<{ Bindings: Bindings }>();

@@ -1,15 +1,15 @@
 import { Hono } from "hono";
 import { createDb } from "@repo/db";
-import { ScheduledPostService } from "../services/scheduled-post";
-import { QStashService } from "../services/qstash";
-import { RateLimitService } from "../services/rate-limit";
+import { ScheduledPostService } from "../services/scheduled-post.service";
+import { QStashService } from "../services/qstash.service";
+import { RateLimitService } from "../services/rate-limit.service";
 import type { Bindings } from "../types";
 
 /**
  * Posts Route
  * Handles CRUD operations for scheduled posts.
  */
-import { bulkImportRoute } from "./bulk-import";
+import { bulkImportRoute } from "./bulk-import.controller";
 
 /**
  * Posts Route

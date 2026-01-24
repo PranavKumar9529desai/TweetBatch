@@ -1,5 +1,5 @@
 import { createDb, user } from "@repo/db";
-import { NotificationService } from "./services/notification";
+import { NotificationService } from "../services/notification";
 
 // Use environment variable for DB URL or fallback (bun reads .env automatically)
 const DATABASE_URL = process.env.DATABASE_URL;

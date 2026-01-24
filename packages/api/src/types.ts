@@ -4,4 +4,8 @@ export interface Bindings {
   BETTER_AUTH_URL: string;
   TWITTER_CLIENT_ID: string;
   TWITTER_CLIENT_SECRET: string;
+  QSTASH_TOKEN: string;
+  QSTASH_CURRENT_SIGNING_KEY: string;
+  QSTASH_NEXT_SIGNING_KEY: string;
+  BACKEND_URL: string;
 }

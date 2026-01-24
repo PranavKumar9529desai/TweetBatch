@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getAuth } from '@repo/auth'
+import { qstashWebhookRoute, syncPostsToQStash } from '@repo/api'
 
 const app = new Hono<{
     Bindings: CloudflareBindings
@@ -37,5 +38,17 @@ app.all("/auth/**", (c) => {
     return getAuth(c.env).handler(c.req.raw);
 })
 
+// QStash webhook routes
+app.route('/api/qstash', qstashWebhookRoute);
+
 export const handle = app.fetch
-export default app
+
+// Export for Cloudflare Workers with cron support
+export default {
+    fetch: app.fetch,
+    async scheduled(event: ScheduledEvent, env: CloudflareBindings, ctx: ExecutionContext) {
+        console.log(`Cron triggered at: ${new Date().toISOString()}`);
+        ctx.waitUntil(syncPostsToQStash(env));
+    }
+}
+

@@ -53,9 +53,13 @@ export const account = pgTable(
         updatedAt: timestamp("updated_at")
             .$onUpdate(() => new Date())
             .notNull(),
+        // Disconnection tracking for handling permanent auth failures
+        disconnectedAt: timestamp("disconnected_at"),
+        disconnectedReason: text("disconnected_reason"),
     },
     (table) => [index("account_userId_idx").on(table.userId)],
 );
+
 
 export const verification = pgTable(
     "verification",

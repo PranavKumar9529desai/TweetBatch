@@ -3,6 +3,8 @@ import { createDb } from "@repo/db";
 import { QStashService } from "../services/qstash";
 import { ScheduledPostService } from "../services/scheduled-post";
 import { TwitterService } from "../services/twitter";
+import { AccountService } from "../services/account";
+import { classifyTwitterError, TwitterErrorType } from "../services/error-handler";
 import type { Bindings } from "../types";
 
 /**
@@ -60,6 +62,7 @@ qstashWebhookRoute.post("/post-tweet", async (c) => {
     // 3. Initialize services
     const db = createDb(env.DATABASE_URL);
     const postService = new ScheduledPostService(db);
+    const accountService = new AccountService(db);
     const twitterService = new TwitterService(
         db,
         env.TWITTER_CLIENT_ID,
@@ -109,62 +112,79 @@ qstashWebhookRoute.post("/post-tweet", async (c) => {
     } catch (error: any) {
         console.error(`Failed to post tweet for post ${postId}:`, error);
 
-        // Classify the error
-        const errorMessage = error.message || "Unknown error";
-        const isRecoverable = isRecoverableError(error);
+        // Classify the error using dedicated service
+        const classification = classifyTwitterError(error);
 
-        if (isRecoverable) {
-            // Mark as failed but don't prevent QStash retry
-            await postService.markAsFailed(postId, errorMessage, true);
+        console.log(`Error classification for post ${postId}:`, {
+            type: classification.type,
+            isRecoverable: classification.isRecoverable,
+            shouldMarkAccountDisconnected: classification.shouldMarkAccountDisconnected,
+            message: classification.message,
+        });
 
+        // Handle account disconnection
+        if (classification.shouldMarkAccountDisconnected) {
+            console.log(`Marking account as disconnected for user ${post.userId}`);
+
+            await accountService.markAsDisconnected(
+                post.userId,
+                "twitter",
+                classification.message
+            );
+
+            // Cancel all pending posts for this user
+            const cancelledPendingCount = await postService.cancelAllPendingPostsForUser(
+                post.userId,
+                `Account disconnected: ${classification.message}`
+            );
+
+            // Cancel all queued posts and get their QStash message IDs
+            const qstashMessageIds = await postService.cancelAllQueuedPostsForUser(
+                post.userId,
+                `Account disconnected: ${classification.message}`
+            );
+
+            // Cancel QStash messages (best effort)
+            for (const messageId of qstashMessageIds) {
+                try {
+                    await qstashService.cancelMessage(messageId);
+                } catch (cancelError) {
+                    console.warn(`Failed to cancel QStash message ${messageId}:`, cancelError);
+                }
+            }
+
+            console.log(
+                `Account disconnection handled for user ${post.userId}: ` +
+                `cancelled ${cancelledPendingCount} pending posts, ` +
+                `${qstashMessageIds.length} queued posts`
+            );
+        }
+
+        // Mark this specific post as failed
+        await postService.markAsFailed(postId, classification.message, true);
+
+        if (classification.isRecoverable) {
             // Return 500 to trigger QStash retry
             return c.json(
-                { status: "error", error: errorMessage, recoverable: true },
+                {
+                    status: "error",
+                    errorType: classification.type,
+                    error: classification.message,
+                    recoverable: true,
+                },
                 500
             );
         } else {
-            // Permanent failure - mark as failed and return 200 to stop retries
-            await postService.markAsFailed(postId, errorMessage, true);
-
-            console.log(`Permanent failure for post ${postId}: ${errorMessage}`);
+            // Permanent failure - return 200 to stop retries
+            console.log(`Permanent failure for post ${postId}: ${classification.message}`);
 
             return c.json({
                 status: "failed",
-                error: errorMessage,
+                errorType: classification.type,
+                error: classification.message,
                 recoverable: false,
             });
         }
     }
 });
 
-/**
- * Determines if an error is recoverable (should be retried).
- */
-function isRecoverableError(error: any): boolean {
-    const code = error.code || error.status;
-    const message = error.message || "";
-
-    // Rate limited - recoverable
-    if (code === 429) return true;
-
-    // Server errors - recoverable
-    if (code >= 500 && code < 600) return true;
-
-    // Timeout errors - recoverable
-    if (message.includes("timeout") || message.includes("ETIMEDOUT")) return true;
-
-    // Network errors - recoverable
-    if (message.includes("ECONNRESET") || message.includes("ENOTFOUND")) return true;
-
-    // Auth errors after token refresh failed - not recoverable
-    if (code === 401 || code === 403) return false;
-
-    // Duplicate tweet - not recoverable
-    if (message.includes("duplicate")) return false;
-
-    // Invalid content - not recoverable
-    if (code === 400) return false;
-
-    // Default: assume recoverable for unknown errors
-    return true;
-}

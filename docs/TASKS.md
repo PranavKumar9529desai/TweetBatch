@@ -59,67 +59,77 @@
 
 ## Phase 4: Cron Jobs (4-Window Strategy)
 
-- [ ] Configure Cloudflare Cron Triggers in `wrangler.toml`
-  - [ ] 12:00 AM IST - Sync posts for 00:00-06:00
-  - [ ] 6:00 AM IST - Sync posts for 06:00-12:00
-  - [ ] 12:00 PM IST - Sync posts for 12:00-18:00
-  - [ ] 6:00 PM IST - Sync posts for 18:00-00:00
-- [ ] Implement cron handler in backend
-  - [ ] Query unsynced posts for time window
-  - [ ] Chunked push to QStash (100 at a time, 500ms delay)
-  - [ ] Update `syncedToQStash` flag
-  - [ ] Error handling and logging
-- [ ] Implement recovery cron (30 min after each main cron)
-  - [ ] Find missed posts
-  - [ ] Mark as failed and notify users
+- [x] Configure Cloudflare Cron Triggers in `wrangler.jsonc`
+  - [x] 12:00 AM IST - Sync posts for 00:00-06:00
+  - [x] 6:00 AM IST - Sync posts for 06:00-12:00
+  - [x] 12:00 PM IST - Sync posts for 12:00-18:00
+  - [x] 6:00 PM IST - Sync posts for 18:00-00:00
+- [x] Implement cron handler in backend
+  - [x] Query unsynced posts for time window
+  - [x] Chunked push to QStash (100 at a time, 500ms delay)
+  - [x] Update `syncedToQStash` flag
+  - [x] Error handling and logging
+- [x] Implement recovery cron (30 min after each main cron)
+  - [x] Find missed posts
+  - [x] Mark as failed and notify users
 
 ---
 
 ## Phase 5: QStash Webhook Endpoint
 
-- [ ] Create `/api/qstash/post-tweet` endpoint
-  - [ ] Signature verification (security)
-  - [ ] Fetch post from database by postId
-  - [ ] Status checks (skip if cancelled/posted/deleted)
-  - [ ] Call `TwitterService.postTweet()`
-  - [ ] Update post status on success
-  - [ ] Handle errors (recoverable vs permanent)
-  - [ ] Return appropriate status codes for QStash retry logic
+- [x] Create `/api/qstash/post-tweet` endpoint
+  - [x] Signature verification (security)
+  - [x] Fetch post from database by postId
+  - [x] Status checks (skip if cancelled/posted/deleted)
+  - [x] Call `TwitterService.postTweet()`
+  - [x] Update post status on success
+  - [x] Handle errors (recoverable vs permanent)
+  - [x] Return appropriate status codes for QStash retry logic
 
 ---
 
 ## Phase 6: Failure Handling
 
-- [ ] Implement error classification logic
-  - [ ] `isRecoverableError(error)` function
-  - [ ] Handle 401 (refresh token)
-  - [ ] Handle 403 (account revoked)
-  - [ ] Handle 429 (rate limited)
-  - [ ] Handle 5xx (Twitter down)
-- [ ] Update post status on failure
-  - [ ] Set `status = 'failed'`
-  - [ ] Store `errorMessage`
-  - [ ] Increment `retryCount`
-  - [ ] Set `failedAt` timestamp
-- [ ] Handle permanently disconnected accounts
-  - [ ] Mark account as disconnected
-  - [ ] Cancel all pending posts for user
-  - [ ] Queue user notification
+- [x] Implement error classification logic
+  - [x] `classifyTwitterError(error)` function in `error-handler.ts`
+  - [x] Handle 401 (auth expired after refresh attempt)
+  - [x] Handle 403 (account revoked/suspended)
+  - [x] Handle 429 (rate limited)
+  - [x] Handle 5xx (Twitter server down)
+  - [x] Handle network errors (timeout, ECONNRESET)
+  - [x] Handle duplicate tweet errors
+  - [x] Handle invalid content (400)
+- [x] Update post status on failure
+  - [x] Set `status = 'failed'`
+  - [x] Store `errorMessage`
+  - [x] Increment `retryCount`
+  - [x] Set `failedAt` timestamp
+- [x] Handle permanently disconnected accounts
+  - [x] Add `disconnectedAt`/`disconnectedReason` to account schema
+  - [x] Mark account as disconnected via `AccountService`
+  - [x] Cancel all pending posts for user
+  - [x] Cancel all queued posts and their QStash messages
+  - [ ] Queue user notification (deferred to Phase 9)
 
 ---
 
 ## Phase 7: Bulk Import Feature
 
-- [ ] Create JSON schema for bulk import
-- [ ] Create `/api/posts/bulk-import` endpoint
-  - [ ] Parse and validate JSON
-  - [ ] Validate all scheduled times are in future
-  - [ ] Check for duplicates (content + time hash)
-  - [ ] Batch insert to database
-  - [ ] Return import summary (success/skipped/errors)
-- [ ] Add rate limit validation
-  - [ ] Warn if import exceeds Twitter daily limits
-  - [ ] Suggest spreading posts across days
+- [x] Create rate limit service (`packages/api/src/services/rate-limit.ts`)
+  - [x] Define rate limit constants (3/day, 20/week, 50/import)
+  - [x] `countPostsForDay(userId, date)` - Count posts for a day
+  - [x] `countPostsForWeek(userId, weekStart)` - Count posts for a week
+  - [x] `validateBulkImportLimits(userId, posts)` - Check all limits
+- [x] Add bulk creation method to `ScheduledPostService`
+  - [x] `createScheduledPosts(inputs)` - Batch insert posts
+- [x] Create `/api/posts/bulk-import` endpoint
+  - [x] Parse and validate JSON structure
+  - [x] Validate tweet content (max 280 chars)
+  - [x] Validate all scheduled times are in future
+  - [x] Enforce rate limits with clear error messages
+  - [x] Batch insert valid posts
+  - [x] Return import summary with violations
+- [x] Export and integrate route in backend
 
 ---
 
@@ -208,10 +218,10 @@
 | Phase 1: Database | ✅ Complete | `scheduled_post` table created |
 | Phase 2: QStash Setup | ✅ Complete | Client + service created |
 | Phase 3: Core Logic | ✅ Complete | QStash + ScheduledPost services |
-| Phase 4: Cron Jobs | ⬜ Not Started | |
-| Phase 5: Webhook | ⬜ Not Started | |
-| Phase 6: Failure Handling | ⬜ Not Started | |
-| Phase 7: Bulk Import | ⬜ Not Started | |
+| Phase 4: Cron Jobs | ✅ Complete | 4-window sync + recovery cron |
+| Phase 5: Webhook | ✅ Complete | Signature verification + error handling |
+| Phase 6: Failure Handling | ✅ Complete | Error classification + account disconnection |
+| Phase 7: Bulk Import | ✅ Complete | Rate limits: 3/day, 20/week, 50/import |
 | Phase 8: API Endpoints | ⬜ Not Started | |
 | Phase 9: Notifications | ⬜ Not Started | |
 | Phase 10: Frontend | ⬜ Not Started | |

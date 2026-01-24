@@ -258,4 +258,95 @@ export class ScheduledPostService {
 
         return updated;
     }
+
+    /**
+     * Create multiple scheduled posts in a batch.
+     * Used for bulk import functionality.
+     */
+    async createScheduledPosts(inputs: CreateScheduledPostInput[]) {
+        if (inputs.length === 0) {
+            return [];
+        }
+
+        const posts = inputs.map((input) => ({
+            id: randomUUID().slice(0, 16),
+            userId: input.userId,
+            content: input.content,
+            scheduledAt: input.scheduledAt,
+            status: "pending" as const,
+            syncedToQStash: false,
+            retryCount: 0,
+        }));
+
+        const inserted = await this.db
+            .insert(scheduledPost)
+            .values(posts)
+            .returning();
+
+        return inserted;
+    }
+
+    /**
+     * Cancel all pending posts for a user.
+     * Used when account is disconnected to prevent processing posts that will fail.
+     * Returns the count of cancelled posts.
+     */
+    async cancelAllPendingPostsForUser(userId: string, reason: string): Promise<number> {
+        const result = await this.db
+            .update(scheduledPost)
+            .set({
+                status: "cancelled",
+                errorMessage: reason,
+            })
+            .where(
+                and(
+                    eq(scheduledPost.userId, userId),
+                    eq(scheduledPost.status, "pending")
+                )
+            )
+            .returning();
+
+        return result.length;
+    }
+
+    /**
+     * Cancel all queued posts for a user and return their QStash message IDs.
+     * Used when account is disconnected to cancel scheduled QStash messages.
+     */
+    async cancelAllQueuedPostsForUser(userId: string, reason: string): Promise<string[]> {
+        const posts = await this.db.query.scheduledPost.findMany({
+            where: (post, { and, eq }) =>
+                and(
+                    eq(post.userId, userId),
+                    eq(post.status, "queued")
+                ),
+        });
+
+        const qstashMessageIds: string[] = [];
+
+        for (const post of posts) {
+            if (post.qstashMessageId) {
+                qstashMessageIds.push(post.qstashMessageId);
+            }
+        }
+
+        // Update all queued posts to cancelled
+        if (posts.length > 0) {
+            await this.db
+                .update(scheduledPost)
+                .set({
+                    status: "cancelled",
+                    errorMessage: reason,
+                })
+                .where(
+                    and(
+                        eq(scheduledPost.userId, userId),
+                        eq(scheduledPost.status, "queued")
+                    )
+                );
+        }
+
+        return qstashMessageIds;
+    }
 }
+

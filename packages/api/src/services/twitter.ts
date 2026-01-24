@@ -1,7 +1,6 @@
 import { TwitterApi } from "twitter-api-v2";
-import { eq } from "drizzle-orm";
+import { createDb, eq } from "@repo/db";
 import * as schema from "@repo/db";
-import { createDb } from "@repo/db";
 
 type DbClient = ReturnType<typeof createDb>;
 
@@ -41,7 +40,7 @@ export class TwitterService {
 
     const twitterAccount = userWithAccount.accounts[0];
 
-    if (!twitterAccount.accessToken) {
+    if (!twitterAccount || !twitterAccount.accessToken) {
       throw new Error(`Twitter account for user ${userId} has no access token`);
     }
 

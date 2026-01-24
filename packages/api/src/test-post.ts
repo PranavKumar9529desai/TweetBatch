@@ -1,7 +1,7 @@
 
 import { TwitterApi } from 'twitter-api-v2';
 import { createDb } from '@repo/db';
-import * as schema from '@repo/db/schema';
+import * as schema from '@repo/db';
 import { eq } from 'drizzle-orm';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -39,6 +39,10 @@ async function main() {
     }
 
     const twitterAccount = usersWithAccounts.accounts[0];
+
+    if (!twitterAccount) {
+        throw new Error('Twitter account not found');
+    }
     console.log(`Found user: ${usersWithAccounts.name} (${usersWithAccounts.email})`);
     console.log(`Account ID: ${twitterAccount.id}`);
     console.log(`Access Token (preview): ${twitterAccount.accessToken?.substring(0, 10)}...`);

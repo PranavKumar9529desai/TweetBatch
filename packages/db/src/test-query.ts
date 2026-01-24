@@ -8,4 +8,4 @@ const alluserdata = await db.query.user.findMany({
         sessions: true,
     },
 });
-console.dir(alluserdata, { depth: Infinity });
+console.dir(alluserdata, { depth: Infinity }); s

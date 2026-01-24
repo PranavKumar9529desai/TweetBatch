@@ -20,40 +20,40 @@
 
 ## Phase 1: Database & Schema
 
-- [ ] Create `scheduled_post` table migration
-  - [ ] Add all required columns (id, userId, content, scheduledAt, status, etc.)
-  - [ ] Add QStash tracking fields (syncedToQStash, qstashMessageId)
-  - [ ] Add result fields (tweetId, errorMessage, retryCount)
-  - [ ] Create necessary indexes
-- [ ] Export schema and relations from `@repo/db`
-- [ ] Run migration on development database
+- [x] Create `scheduled_post` table migration
+  - [x] Add all required columns (id, userId, content, scheduledAt, status, etc.)
+  - [x] Add QStash tracking fields (syncedToQStash, qstashMessageId)
+  - [x] Add result fields (tweetId, errorMessage, retryCount)
+  - [x] Create necessary indexes
+- [x] Export schema and relations from `@repo/db`
+- [x] Run migration on development database
 
 ---
 
 ## Phase 2: QStash Setup
 
-- [ ] Create Upstash account and QStash instance
-- [ ] Add environment variables
-  - [ ] `QSTASH_TOKEN`
-  - [ ] `QSTASH_CURRENT_SIGNING_KEY`
-  - [ ] `QSTASH_NEXT_SIGNING_KEY`
-- [ ] Install `@upstash/qstash` package
-- [ ] Create QStash client utility in `packages/api`
+- [x] Create Upstash account and QStash instance
+- [x] Add environment variables
+  - [x] `QSTASH_TOKEN`
+  - [x] `QSTASH_CURRENT_SIGNING_KEY`
+  - [x] `QSTASH_NEXT_SIGNING_KEY`
+- [x] Install `@upstash/qstash` package
+- [x] Create QStash client utility in `packages/api`
 
 ---
 
 ## Phase 3: Core Scheduling Logic
 
-- [ ] Create QStash service (`packages/api/src/services/qstash.ts`)
-  - [ ] `pushToQStash(post)` - Push single post with delay
-  - [ ] `pushBatchToQStash(posts)` - Chunked batch push with rate limiting
-  - [ ] `cancelQStashMessage(messageId)` - Cancel scheduled message
-- [ ] Create scheduled post service (`packages/api/src/services/scheduled-post.ts`)
-  - [ ] `createScheduledPost(userId, content, scheduledAt)`
-  - [ ] `getScheduledPosts(userId, filters)`
-  - [ ] `updateScheduledPost(postId, updates)`
-  - [ ] `cancelScheduledPost(postId)`
-  - [ ] `deleteScheduledPost(postId)`
+- [x] Create QStash service (`packages/api/src/services/qstash.ts`)
+  - [x] `pushToQStash(post)` - Push single post with delay
+  - [x] `pushBatchToQStash(posts)` - Chunked batch push with rate limiting
+  - [x] `cancelQStashMessage(messageId)` - Cancel scheduled message
+- [x] Create scheduled post service (`packages/api/src/services/scheduled-post.ts`)
+  - [x] `createScheduledPost(userId, content, scheduledAt)`
+  - [x] `getScheduledPosts(userId, filters)`
+  - [x] `updateScheduledPost(postId, updates)`
+  - [x] `cancelScheduledPost(postId)`
+  - [x] `deleteScheduledPost(postId)`
 
 ---
 
@@ -207,7 +207,7 @@
 |-------|--------|-------|
 | Phase 1: Database | ✅ Complete | `scheduled_post` table created |
 | Phase 2: QStash Setup | ✅ Complete | Client + service created |
-| Phase 3: Core Logic | ⬜ Not Started | |
+| Phase 3: Core Logic | ✅ Complete | QStash + ScheduledPost services |
 | Phase 4: Cron Jobs | ⬜ Not Started | |
 | Phase 5: Webhook | ⬜ Not Started | |
 | Phase 6: Failure Handling | ⬜ Not Started | |

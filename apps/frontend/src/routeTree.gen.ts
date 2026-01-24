@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardManageTweetRouteImport } from './routes/dashboard/manage-tweet'
+import { Route as DashboardImportTweetRouteImport } from './routes/dashboard/import-tweet'
+import { Route as DashboardCreateTweetRouteImport } from './routes/dashboard/create-tweet'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -22,6 +26,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -34,35 +43,81 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardManageTweetRoute = DashboardManageTweetRouteImport.update({
+  id: '/manage-tweet',
+  path: '/manage-tweet',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardImportTweetRoute = DashboardImportTweetRouteImport.update({
+  id: '/import-tweet',
+  path: '/import-tweet',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCreateTweetRoute = DashboardCreateTweetRouteImport.update({
+  id: '/create-tweet',
+  path: '/create-tweet',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/about': typeof AboutRoute
+  '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
+  '/dashboard/import-tweet': typeof DashboardImportTweetRoute
+  '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/about': typeof AboutRoute
+  '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
+  '/dashboard/import-tweet': typeof DashboardImportTweetRoute
+  '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/about': typeof AboutRoute
+  '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
+  '/dashboard/import-tweet': typeof DashboardImportTweetRoute
+  '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/dashboard' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/dashboard/create-tweet'
+    | '/dashboard/import-tweet'
+    | '/dashboard/manage-tweet'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/dashboard'
-  id: '__root__' | '/' | '/about' | '/dashboard' | '/dashboard/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/dashboard/create-tweet'
+    | '/dashboard/import-tweet'
+    | '/dashboard/manage-tweet'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/about'
+    | '/dashboard/create-tweet'
+    | '/dashboard/import-tweet'
+    | '/dashboard/manage-tweet'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRoute
   AboutRoute: typeof AboutRoute
   DashboardRoute: typeof DashboardRouteWithChildren
 }
@@ -83,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -97,14 +159,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/manage-tweet': {
+      id: '/dashboard/manage-tweet'
+      path: '/manage-tweet'
+      fullPath: '/dashboard/manage-tweet'
+      preLoaderRoute: typeof DashboardManageTweetRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/import-tweet': {
+      id: '/dashboard/import-tweet'
+      path: '/import-tweet'
+      fullPath: '/dashboard/import-tweet'
+      preLoaderRoute: typeof DashboardImportTweetRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/create-tweet': {
+      id: '/dashboard/create-tweet'
+      path: '/create-tweet'
+      fullPath: '/dashboard/create-tweet'
+      preLoaderRoute: typeof DashboardCreateTweetRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardCreateTweetRoute: typeof DashboardCreateTweetRoute
+  DashboardImportTweetRoute: typeof DashboardImportTweetRoute
+  DashboardManageTweetRoute: typeof DashboardManageTweetRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCreateTweetRoute: DashboardCreateTweetRoute,
+  DashboardImportTweetRoute: DashboardImportTweetRoute,
+  DashboardManageTweetRoute: DashboardManageTweetRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
@@ -114,6 +203,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRoute,
   AboutRoute: AboutRoute,
   DashboardRoute: DashboardRouteWithChildren,
 }

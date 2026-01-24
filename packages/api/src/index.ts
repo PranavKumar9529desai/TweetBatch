@@ -22,6 +22,7 @@ export * from "./services/scheduled-post";
 export * from "./services/rate-limit";
 export * from "./routes/qstash-webhook";
 export * from "./routes/bulk-import";
+export * from "./routes/posts";
 export * from "./cron/sync-cron";
 
 export type AppType = typeof routes;

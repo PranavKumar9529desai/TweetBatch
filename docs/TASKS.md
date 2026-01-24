@@ -222,7 +222,7 @@
 | Phase 5: Webhook | ✅ Complete | Signature verification + error handling |
 | Phase 6: Failure Handling | ✅ Complete | Error classification + account disconnection |
 | Phase 7: Bulk Import | ✅ Complete | Rate limits: 3/day, 20/week, 50/import |
-| Phase 8: API Endpoints | ⬜ Not Started | |
+| Phase 8: API Endpoints | ✅ Complete | CRUD endpoints created & verified |
 | Phase 9: Notifications | ⬜ Not Started | |
 | Phase 10: Frontend | ⬜ Not Started | |
 | Phase 11: Testing | ⬜ Not Started | |

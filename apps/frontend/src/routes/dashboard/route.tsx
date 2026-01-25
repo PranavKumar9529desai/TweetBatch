@@ -8,7 +8,7 @@ import {
     BreadcrumbSeparator,
 } from '@repo/ui/components/ui/breadcrumb'
 import { Separator } from '@repo/ui/components/ui/separator'
-import { createFileRoute, Outlet, useLocation, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/dashboard')({
     // beforeLoad: ({ context, location }) => {
@@ -31,7 +31,7 @@ function RouteComponent() {
         .replace(/\b\w/g, (l) => l.toUpperCase()) || 'Dashboard'
 
     return (
-        <div className="flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden h-screen">
+        <div className="flex flex-col md:flex-row w-full flex-1 mx-auto border border-neutral-200 overflow-hidden h-screen">
             <AppSidebar />
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-y-auto w-full h-full">
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">

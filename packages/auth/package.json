@@ -13,11 +13,14 @@
         "check-types": "tsc --noEmit"
     },
     "dependencies": {
+        "@repo/db": "workspace:*",
         "better-auth": "^1.1.14",
-        "@repo/db": "workspace:*"
+        "nodemailer": "^7.0.12",
+        "worker-mailer": "^1.2.1"
     },
     "devDependencies": {
         "@repo/typescript-config": "workspace:*",
+        "@types/nodemailer": "^7.0.5",
         "typescript": "5.9.2"
     }
 }

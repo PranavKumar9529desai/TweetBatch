@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { magicLink } from "better-auth/plugins";
 import * as schema from "@repo/db";
+import { sendMagicLinkEmail } from "./utils/email.js";
 
 export const getAuth = (env: {
     DATABASE_URL: string;
@@ -8,7 +10,11 @@ export const getAuth = (env: {
     BETTER_AUTH_URL: string;
     TWITTER_CLIENT_ID: string;
     TWITTER_CLIENT_SECRET: string;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
     FRONTEND_URL: string;
+    GMAIL_USER: string;
+    GMAIL_PASSWORD: string;
 }) => betterAuth({
     database: drizzleAdapter(schema.createDb(env.DATABASE_URL), {
         provider: "pg",
@@ -27,8 +33,19 @@ export const getAuth = (env: {
             clientId: env.TWITTER_CLIENT_ID,
             clientSecret: env.TWITTER_CLIENT_SECRET,
             scope: ["tweet.read", "tweet.write", "users.read", "offline.access"],
-        }
-    }
+        },
+        google: {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+    },
+    plugins: [
+        magicLink({
+            sendMagicLink: async ({ email, url }) => {
+                await sendMagicLinkEmail(email, url, env.GMAIL_USER, env.GMAIL_PASSWORD);
+            },
+        }),
+    ],
 });
 
 export type Auth = ReturnType<typeof getAuth>;

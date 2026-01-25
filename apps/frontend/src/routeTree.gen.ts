@@ -11,11 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardManageTweetRouteImport } from './routes/dashboard/manage-tweet'
 import { Route as DashboardImportTweetRouteImport } from './routes/dashboard/import-tweet'
 import { Route as DashboardCreateTweetRouteImport } from './routes/dashboard/create-tweet'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
@@ -25,6 +28,11 @@ const AboutRoute = AboutRouteImport.update({
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -52,11 +60,24 @@ const DashboardCreateTweetRoute = DashboardCreateTweetRouteImport.update({
   path: '/create-tweet',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
   '/dashboard/import-tweet': typeof DashboardImportTweetRoute
   '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
@@ -64,7 +85,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
   '/dashboard/import-tweet': typeof DashboardImportTweetRoute
   '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
@@ -73,8 +97,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/create-tweet': typeof DashboardCreateTweetRoute
   '/dashboard/import-tweet': typeof DashboardImportTweetRoute
   '/dashboard/manage-tweet': typeof DashboardManageTweetRoute
@@ -84,8 +111,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/about'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/dashboard/create-tweet'
     | '/dashboard/import-tweet'
     | '/dashboard/manage-tweet'
@@ -93,7 +123,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/about'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/dashboard/create-tweet'
     | '/dashboard/import-tweet'
     | '/dashboard/manage-tweet'
@@ -101,8 +134,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/about'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/dashboard/create-tweet'
     | '/dashboard/import-tweet'
     | '/dashboard/manage-tweet'
@@ -111,6 +147,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
 }
@@ -129,6 +166,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -166,8 +210,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCreateTweetRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/auth/sign-up': {
+      id: '/auth/sign-up'
+      path: '/sign-up'
+      fullPath: '/auth/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
+
+interface AuthRouteRouteChildren {
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
 
 interface DashboardRouteRouteChildren {
   DashboardCreateTweetRoute: typeof DashboardCreateTweetRoute
@@ -189,6 +261,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AboutRoute: AboutRoute,
 }

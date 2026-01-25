@@ -12,12 +12,12 @@ import { cn } from "@repo/ui/lib/utils";
 import { ChevronsUpDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../theme-provider";
 
-export function Profile() {
+export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }) {
     const { open } = useSidebar();
     const { setTheme, theme } = useTheme();
 
     return (
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setIsLocked}>
             <DropdownMenuTrigger asChild>
                 <div
                     className={cn(

@@ -9,9 +9,23 @@ import { Profile } from "./profile";
 
 export function AppSidebar() {
     const [open, setOpen] = useState(false);
+    const [locked, setLocked] = useState(false);
+
+    const handleSetOpen = (value: boolean | ((prevState: boolean) => boolean)) => {
+        if (typeof value === "boolean") {
+            if (open && !value && locked) return;
+            setOpen(value);
+        } else {
+            setOpen((prev) => {
+                const newValue = value(prev);
+                if (prev && !newValue && locked) return prev;
+                return newValue;
+            });
+        }
+    };
 
     return (
-        <Sidebar open={open} setOpen={setOpen}>
+        <Sidebar open={open} setOpen={handleSetOpen}>
             <SidebarBody className="justify-between gap-10 bg-sidebar  border-r border-sidebar-border">
                 <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
                     {open ? <Logo /> : <LogoIcon />}
@@ -32,7 +46,7 @@ export function AppSidebar() {
                     </div>
                 </div>
                 <div>
-                    <Profile />
+                    <Profile setIsLocked={setLocked} />
                 </div>
             </SidebarBody>
         </Sidebar>

@@ -1,5 +1,6 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { ThemeProvider } from "../components/theme-provider";
+import { Toaster } from "@repo/ui/components/ui/sonner";
 import { authClient } from "../utils/auth/auth-client";
 
 type UserType = typeof authClient.$Infer.Session.user;
@@ -26,6 +27,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Outlet />
-    </ThemeProvider >
+      <Toaster />
+    </ThemeProvider>
   ),
 });

@@ -16,6 +16,7 @@ export const getAuth = (env: {
     GMAIL_USER: string;
     GMAIL_PASSWORD: string;
 }) => betterAuth({
+    basePath: "/api/auth",
     database: drizzleAdapter(schema.createDb(env.DATABASE_URL), {
         provider: "pg",
         schema: {
@@ -42,6 +43,7 @@ export const getAuth = (env: {
     plugins: [
         magicLink({
             sendMagicLink: async ({ email, url }) => {
+                console.log("Sending magic link to", email, "with url", url);
                 await sendMagicLinkEmail(email, url, env.GMAIL_USER, env.GMAIL_PASSWORD);
             },
         }),

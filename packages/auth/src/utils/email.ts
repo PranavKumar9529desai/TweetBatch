@@ -4,20 +4,51 @@
  */
 
 // Email HTML template
+// TODO : update the image url with correct url
 const getEmailHtml = (url: string) => `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #1a1a1a;">Sign in to Twitter Scheduler</h2>
-        <p style="color: #666;">Click the button below to sign in to your account. This link will expire in 10 minutes.</p>
-        <a href="${url}" style="display: inline-block; background-color: #1a1a1a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 16px 0;">Sign In</a>
-        <p style="color: #999; font-size: 12px;">If you didn't request this email, you can safely ignore it.</p>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #1c1917; padding: 40px; border-radius: 12px; color: #f5f5f4;">
+        <div style="text-align: center; margin-bottom: 32px;">
+             <img src="https://ui-avatars.com/api/?name=Tweet+Batch&background=b91c1c&color=faf7f5&size=128&rounded=true&bold=true" alt="TweetBatch Logo" style="width: 48px; height: 48px; border-radius: 8px;" />
+        </div>
+        <h2 style="color: #f5f5f4; text-align: center; font-size: 24px; font-weight: 600; margin-bottom: 24px;">Sign in to TweetBatch</h2>
+        <p style="color: #d6d3d1; text-align: center; font-size: 16px; margin-bottom: 32px; line-height: 1.5;">Click the button below to sign in to your account. This link will expire in 10 minutes.</p>
+        <div style="text-align: center;">
+            <a href="${url}" style="display: inline-block; background-color: #b91c1c; color: #faf7f5; padding: 16px 32px; text-decoration: none; border-radius: 9999px; font-weight: 600; font-size: 16px; transition: opacity 0.2s;">Sign In to TweetBatch</a>
+        </div>
+        <p style="color: #d6d3d1; text-align: center; font-size: 14px; margin-top: 32px;">If you didn't request this email, you can safely ignore it.</p>
+        <div style="border-top: 1px solid #44403c; margin-top: 32px; padding-top: 32px; text-align: center;">
+            <p style="color: #d6d3d1; font-size: 12px;">© ${new Date().getFullYear()} TweetBatch. All rights reserved.</p>
+        </div>
     </div>
 `;
 
-// Detect if running in Cloudflare Workers environment
-function isCloudflareWorkers(): boolean {
-    return typeof navigator !== "undefined" &&
+// Detect if running in Cloudflare Workers PRODUCTION environment
+// Wrangler dev simulates Workers but can't make SMTP connections
+function isCloudflareWorkersProduction(gmailUser: string): boolean {
+    const isWorkersRuntime = typeof navigator !== "undefined" &&
         typeof navigator.userAgent === "string" &&
         navigator.userAgent === "Cloudflare-Workers";
+
+    // If gmailUser is undefined or we can detect localhost in any way, use nodemailer
+    // In wrangler dev, SMTP connections fail, so we must use nodemailer
+    if (!gmailUser) {
+        console.log("[email] No GMAIL_USER configured, falling back to nodemailer");
+        return false;
+    }
+
+    // For local wrangler dev, we need to use nodemailer
+    // The simplest detection: if worker-mailer fails, we should have tried nodemailer
+    // But we can't easily detect wrangler dev vs production
+    // So we'll check if globalThis has the 'process' object (Node.js specific)
+    const hasNodeProcess = typeof globalThis !== "undefined" &&
+        typeof (globalThis as Record<string, unknown>).process !== "undefined";
+
+    if (hasNodeProcess) {
+        console.log("[email] Node.js process detected, using nodemailer");
+        return false;
+    }
+
+    return isWorkersRuntime;
 }
 
 // Send email using worker-mailer (Cloudflare Workers production)
@@ -49,9 +80,9 @@ async function sendWithWorkerMailer(
                 authType: "plain",
             },
             {
-                from: { name: "Twitter Scheduler", email: gmailUser },
+                from: { name: "TweetBatch", email: gmailUser },
                 to: email,
-                subject: "Sign in to Twitter Scheduler",
+                subject: "Sign in to TweetBatch",
                 text: `Click this link to sign in: ${url}`,
                 html: getEmailHtml(url),
             }
@@ -87,9 +118,9 @@ async function sendWithNodemailer(
         });
 
         await transporter.sendMail({
-            from: `"Twitter Scheduler" <${gmailUser}>`,
+            from: `"TweetBatch" <${gmailUser}>`,
             to: email,
-            subject: "Sign in to Twitter Scheduler",
+            subject: "Sign in to TweetBatch",
             text: `Click this link to sign in: ${url}`,
             html: getEmailHtml(url),
         });
@@ -114,8 +145,8 @@ export async function sendMagicLinkEmail(
     console.log("[sendMagicLinkEmail] Magic link requested for:", email);
     console.log("[sendMagicLinkEmail] URL:", url);
 
-    const isWorkers = isCloudflareWorkers();
-    console.log("[sendMagicLinkEmail] Runtime:", isWorkers ? "Cloudflare Workers" : "Node.js (local dev)");
+    const isWorkers = isCloudflareWorkersProduction(gmailUser);
+    console.log("[sendMagicLinkEmail] Runtime:", isWorkers ? "Cloudflare Workers (production)" : "Node.js/Wrangler dev");
 
     if (isWorkers) {
         await sendWithWorkerMailer(email, url, gmailUser, gmailPassword);

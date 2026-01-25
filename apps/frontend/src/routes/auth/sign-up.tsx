@@ -1,105 +1,135 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Button } from '@repo/ui/components/ui/button'
-import { Input } from '@repo/ui/components/ui/input'
-import { Label } from '@repo/ui/components/ui/label'
-import { Separator } from '@repo/ui/components/ui/separator'
-import { authClient } from '@/utils/auth/auth-client'
-import { useState } from 'react'
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { AuthButton } from "@/components/auth/auth-button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
+import { Separator } from "@repo/ui/components/ui/separator";
+import { authClient } from "@/utils/auth/auth-client";
+import { useState } from "react";
+import { toast } from "@repo/ui/components/ui/sonner";
 
-export const Route = createFileRoute('/auth/sign-up')({
+export const Route = createFileRoute("/auth/sign-up")({
   component: SignUpPage,
-})
+});
 
 function SignUpPage() {
-  const [email, setEmail] = useState('')
-  const [name, setName] = useState('')
-  const [isLoading, setIsLoading] = useState<string | null>(null)
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const handleTwitterSignUp = async () => {
-    setIsLoading('twitter')
+    setIsLoading("twitter");
+    const toastId = toast.loading("Redirecting to X (Twitter)...");
     try {
-      await authClient.signIn.social({
-        provider: 'twitter',
-        callbackURL: '/dashboard',
-      })
+      const { error } = await authClient.signIn.social({
+        provider: "twitter",
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to sign up with X", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Redirecting...", { id: toastId });
+      }
     } catch (error) {
-      console.error('Twitter sign up error:', error)
-      setIsLoading(null)
+      console.error("Twitter sign up error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   const handleGoogleSignUp = async () => {
-    setIsLoading('google')
+    setIsLoading("google");
+    const toastId = toast.loading("Redirecting to Google...");
     try {
-      await authClient.signIn.social({
-        provider: 'google',
-        callbackURL: '/dashboard',
-      })
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to sign up with Google", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Redirecting...", { id: toastId });
+      }
     } catch (error) {
-      console.error('Google sign up error:', error)
-      setIsLoading(null)
+      console.error("Google sign up error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
+    e.preventDefault();
+    if (!email) return;
 
-    setIsLoading('email')
+    setIsLoading("email");
+    const toastId = toast.loading("Sending magic link...");
     try {
-      await authClient.signIn.magicLink({
+      const { error } = await authClient.signIn.magicLink({
         email,
-        callbackURL: '/dashboard',
-      })
-      // Show success message
+        name,
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to send magic link", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Magic link sent! Check your email.", { id: toastId });
+        // Keep loading state or reset? Usually reset for magic link if staying on page
+        setIsLoading(null);
+      }
     } catch (error) {
-      console.error('Email sign up error:', error)
-      setIsLoading(null)
+      console.error("Email sign up error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   return (
     <div className="space-y-6 w-full max-w-sm mx-auto">
       <div className="text-center">
-        <h2 className="text-xl font-semibold text-foreground">Create an account</h2>
-        <p className="text-muted-foreground text-sm mt-1">Start scheduling your tweets today</p>
+        <h2 className="text-xl font-semibold text-foreground">
+          Create an account
+        </h2>
+        <p className="text-muted-foreground text-sm mt-1">
+          Start scheduling your tweets today
+        </p>
       </div>
 
       {/* Social Sign Up */}
       <div className="space-y-3">
         {/* Twitter/X Sign Up */}
-        <Button
-          variant="outline"
-          className="w-full h-12"
+        <AuthButton
           onClick={handleTwitterSignUp}
+          isLoading={isLoading === "twitter"}
           disabled={isLoading !== null}
-        >
-          {isLoading === 'twitter' ? (
-            <div className="w-5 h-5 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
-          ) : (
+          icon={
             <svg
-              className="w-5 h-5 mr-3"
+              className="w-full h-full"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
-          )}
+          }
+        >
           Continue with X
-        </Button>
+        </AuthButton>
 
         {/* Google Sign Up */}
-        <Button
-          variant="outline"
-          className="w-full h-12"
+        <AuthButton
           onClick={handleGoogleSignUp}
+          isLoading={isLoading === "google"}
           disabled={isLoading !== null}
-        >
-          {isLoading === 'google' ? (
-            <div className="w-5 h-5 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
-          ) : (
-            <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+          icon={
+            <svg className="w-full h-full" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -117,9 +147,10 @@ function SignUpPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-          )}
+          }
+        >
           Continue with Google
-        </Button>
+        </AuthButton>
       </div>
 
       {/* Divider */}
@@ -135,9 +166,7 @@ function SignUpPage() {
       {/* Email Sign Up */}
       <form onSubmit={handleEmailSignUp} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">
-            Name
-          </Label>
+          <Label htmlFor="name">Name</Label>
           <Input
             id="name"
             type="text"
@@ -149,9 +178,7 @@ function SignUpPage() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">
-            Email address
-          </Label>
+          <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
             type="email"
@@ -162,28 +189,26 @@ function SignUpPage() {
             disabled={isLoading !== null}
           />
         </div>
-        <Button
+        <AuthButton
           type="submit"
-          className="w-full h-12"
+          isLoading={isLoading === "email"}
           disabled={isLoading !== null || !email}
         >
-          {isLoading === 'email' ? (
-            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          ) : (
-            'Continue with Email'
-          )}
-        </Button>
+          Continue with Email
+        </AuthButton>
       </form>
 
       {/* Sign In Link */}
       <p className="text-center text-muted-foreground text-sm">
-        Already have an account?{' '}
+        Already have an account?{" "}
         <Link
           to="/auth/sign-in"
-          className="text-primary hover:underline font-medium" search={{ redirect: '/dashboard' }}        >
+          className="text-primary hover:underline font-medium"
+          search={{ redirect: "/dashboard" }}
+        >
           Sign in
         </Link>
       </p>
     </div>
-  )
+  );
 }

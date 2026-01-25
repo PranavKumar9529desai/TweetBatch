@@ -1,108 +1,134 @@
-import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
-import { Button } from '@repo/ui/components/ui/button'
-import { Input } from '@repo/ui/components/ui/input'
-import { Label } from '@repo/ui/components/ui/label'
-import { Separator } from '@repo/ui/components/ui/separator'
-import { authClient } from '@/utils/auth/auth-client'
-import { useState } from 'react'
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { AuthButton } from "@/components/auth/auth-button";
+import { Input } from "@repo/ui/components/ui/input";
+import { Label } from "@repo/ui/components/ui/label";
+import { Separator } from "@repo/ui/components/ui/separator";
+import { authClient } from "@/utils/auth/auth-client";
+import { useState } from "react";
+import { toast } from "@repo/ui/components/ui/sonner";
 
-export const Route = createFileRoute('/auth/sign-in')({
+export const Route = createFileRoute("/auth/sign-in")({
   component: SignInPage,
   validateSearch: (search: Record<string, unknown>) => ({
-    redirect: (search.redirect as string) || '/dashboard',
+    redirect: (search.redirect as string) || "/dashboard",
   }),
-})
+});
 
 function SignInPage() {
-  const { redirect } = useSearch({ from: '/auth/sign-in' })
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState<string | null>(null)
+  const { redirect } = useSearch({ from: "/auth/sign-in" });
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   const handleTwitterSignIn = async () => {
-    setIsLoading('twitter')
+    setIsLoading("twitter");
+    const toastId = toast.loading("Redirecting to X (Twitter)...");
     try {
-      await authClient.signIn.social({
-        provider: 'twitter',
-        callbackURL: redirect,
-      })
+      const { error } = await authClient.signIn.social({
+        provider: "twitter",
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to sign in with X", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Redirecting...", { id: toastId });
+      }
     } catch (error) {
-      console.error('Twitter sign in error:', error)
-      setIsLoading(null)
+      console.error("Twitter sign in error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading('google')
+    setIsLoading("google");
+    const toastId = toast.loading("Redirecting to Google...");
     try {
-      await authClient.signIn.social({
-        provider: 'google',
-        callbackURL: redirect,
-      })
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to sign in with Google", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Redirecting...", { id: toastId });
+      }
     } catch (error) {
-      console.error('Google sign in error:', error)
-      setIsLoading(null)
+      console.error("Google sign in error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
+    e.preventDefault();
+    if (!email) return;
 
-    setIsLoading('email')
+    setIsLoading("email");
+    const toastId = toast.loading("Sending magic link...");
     try {
-      await authClient.signIn.magicLink({
+      const { error } = await authClient.signIn.magicLink({
         email,
-        callbackURL: redirect,
-      })
-      // Show success message or redirect
+        callbackURL: import.meta.env.VITE_FRONTEND_URL + "/dashboard",
+      });
+      if (error) {
+        toast.error(error.message || "Failed to send magic link", {
+          id: toastId,
+        });
+        setIsLoading(null);
+      } else {
+        toast.success("Magic link sent! Check your email.", { id: toastId });
+        setIsLoading(null);
+      }
     } catch (error) {
-      console.error('Email sign in error:', error)
-      setIsLoading(null)
+      console.error("Email sign in error:", error);
+      toast.error("An unexpected error occurred", { id: toastId });
+      setIsLoading(null);
     }
-  }
+  };
 
   return (
     <div className="space-y-6 w-full max-w-sm mx-auto">
       <div className="text-center">
         <h2 className="text-xl font-semibold text-foreground">Welcome back</h2>
-        <p className="text-muted-foreground text-sm mt-1">Sign in to your account</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Sign in to your account
+        </p>
       </div>
 
       {/* Social Sign In */}
       <div className="space-y-3">
         {/* Twitter/X Sign In */}
-        <Button
-          variant="outline"
-          className="w-full h-12"
+        <AuthButton
           onClick={handleTwitterSignIn}
+          isLoading={isLoading === "twitter"}
           disabled={isLoading !== null}
-        >
-          {isLoading === 'twitter' ? (
-            <div className="w-5 h-5 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
-          ) : (
+          icon={
             <svg
-              className="w-5 h-5 mr-3"
               fill="currentColor"
               viewBox="0 0 24 24"
               aria-hidden="true"
+              className="w-full h-full"
             >
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
-          )}
+          }
+        >
           Continue with X
-        </Button>
+        </AuthButton>
 
         {/* Google Sign In */}
-        <Button
-          variant="outline"
-          className="w-full h-12"
+        <AuthButton
           onClick={handleGoogleSignIn}
+          isLoading={isLoading === "google"}
           disabled={isLoading !== null}
-        >
-          {isLoading === 'google' ? (
-            <div className="w-5 h-5 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
-          ) : (
-            <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+          icon={
+            <svg viewBox="0 0 24 24" className="w-full h-full">
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -120,9 +146,10 @@ function SignInPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-          )}
+          }
+        >
           Continue with Google
-        </Button>
+        </AuthButton>
       </div>
 
       {/* Divider */}
@@ -138,9 +165,7 @@ function SignInPage() {
       {/* Email Sign In */}
       <form onSubmit={handleEmailSignIn} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email">
-            Email address
-          </Label>
+          <Label htmlFor="email">Email address</Label>
           <Input
             id="email"
             type="email"
@@ -151,22 +176,18 @@ function SignInPage() {
             disabled={isLoading !== null}
           />
         </div>
-        <Button
+        <AuthButton
           type="submit"
-          className="w-full h-12"
+          isLoading={isLoading === "email"}
           disabled={isLoading !== null || !email}
         >
-          {isLoading === 'email' ? (
-            <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          ) : (
-            'Continue with Email'
-          )}
-        </Button>
+          Continue with Email
+        </AuthButton>
       </form>
 
       {/* Sign Up Link */}
       <p className="text-center text-muted-foreground text-sm">
-        Don't have an account?{' '}
+        Don't have an account?{" "}
         <Link
           to="/auth/sign-up"
           className="text-primary hover:underline font-medium"
@@ -175,5 +196,5 @@ function SignInPage() {
         </Link>
       </p>
     </div>
-  )
+  );
 }

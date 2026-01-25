@@ -11,6 +11,18 @@ import { useSidebar } from "@repo/ui/components/ui/sidebar";
 import { cn } from "@repo/ui/lib/utils";
 import { ChevronsUpDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../theme-provider";
+import { authClient } from "@repo/auth/client"; ``
+
+const handleLogout = async () => {
+    const res = await authClient.signOut()
+    console.log(res)
+    if (res.error) {
+        console.log(res.error)
+    }
+    else {
+        window.location.href = "/"
+    }
+}
 
 export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }) {
     const { open } = useSidebar();
@@ -70,7 +82,7 @@ export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }
                     Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Log out
                 </DropdownMenuItem>

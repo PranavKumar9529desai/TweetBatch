@@ -21,22 +21,18 @@ app.use('*', async (c, next) => {
     return corsMiddleware(c, next);
 });
 
-// Root route
+// Handle auth requests
+app.all("/api/auth/*", (c) => {
+    return getAuth(c.env).handler(c.req.raw);
+})
+
 app.get('/', (c) => {
     return c.json({
         message: 'Hello from Backend!'
     })
 })
 
-// Handle auth requests
-app.all("/api/auth/**", (c) => {
-    console.log("Auth Request (API):", c.req.url, !!c.env.DATABASE_URL);
-    return getAuth(c.env).handler(c.req.raw);
-})
-app.all("/auth/**", (c) => {
-    console.log("Auth Request:", c.req.url, !!c.env.DATABASE_URL);
-    return getAuth(c.env).handler(c.req.raw);
-})
+
 
 // QStash webhook routes
 app.route('/api/qstash', qstashWebhookRoute);

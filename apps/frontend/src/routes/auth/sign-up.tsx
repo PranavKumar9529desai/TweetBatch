@@ -9,6 +9,9 @@ import { toast } from "@repo/ui/components/ui/sonner";
 
 export const Route = createFileRoute("/auth/sign-up")({
   component: SignUpPage,
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
+    redirect: (search.redirect as string) || undefined,
+  }),
 });
 
 function SignUpPage() {
@@ -204,7 +207,6 @@ function SignUpPage() {
         <Link
           to="/auth/sign-in"
           className="text-primary hover:underline font-medium"
-          search={{ redirect: "/dashboard" }}
         >
           Sign in
         </Link>

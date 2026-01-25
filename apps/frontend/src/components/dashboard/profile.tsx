@@ -11,22 +11,28 @@ import { useSidebar } from "@repo/ui/components/ui/sidebar";
 import { cn } from "@repo/ui/lib/utils";
 import { ChevronsUpDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../theme-provider";
-import { authClient } from "@repo/auth/client"; ``
+import { authClient } from "@repo/auth/client";
+import { useRouter } from "@tanstack/react-router";
 
-const handleLogout = async () => {
-    const res = await authClient.signOut()
-    console.log(res)
-    if (res.error) {
-        console.log(res.error)
-    }
-    else {
-        window.location.href = "/"
-    }
-}
+import { toast } from "@repo/ui/components/ui/sonner";
 
 export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }) {
     const { open } = useSidebar();
     const { setTheme, theme } = useTheme();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        const toastId = toast.loading("Logging out...");
+        const res = await authClient.signOut();
+        if (res.error) {
+            toast.error(res.error.message || "Failed to log out", { id: toastId });
+            console.log(res.error);
+        } else {
+            toast.success("Logged out successfully", { id: toastId });
+            await router.invalidate();
+            await router.navigate({ to: "/auth/sign-in" });
+        }
+    };
 
     return (
         <DropdownMenu onOpenChange={setIsLocked}>

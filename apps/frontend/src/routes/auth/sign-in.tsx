@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthButton } from "@/components/auth/auth-button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
@@ -9,13 +9,12 @@ import { toast } from "@repo/ui/components/ui/sonner";
 
 export const Route = createFileRoute("/auth/sign-in")({
   component: SignInPage,
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: (search.redirect as string) || "/dashboard",
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
+    redirect: (search.redirect as string) || undefined,
   }),
 });
 
 function SignInPage() {
-  const { redirect } = useSearch({ from: "/auth/sign-in" });
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState<string | null>(null);
 

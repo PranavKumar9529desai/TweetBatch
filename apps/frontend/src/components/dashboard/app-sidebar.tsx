@@ -7,6 +7,8 @@ import { Link } from "@tanstack/react-router";
 import { LayoutDashboard } from "lucide-react";
 import { Profile } from "./profile";
 
+import { Separator } from "@repo/ui/components/ui/separator";
+
 export function AppSidebar() {
     const [open, setOpen] = useState(false);
     const [locked, setLocked] = useState(false);
@@ -26,10 +28,11 @@ export function AppSidebar() {
 
     return (
         <Sidebar open={open} setOpen={handleSetOpen}>
-            <SidebarBody className="justify-between gap-10 bg-sidebar  border-r border-sidebar-border">
+            <SidebarBody className="justify-between gap-10 bg-sidebar border-r border-sidebar-border">
                 <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
                     {open ? <Logo /> : <LogoIcon />}
-                    <div className="mt-8 flex flex-col gap-2">
+                    <div className="mt-6 flex flex-col gap-2">
+                        {open && <Separator className="mb-4 opacity-50" />}
                         <DashboardSidebarLink
                             link={{
                                 label: "Dashboard",
@@ -100,13 +103,20 @@ export const Logo = () => {
             to="/dashboard"
             className="font-normal flex space-x-2 items-center text-sm text-black dark:text-white py-1 relative z-20"
         >
-            <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+            <motion.img
+                src="/favicon/favicon.svg"
+                alt="TweetBatch Logo"
+                className="h-8 w-8 flex-shrink-0"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            />
             <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="font-medium text-black dark:text-white whitespace-pre"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="font-bold text-lg text-black dark:text-white whitespace-pre ml-2"
             >
-                Twitter Scheduler
+                TweetBatch
             </motion.span>
         </Link>
     );
@@ -118,7 +128,13 @@ export const LogoIcon = () => {
             to="/dashboard"
             className="font-normal flex space-x-2 items-center text-sm text-black dark:text-white py-1 relative z-20"
         >
-            <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+            <motion.img
+                src="/favicon/favicon.svg"
+                alt="TweetBatch Logo"
+                className="h-8 w-8 flex-shrink-0"
+                whileHover={{ scale: 1.2, rotate: 10 }}
+                transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            />
         </Link>
     );
 };

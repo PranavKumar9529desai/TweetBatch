@@ -43,14 +43,14 @@ function RouteComponent() {
                                     <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator className="hidden md:block" />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>{currentPage}</BreadcrumbPage>
+                                <BreadcrumbItem className=''>
+                                    <BreadcrumbPage className='text-sm text-primary font-semibold'>{currentPage}</BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                <div className="">
                     <Outlet />
                 </div>
             </div>

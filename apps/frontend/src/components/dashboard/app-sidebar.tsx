@@ -11,7 +11,7 @@ export function AppSidebar() {
 
     return (
         <Sidebar open={open} setOpen={setOpen}>
-            <SidebarBody className="justify-between gap-10">
+            <SidebarBody className="justify-between gap-10 bg-sidebar border-r border-sidebar-border">
                 <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
                     {open ? <Logo /> : <LogoIcon />}
                     <div className="mt-8 flex flex-col gap-2">
@@ -20,7 +20,7 @@ export function AppSidebar() {
                                 label: "Dashboard",
                                 href: "/dashboard",
                                 icon: (
-                                    <LayoutDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+                                    <LayoutDashboard className="text-sidebar-foreground h-5 w-5 flex-shrink-0" />
                                 ),
                             }}
                         />
@@ -35,7 +35,7 @@ export function AppSidebar() {
                             label: "Log out",
                             href: "#",
                             icon: (
-                                <div className="h-7 w-7 flex-shrink-0 rounded-full bg-neutral-100 dark:bg-neutral-800" />
+                                <div className="h-7 w-7 flex-shrink-0 rounded-full bg-sidebar-accent" />
                             ),
                         }}
                     />

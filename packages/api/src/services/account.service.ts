@@ -1,6 +1,6 @@
 import { createDb, eq, and } from "@repo/db";
 import * as schema from "@repo/db";
-import { NotificationService } from "./notification";
+import { NotificationService } from "./notification.service";
 
 type DbClient = ReturnType<typeof createDb>;
 

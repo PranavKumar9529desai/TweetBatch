@@ -1,6 +1,6 @@
 import { createDb } from "@repo/db";
-import { QStashService } from "../services/qstash";
-import { ScheduledPostService } from "../services/scheduled-post";
+import { QStashService } from "../services/qstash.service";
+import { ScheduledPostService } from "../services/scheduled-post.service";
 import type { Bindings } from "../types";
 
 /**

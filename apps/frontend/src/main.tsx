@@ -1,14 +1,22 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-
+import type { MyRouterContext } from './routes/__root'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
 import '@repo/ui/globals.css'
 
 // Create a new router instance
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  context: {
+    auth: {
+      user: null,
+      session: null
+    }
+  } as MyRouterContext
+})
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {

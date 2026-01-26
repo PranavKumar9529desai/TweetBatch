@@ -3,7 +3,7 @@ import { createDb } from "@repo/db";
 import { TwitterService } from "../services/twitter.service";
 import { Bindings } from "../types";
 
-export const postTweet = async (c: Context<{ Bindings: Bindings }>) => {
+export const DirectPostRoute = async (c: Context<{ Bindings: Bindings }>) => {
     const { userId, content } = await c.req.json();
 
     if (!userId || !content) {

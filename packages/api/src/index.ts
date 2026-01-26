@@ -11,14 +11,15 @@ const app = new Hono<{
   Variables: Variables;
 }>();
 
+// Protected routes middleware - apply before mounting routes
 app.use("/posts/*", authMiddleware);
 app.use("/notifications/*", authMiddleware);
 app.use("/tweet", authMiddleware);
 
 const routes = app
+  .route("/qstash", qstashWebhookRoute)
   .route("/posts", postsRoute)
-  .route("/notifications", notificationsRoute)
-  .route("/webhooks/qstash", qstashWebhookRoute)
+  .route("/notifications", notificationsRoute);
 
 // Export types and services
 export * from "./types";
@@ -34,5 +35,5 @@ export * from "./services/notification.service";
 export * from "./cron/sync-cron";
 
 export type AppType = typeof routes;
-export default app;
+export default routes;
 

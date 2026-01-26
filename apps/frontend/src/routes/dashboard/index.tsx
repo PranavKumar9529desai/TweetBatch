@@ -34,7 +34,7 @@ function DashboardIndex() {
                 </CreatePostDialog>
             </div>
 
-            <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+            <Card className="border-border/50 bg-card/50 backdrop-blur-sm" >
                 <CardHeader>
                     <CardTitle>Queue</CardTitle>
                     <CardDescription>

@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { getAuth } from '@repo/auth'
-import { qstashWebhookRoute, bulkImportRoute, postsRoute, notificationsRoute, syncPostsToQStash } from '@repo/api'
+import api, { syncPostsToQStash } from '@repo/api'
 
 const app = new Hono<{
     Bindings: CloudflareBindings
@@ -28,20 +28,12 @@ app.all("/api/auth/*", (c) => {
 
 app.get('/', (c) => {
     return c.json({
-        message: 'Hello from Backend!'
+        message: 'Hello from TweetBatch API!'
     })
 })
 
-
-
-// QStash webhook routes
-app.route('/api/qstash', qstashWebhookRoute);
-
-// Posts routes (bulk import, CRUD, etc.)
-app.route('/api/posts', postsRoute);
-
-// Notifications routes
-app.route('/api/notifications', notificationsRoute);
+// Mount the entire shared API
+app.route('/api', api);
 
 export const handle = app.fetch
 

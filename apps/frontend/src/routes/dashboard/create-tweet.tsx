@@ -5,7 +5,6 @@ import { TweetPreview } from "@/components/create-tweet/tweet-preview";
 import { MobileFrame } from "@/components/create-tweet/mobile-frame";
 import { Title } from "@/components/title";
 import { apiclient } from "@/lib/api.client";
-import { authClient } from "@/lib/auth.client";
 import { toast } from "@repo/ui/components/ui/sonner";
 
 export const Route = createFileRoute("/dashboard/create-tweet")({
@@ -13,15 +12,17 @@ export const Route = createFileRoute("/dashboard/create-tweet")({
 });
 
 function CreateTweetPage() {
+
   const [content, setContent] = useState("");
   const [media, setMedia] = useState<
     Array<{ id: string; url: string; type: "image" | "gif" | "video" }>
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: session } = authClient.useSession();
+  const { auth } = Route.useRouteContext();
+  const user = auth.user;
 
   const handlePost = async (isScheduled: boolean, scheduledAt?: Date) => {
-    if (!session?.user?.id) {
+    if (!user?.id) {
       toast.error("You must be logged in to post");
       return;
     }
@@ -37,7 +38,7 @@ function CreateTweetPage() {
         // Use posts API for scheduling
         const res = await apiclient.posts.$post({
           json: {
-            userId: session.user.id,
+            userId: user.id,
             content: content,
             scheduledAt: scheduledAt.toISOString(),
           }
@@ -54,7 +55,7 @@ function CreateTweetPage() {
         // Use direct tweet API for immediate posting
         const res = await apiclient.tweet.$post({
           json: {
-            userId: session.user.id,
+            userId: user.id,
             content: content,
           }
         });

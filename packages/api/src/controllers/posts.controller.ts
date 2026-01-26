@@ -48,7 +48,7 @@ export const postsRoute = app
         const env = c.env;
         const body = await c.req.json<{ userId: string; content: string; scheduledAt: string }>();
         const { userId, content, scheduledAt } = body;
-
+        console.log("body", body);
         if (!userId || !content || !scheduledAt) {
             return c.json({ success: false, error: "Missing required fields" }, 400);
         }

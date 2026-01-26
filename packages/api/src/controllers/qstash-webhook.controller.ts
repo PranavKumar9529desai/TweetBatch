@@ -11,13 +11,13 @@ import type { Bindings } from "../types";
  * QStash Webhook Route
  * Handles callbacks from QStash to post scheduled tweets.
  */
-export const qstashWebhookRoute = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings }>();
 
 /**
  * POST /post-tweet
  * Called by QStash when it's time to post a scheduled tweet.
  */
-qstashWebhookRoute.post("/post-tweet", async (c) => {
+export const qstashWebhookRoute = app.post("/post-tweet", async (c) => {
     const env = c.env;
 
     // 1. Verify QStash signature

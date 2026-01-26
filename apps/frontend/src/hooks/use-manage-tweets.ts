@@ -193,6 +193,17 @@ export function useManageTweets({
       // Invalidating immediately causes a race condition where the backend search index
       // might not have updated yet, causing the post to disappear from the list.
       // queryClient.invalidateQueries({ queryKey: queryKeys.all });
+
+      // Synchronize Queue (Drafts) Cache
+      // The Queue sidebar uses the 'all'/'all' query (undefined dates)
+      // We must remove the post from there so it doesn't appear as a duplicate
+      const queueKey = queryKeys.search(undefined, undefined, search);
+
+      queryClient.setQueryData<ScheduledPost[]>(queueKey, (oldPosts) => {
+        if (!oldPosts) return [];
+        // Remove the post from the queue as it is now scheduled
+        return oldPosts.filter(p => p.id !== updatedPost.id);
+      });
     },
     onError: (error, _variables, context) => {
       // Rollback on error

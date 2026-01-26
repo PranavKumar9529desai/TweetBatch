@@ -37,7 +37,18 @@ export function CalendarContextWrapper({
 function CalendarDnDHandler({ children }: { children: ReactNode }) {
     const sensors = useDndSensors();
     const { currentWeekStart, searchQuery } = useCalendarContext();
-    const { reschedulePost } = useManageTweets({ search: searchQuery });
+
+    // Calculate end of the week (Start + 7 days) to match CalendarProvider's fetch
+    // This ensures the manual cache update in useManageTweets targets the correct query key
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekEnd.getDate() + 7);
+    currentWeekEnd.setHours(23, 59, 59, 999);
+
+    const { reschedulePost } = useManageTweets({
+        startDate: currentWeekStart,
+        endDate: currentWeekEnd,
+        search: searchQuery
+    });
     const [activePost, setActivePost] = useState<ScheduledPost | null>(null);
 
     const handleDragStart = (event: DragStartEvent) => {

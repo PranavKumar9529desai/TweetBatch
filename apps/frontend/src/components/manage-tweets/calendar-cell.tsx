@@ -23,12 +23,10 @@ interface CalendarCellProps {
  * - Loading state during mutation
  */
 export function CalendarCell({ dayIndex, hour, date }: CalendarCellProps) {
-    const { searchQuery } = useCalendarContext();
-    const { posts, reschedulePost } = useManageTweets({
-        startDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-        endDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999),
+    const { getPostsForSlot, searchQuery } = useCalendarContext();
+    const { reschedulePost } = useManageTweets({
         search: searchQuery,
-    });
+    }); // We only keep this for the mutation ability
 
     const [isLoadingDrop, setIsLoadingDrop] = useState(false);
 
@@ -40,16 +38,8 @@ export function CalendarCell({ dayIndex, hour, date }: CalendarCellProps) {
         id: cellId,
     });
 
-    // Filter posts that belong to this hour
-    const postsInCell = useMemo(() => {
-        return posts.filter((post) => {
-            if (!post.scheduledAt) return false;
-            const postDate = new Date(post.scheduledAt);
-            const postHour = postDate.getHours();
-            const postDay = postDate.getDate();
-            return postHour === hour && postDay === date.getDate();
-        });
-    }, [posts, hour, date]);
+    // Get posts efficiently from Context (O(1) lookup)
+    const postsInCell = getPostsForSlot(dayIndex, hour);
 
     // Calculate target time for drop
     const getTargetTime = (): Date => {

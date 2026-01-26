@@ -34,6 +34,9 @@
 - Use `async/await` for all DB/Network calls.
 - Schema definitions in `src/db/schema.ts`.
 - Environment variables accessed via `env` (Hono Context), not `process.env`.
+- **File Naming:**
+    - ALWAYS use **kebab-case** for file names (e.g., `tweet-editor.tsx`, `user-profile.ts`).
+    - Component names inside the file should remain **PascalCase** (e.g., `export function TweetEditor()`).
 
 ## Package Management
 - **Primary Tool:** Always use `bun` for package management and script execution.

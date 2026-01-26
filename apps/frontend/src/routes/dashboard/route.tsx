@@ -8,16 +8,16 @@ import {
     BreadcrumbSeparator,
 } from '@repo/ui/components/ui/breadcrumb'
 import { Separator } from '@repo/ui/components/ui/separator'
-import { createFileRoute, Outlet, useLocation } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useLocation, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/dashboard')({
-    // beforeLoad: ({ context, location }) => {
-    //     if (!context.auth.user) {
-    //         throw redirect({
-    //             href: `/auth/sign-in?redirect=${encodeURIComponent(location.href)}`,
-    //         })
-    //     }
-    // },
+    beforeLoad: ({ context, location }) => {
+        if (!context.auth.user) {
+            throw redirect({
+                href: `/auth/sign-in?redirect=${encodeURIComponent(location.href)}`,
+            })
+        }
+    },
     component: RouteComponent,
 })
 

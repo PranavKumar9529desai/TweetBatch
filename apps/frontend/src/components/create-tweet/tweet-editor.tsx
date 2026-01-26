@@ -7,15 +7,56 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Separator } from "@repo/ui/components/ui/separator";
 import clsx from "clsx";
 
+import { useRef } from "react";
+
+interface MediaAttachment {
+    id: string;
+    url: string;
+    type: "image" | "gif" | "video";
+}
+
 interface TweetEditorProps {
     content: string;
     onChange: (content: string) => void;
+    media: MediaAttachment[];
+    onMediaChange: (media: MediaAttachment[]) => void;
     className?: string;
 }
 
 const LIMIT = 280;
 
-export function TweetEditor({ content, onChange, className }: TweetEditorProps) {
+export function TweetEditor({ content, onChange, media, onMediaChange, className }: TweetEditorProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files) return;
+
+        const newMedia: MediaAttachment[] = [];
+
+        Array.from(files).forEach((file) => {
+            const url = URL.createObjectURL(file);
+            const type = file.type.startsWith("video") ? "video" : "image";
+            newMedia.push({
+                id: Math.random().toString(36).substring(7),
+                url,
+                type
+            });
+        });
+
+        // Simple concat for now, we can enforce limits later
+        onMediaChange([...media, ...newMedia]);
+
+        // Reset input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    const triggerFileSelect = () => {
+        fileInputRef.current?.click();
+    };
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -68,8 +109,21 @@ export function TweetEditor({ content, onChange, className }: TweetEditorProps) 
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted">
                         <Smile className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted"
+                        onClick={triggerFileSelect}
+                    >
                         <ImageIcon className="h-4 w-4" />
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept="image/*,video/*"
+                            multiple
+                            onChange={handleFileSelect}
+                        />
                     </Button>
                 </div>
 

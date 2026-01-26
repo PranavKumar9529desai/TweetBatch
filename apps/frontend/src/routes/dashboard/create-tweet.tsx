@@ -10,6 +10,9 @@ export const Route = createFileRoute("/dashboard/create-tweet")({
 
 function CreateTweetPage() {
   const [content, setContent] = useState("");
+  const [media, setMedia] = useState<
+    Array<{ id: string; url: string; type: "image" | "gif" | "video" }>
+  >([]);
 
   return (
     <div className="flex container mx-auto py-10 max-w-[100rem]">
@@ -23,6 +26,8 @@ function CreateTweetPage() {
         <TweetEditor
           content={content}
           onChange={setContent}
+          media={media}
+          onMediaChange={setMedia}
           className="flex-1 min-h-[400px]"
         />
       </div>
@@ -34,6 +39,7 @@ function CreateTweetPage() {
             <div className="min-h-full "> {/* Add top padding for status bar */}
               <TweetPreview
                 content={content}
+                media={media}
                 authorHandle="pranav"
                 authorName="Pranav"
               />

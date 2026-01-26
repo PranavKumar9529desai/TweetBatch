@@ -58,20 +58,36 @@ export function TweetPreview({
 
                     {/* Media Grid */}
                     {media.length > 0 && (
-                        <div className={clsx("mt-3 grid gap-0.5 overflow-hidden rounded-2xl border border-border", {
+                        <div className={clsx("mt-3 grid gap-0.5 overflow-hidden rounded-2xl border border-border select-none", {
+                            "aspect-[16/9]": media.length === 1 || media.length === 2,
+                            // For 3 and 4 images it naturally flows with grid-rows but we can force aspect
+                            "aspect-[1/1]": media.length >= 3,
+                            // Grid assignments
                             "grid-cols-1": media.length === 1,
                             "grid-cols-2": media.length > 1,
-                            "aspect-[16/9]": media.length === 1,
-                            "aspect-[16/10]": media.length > 1
+                            "grid-rows-1": media.length <= 2,
+                            "grid-rows-2": media.length > 2,
                         })}>
-                            {media.slice(0, 4).map((m) => (
-                                <div key={m.id} className="relative h-full w-full bg-muted">
-                                    {m.type === 'image' && (
-                                        <img src={m.url} alt="attachment" className="h-full w-full object-cover" />
-                                    )}
-                                    {/* Add video/gif handling if needed */}
-                                </div>
-                            ))}
+                            {media.slice(0, 4).map((m, index) => {
+                                // For 3 images: First image spans 2 rows (left side), others stack on right
+                                const isThreeImages = media.length === 3;
+                                const isFirstOfThree = isThreeImages && index === 0;
+
+                                return (
+                                    <div
+                                        key={m.id}
+                                        className={clsx("relative h-full w-full bg-muted overflow-hidden", {
+                                            "row-span-2": isFirstOfThree
+                                        })}
+                                    >
+                                        {m.type === 'video' ? (
+                                            <video src={m.url} controls className="h-full w-full object-cover" />
+                                        ) : (
+                                            <img src={m.url} alt="attachment" className="h-full w-full object-cover" />
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 

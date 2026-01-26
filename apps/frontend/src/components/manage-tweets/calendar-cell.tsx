@@ -26,7 +26,7 @@ export function CalendarCell({ dayIndex, hour, date }: CalendarCellProps) {
     const { searchQuery } = useCalendarContext();
     const { posts, reschedulePost } = useManageTweets({
         startDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
-        endDate: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+        endDate: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999),
         search: searchQuery,
     });
 

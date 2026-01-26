@@ -36,8 +36,8 @@ export function CalendarContextWrapper({
 
 function CalendarDnDHandler({ children }: { children: ReactNode }) {
     const sensors = useDndSensors();
-    const { reschedulePost } = useManageTweets({});
-    const { currentWeekStart } = useCalendarContext();
+    const { currentWeekStart, searchQuery } = useCalendarContext();
+    const { reschedulePost } = useManageTweets({ search: searchQuery });
     const [activePost, setActivePost] = useState<ScheduledPost | null>(null);
 
     const handleDragStart = (event: DragStartEvent) => {

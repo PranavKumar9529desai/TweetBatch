@@ -160,6 +160,12 @@ export const postsRoute = app
             startDate = new Date(startDateStr);
             endDate = new Date(endDateStr);
 
+            // Only force end-of-day if the input is just a date (no time component)
+            // This allows frontend to pass precise ISO ranges
+            if (!endDateStr.includes('T')) {
+                endDate.setUTCHours(23, 59, 59, 999);
+            }
+
             if (isNaN(startDate.getTime())) {
                 return c.json({ error: "Invalid startDate format. Use ISO 8601 (e.g., 2026-01-27)" }, 400);
             }

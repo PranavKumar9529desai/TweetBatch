@@ -41,20 +41,20 @@ export function TweetCard({ post, isLoadingDrop }: TweetCardProps) {
         transform: CSS.Translate.toString(transform),
     };
 
-    const getStatusColor = (status: string): string => {
+    const getStatusGradient = (status: string): string => {
         switch (status) {
             case 'pending':
-                return 'bg-yellow-500/10 text-yellow-700 border-yellow-200';
+                return 'bg-yellow-500/10 border-yellow-500/20';
             case 'queued':
-                return 'bg-blue-500/10 text-blue-700 border-blue-200';
+                return 'bg-blue-500/10 border-blue-500/20';
             case 'posted':
-                return 'bg-green-500/10 text-green-700 border-green-200';
+                return 'bg-green-500/10 border-green-500/20';
             case 'failed':
-                return 'bg-red-500/10 text-red-700 border-red-200';
+                return 'bg-red-500/10 border-red-500/20';
             case 'cancelled':
-                return 'bg-gray-500/10 text-gray-700 border-gray-200';
+                return 'bg-gray-500/10 border-gray-500/20';
             default:
-                return 'bg-gray-500/10 text-gray-700 border-gray-200';
+                return 'bg-card border-border';
         }
     };
 
@@ -63,15 +63,15 @@ export function TweetCard({ post, isLoadingDrop }: TweetCardProps) {
         : '(empty)';
 
     const status = post.status || 'pending';
-    const statusDisplay = status.charAt(0).toUpperCase() + status.slice(1);
 
     return (
         <div
             ref={setNodeRef}
             style={style}
             className={cn(
-                'relative flex items-start gap-2 bg-card border border-border rounded-md p-2 text-xs transition-all',
-                'group hover:shadow-md hover:border-primary/50',
+                'relative flex items-start gap-2 border rounded-md p-2 text-xs transition-all',
+                getStatusGradient(status),
+                'group hover:shadow-md',
                 isDragging && 'opacity-50 shadow-lg',
                 isLoadingDrop && 'opacity-60'
             )}
@@ -88,17 +88,8 @@ export function TweetCard({ post, isLoadingDrop }: TweetCardProps) {
 
             {/* Content preview */}
             <div className="flex-1 min-w-0">
-                <div className="text-xs text-foreground line-clamp-2 break-words">
+                <div className="text-xs text-foreground line-clamp-3 break-words leading-relaxed">
                     {contentPreview}
-                </div>
-
-                {/* Status badge */}
-                <div className={cn(
-                    'inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded border text-xs font-medium',
-                    getStatusColor(status)
-                )}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                    {statusDisplay}
                 </div>
             </div>
 
@@ -108,7 +99,7 @@ export function TweetCard({ post, isLoadingDrop }: TweetCardProps) {
                     onClick={() => setShowMenu(!showMenu)}
                     className={cn(
                         'p-1 text-muted-foreground hover:text-foreground transition-colors',
-                        'rounded hover:bg-muted',
+                        'rounded hover:bg-muted/50',
                         isLoadingDrop && 'pointer-events-none opacity-50'
                     )}
                     title="More actions"

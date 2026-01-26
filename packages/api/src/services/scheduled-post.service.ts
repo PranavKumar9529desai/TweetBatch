@@ -501,7 +501,7 @@ export class ScheduledPostService {
 
         // 4. Update the post
         let newStatus = post.status;
-        if (post.status === "queued" || post.status === "failed") {
+        if (post.status === "queued" || post.status === "failed" || post.status === "draft") {
             newStatus = "pending";
         }
 

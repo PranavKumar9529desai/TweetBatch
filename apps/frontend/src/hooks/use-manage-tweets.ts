@@ -71,8 +71,8 @@ export function useManageTweets({
     queryKey: queryKeys.search(startDate, endDate, search),
     queryFn: async () => {
       const queryParams: any = {};
-      if (startDate) queryParams.startDate = startDate.toISOString().split('T')[0];
-      if (endDate) queryParams.endDate = endDate.toISOString().split('T')[0];
+      if (startDate) queryParams.startDate = startDate.toISOString();
+      if (endDate) queryParams.endDate = endDate.toISOString();
       if (search) queryParams.search = search;
 
       const response = await apiclient.posts.search.$get({
@@ -132,7 +132,7 @@ export function useManageTweets({
       // Optimistically update the cache
       if (previousPosts) {
         const updatedPosts = previousPosts.map((post) =>
-          post.id === postId ? { ...post, scheduledAt } : post
+          post.id === postId ? { ...post, scheduledAt: scheduledAt.toISOString(), status: 'pending' as const } : post
         );
         queryClient.setQueryData(
           queryKeys.search(startDate, endDate, search),
@@ -140,14 +140,59 @@ export function useManageTweets({
         );
       }
 
+      // Also update the target date's query (for CalendarCell)
+      const targetStart = new Date(scheduledAt.getFullYear(), scheduledAt.getMonth(), scheduledAt.getDate());
+      const targetEnd = new Date(targetStart);
+      const targetKey = queryKeys.search(targetStart, targetEnd, search);
+
+      // We need to find the post data to add it to the target list
+      // It might be in previousPosts (if it was in the source list)
+      const sourcePost = previousPosts?.find((p) => p.id === postId);
+
+      if (sourcePost) {
+        const newPost: ScheduledPost = {
+          ...sourcePost,
+          scheduledAt: scheduledAt.toISOString(),
+          status: 'pending' as const
+        };
+
+        queryClient.setQueryData<ScheduledPost[]>(targetKey, (oldPosts) => {
+          if (!oldPosts) return [newPost];
+          // Check if it already exists to avoid duplicates
+          if (oldPosts.some(p => p.id === postId)) {
+            return oldPosts.map(p => p.id === postId ? newPost : p);
+          }
+          return [...oldPosts, newPost];
+        });
+      }
+
       return { previousPosts };
     },
     onSuccess: (updatedPost) => {
       toast.success('Post rescheduled successfully');
+
       // Update the detail cache if it exists
       queryClient.setQueryData(queryKeys.detail(updatedPost.id), updatedPost);
-      // Invalidate all lists to ensure queue/calendar sync
-      queryClient.invalidateQueries({ queryKey: queryKeys.all });
+
+      // Manually update the search list cache to prevent "vanishing" post
+      // This relies on the mutation response being authoritative
+      queryClient.setQueryData<ScheduledPost[]>(
+        queryKeys.search(startDate, endDate, search),
+        (oldPosts) => {
+          if (!oldPosts) return [updatedPost];
+
+          // Remove the old version of the post if it exists to avoid duplicates
+          const filtered = oldPosts.filter(p => p.id !== updatedPost.id);
+
+          // Add the updated post from server
+          return [...filtered, updatedPost];
+        }
+      );
+
+      // NOTE: We deliberately DO NOT invalidate queryKeys.all here.
+      // Invalidating immediately causes a race condition where the backend search index
+      // might not have updated yet, causing the post to disappear from the list.
+      // queryClient.invalidateQueries({ queryKey: queryKeys.all });
     },
     onError: (error, _variables, context) => {
       // Rollback on error

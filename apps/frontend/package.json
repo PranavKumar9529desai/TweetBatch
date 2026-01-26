@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@repo/api": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-router": "^1.154.12",
     "@tiptap/extension-character-count": "^3.17.1",
     "@tiptap/extension-placeholder": "^3.17.1",

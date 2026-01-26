@@ -1,7 +1,7 @@
 import { Context } from "hono";
 import { createDb } from "@repo/db";
 import { ScheduledPostService } from "../services/scheduled-post.service";
-import { Bindings } from "../types";
+import type { Bindings } from "../types";
 
 export const DirectPostRoute = async (c: Context<{ Bindings: Bindings }>) => {
     const { userId, content } = await c.req.json();
@@ -25,6 +25,10 @@ export const DirectPostRoute = async (c: Context<{ Bindings: Bindings }>) => {
             content,
             scheduledAt: new Date(), // Will be updated when user schedules it
         });
+
+        if (!draftPost) {
+            return c.json({ success: false, error: "Failed to create draft post" }, 500);
+        }
 
         return c.json({ 
             success: true, 

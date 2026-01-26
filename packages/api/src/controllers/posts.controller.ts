@@ -3,7 +3,7 @@ import { createDb } from "@repo/db";
 import { ScheduledPostService } from "../services/scheduled-post.service";
 import { QStashService } from "../services/qstash.service";
 import { RateLimitService } from "../services/rate-limit.service";
-import type { Bindings } from "../types";
+import type { Bindings, Variables } from "../types";
 
 /**
  * Posts Route
@@ -15,7 +15,7 @@ import { bulkImportRoute } from "./bulk-import.controller";
  * Posts Route
  * Handles CRUD operations for scheduled posts.
  */
-const app = new Hono<{ Bindings: Bindings }>();
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
 // Helper to get services
 const getServices = (env: Bindings) => {
@@ -29,6 +29,12 @@ const getServices = (env: Bindings) => {
     });
     const rateLimitService = new RateLimitService(db);
     return { postService, qstashService, rateLimitService };
+};
+
+// Helper to validate ISO 8601 date format
+const isValidIsoDate = (dateString: string): boolean => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime()) && dateString === date.toISOString();
 };
 
 /**
@@ -188,5 +194,186 @@ export const postsRoute = app
             return c.json({ success: true, deleted: true });
         } catch (error: any) {
             return c.json({ success: false, error: error.message }, 400);
+        }
+    })
+
+    /**
+     * Task 1.1: GET /
+     * Get posts by date range with optional search filter.
+     * 
+     * Query parameters:
+     * - startDate (required): ISO 8601 date (e.g., 2026-01-27)
+     * - endDate (required): ISO 8601 date (e.g., 2026-02-03)
+     * - search (optional): Case-insensitive substring match on content
+     * 
+     * Validates:
+     * - Both dates are valid ISO 8601 format
+     * - Date range is <= 90 days
+     * - User is authenticated
+     * 
+     * Returns: Array of posts sorted by scheduledAt ascending
+     */
+    .get("/search", async (c) => {
+        const user = c.get("user");
+        if (!user) {
+            return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const env = c.env;
+        const startDateStr = c.req.query("startDate");
+        const endDateStr = c.req.query("endDate");
+        const searchQuery = c.req.query("search");
+
+        // Validate required parameters
+        if (!startDateStr || !endDateStr) {
+            return c.json(
+                { error: "Missing required parameters: startDate and endDate (ISO 8601 format)" },
+                400
+            );
+        }
+
+        // Validate date format (basic ISO 8601 check)
+        const startDate = new Date(startDateStr);
+        const endDate = new Date(endDateStr);
+
+        if (isNaN(startDate.getTime())) {
+            return c.json({ error: "Invalid startDate format. Use ISO 8601 (e.g., 2026-01-27)" }, 400);
+        }
+
+        if (isNaN(endDate.getTime())) {
+            return c.json({ error: "Invalid endDate format. Use ISO 8601 (e.g., 2026-02-03)" }, 400);
+        }
+
+        // Validate date range
+        if (startDate > endDate) {
+            return c.json({ error: "startDate must be before or equal to endDate" }, 400);
+        }
+
+        // Check max 90 days constraint
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        if (diffDays > 90) {
+            return c.json({ error: "Date range cannot exceed 90 days" }, 400);
+        }
+
+        try {
+            const { postService } = getServices(env);
+            const posts = await postService.getPostsByDateRange(
+                user.id,
+                startDate,
+                endDate,
+                searchQuery
+            );
+
+            return c.json({ success: true, posts });
+        } catch (error: any) {
+            console.error("Error fetching posts:", error);
+            return c.json({ error: "Failed to fetch posts" }, 500);
+        }
+    })
+
+    /**
+     * Task 1.2: POST /:id/reschedule
+     * Reschedule a post to a new time.
+     * 
+     * Request body: { scheduledAt: ISO 8601 timestamp }
+     * 
+     * Validates:
+     * - Post exists and belongs to authenticated user
+     * - scheduledAt is >= now + 1 minute
+     * - scheduledAt is <= 90 days from now
+     * - Post status is not 'posted'
+     * - Resets status to 'pending' if it was 'queued' or 'failed'
+     * 
+     * Returns: Updated post object
+     */
+    .post("/:id/reschedule", async (c) => {
+        const user = c.get("user");
+        if (!user) {
+            return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const env = c.env;
+        const postId = c.req.param("id");
+
+        try {
+            const body = await c.req.json<{ scheduledAt: string }>();
+            const { scheduledAt } = body;
+
+            if (!scheduledAt) {
+                return c.json({ error: "Missing required field: scheduledAt" }, 400);
+            }
+
+            const newScheduledAt = new Date(scheduledAt);
+            if (isNaN(newScheduledAt.getTime())) {
+                return c.json({ error: "Invalid scheduledAt format. Use ISO 8601 timestamp" }, 400);
+            }
+
+            const { postService } = getServices(env);
+            const updatedPost = await postService.reschedulePost(
+                postId,
+                user.id,
+                newScheduledAt
+            );
+
+            return c.json({ success: true, post: updatedPost });
+        } catch (error: any) {
+            const message = error.message || "Failed to reschedule post";
+
+            // Distinguish between validation errors and server errors
+            if (
+                message.includes("not found") ||
+                message.includes("Unauthorized") ||
+                message.includes("already been posted") ||
+                message.includes("must be at least") ||
+                message.includes("cannot be more than")
+            ) {
+                return c.json({ error: message }, 400);
+            }
+
+            console.error("Error rescheduling post:", error);
+            return c.json({ error: "Failed to reschedule post" }, 500);
+        }
+    })
+
+    /**
+     * Task 1.3: POST /:id/cancel
+     * Cancel a post (soft delete by setting status='cancelled').
+     * 
+     * Validates:
+     * - Post exists and belongs to authenticated user
+     * - Post status is 'pending' or 'failed'
+     * - Rejects if status is 'queued' or 'posted'
+     * 
+     * Returns: Success response with updated post
+     */
+    .post("/:id/cancel", async (c) => {
+        const user = c.get("user");
+        if (!user) {
+            return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const env = c.env;
+        const postId = c.req.param("id");
+
+        try {
+            const { postService } = getServices(env);
+            const cancelledPost = await postService.cancelPost(postId, user.id);
+
+            return c.json({ success: true, post: cancelledPost });
+        } catch (error: any) {
+            const message = error.message || "Failed to cancel post";
+
+            // Distinguish between validation errors and server errors
+            if (
+                message.includes("not found") ||
+                message.includes("Unauthorized") ||
+                message.includes("Cannot cancel")
+            ) {
+                return c.json({ error: message }, 400);
+            }
+
+            console.error("Error cancelling post:", error);
+            return c.json({ error: "Failed to cancel post" }, 500);
         }
     });

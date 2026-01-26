@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { Bindings, Variables } from "./types";
-import { postTweet } from "./controllers/twitter.controller";
 import { notificationsRoute } from "./controllers/notifications.controller";
 import { postsRoute } from "./controllers/posts.controller";
 import { qstashWebhookRoute } from "./controllers/qstash-webhook.controller";

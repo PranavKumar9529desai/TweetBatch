@@ -202,7 +202,7 @@ export const bulkImportRoute = new Hono<{ Bindings: Bindings }>()
             posts: createdPosts.map((p) => ({
                 id: p.id,
                 content: p.content,
-                scheduledAt: p.scheduledAt.toISOString(),
+                scheduledAt: p.scheduledAt ? p.scheduledAt.toISOString() : new Date().toISOString(),
                 status: p.status,
             })),
         });

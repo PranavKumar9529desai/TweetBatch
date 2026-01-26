@@ -101,10 +101,12 @@ export async function syncPostsToQStash(env: Bindings): Promise<{
     }
 
     // Prepare posts with delay calculations
-    const postsWithDelay = unsyncedPosts.map((post) => ({
-        id: post.id,
-        delaySeconds: calculateDelaySeconds(post.scheduledAt),
-    }));
+    const postsWithDelay = unsyncedPosts
+        .filter((post) => post.scheduledAt !== null)
+        .map((post) => ({
+            id: post.id,
+            delaySeconds: calculateDelaySeconds(post.scheduledAt!),
+        }));
 
     // Push to QStash in batches
     let synced = 0;

@@ -4,6 +4,10 @@ export interface Bindings {
   BETTER_AUTH_URL: string;
   TWITTER_CLIENT_ID: string;
   TWITTER_CLIENT_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GMAIL_USER: string;
+  GMAIL_PASSWORD: string;
   QSTASH_TOKEN: string;
   QSTASH_CURRENT_SIGNING_KEY: string;
   QSTASH_NEXT_SIGNING_KEY: string;

@@ -1,4 +1,4 @@
-import { createDb, scheduledPost, eq, and, gte, lte, desc } from "@repo/db";
+import { createDb, scheduledPost, eq, and, gte, lte, desc, like } from "@repo/db";
 import { randomUUID } from "crypto";
 
 type DbClient = ReturnType<typeof createDb>;
@@ -20,6 +20,16 @@ export interface GetScheduledPostsFilters {
     to?: Date;
     limit?: number;
     offset?: number;
+}
+
+export interface ScheduledPostResponse {
+    id: string;
+    content: string;
+    scheduledAt: Date | null;
+    status: string;
+    tweetId: string | null;
+    errorMessage: string | null;
+    createdAt: Date;
 }
 
 /**
@@ -378,6 +388,224 @@ export class ScheduledPostService {
         }
 
         return qstashMessageIds;
+    }
+
+    /**
+     * Get posts by date range with optional search query.
+     * Task 1.1: Used by GET /api/posts endpoint.
+     * 
+     * @param userId The user ID to filter posts by
+     * @param startDate Start of date range (inclusive)
+     * @param endDate End of date range (inclusive)
+     * @param searchQuery Optional search term for case-insensitive content matching
+     * @returns Array of posts matching the criteria, sorted by scheduledAt ascending
+     */
+    async getPostsByDateRange(
+        userId: string,
+        startDate: Date,
+        endDate: Date,
+        searchQuery?: string
+    ): Promise<ScheduledPostResponse[]> {
+        const conditions = [
+            eq(scheduledPost.userId, userId),
+            gte(scheduledPost.scheduledAt, startDate),
+            lte(scheduledPost.scheduledAt, endDate),
+        ];
+
+        if (searchQuery) {
+            conditions.push(
+                like(scheduledPost.content, `%${searchQuery}%`)
+            );
+        }
+
+        const posts = await this.db.query.scheduledPost.findMany({
+            where: and(...conditions),
+            orderBy: [scheduledPost.scheduledAt],
+        });
+
+        return posts.map((post) => ({
+            id: post.id,
+            content: post.content,
+            scheduledAt: post.scheduledAt,
+            status: post.status,
+            tweetId: post.tweetId,
+            errorMessage: post.errorMessage,
+            createdAt: post.createdAt,
+        }));
+    }
+
+    /**
+     * Reschedule a post to a new time.
+     * Task 1.2: Used by POST /api/posts/{id}/reschedule endpoint.
+     * 
+     * Validates that:
+     * - Post exists and belongs to user
+     * - New time is >= now + 1 minute and <= 90 days from now
+     * - Post status is not 'posted'
+     * - If status is 'queued' or 'failed', resets to 'pending'
+     * 
+     * @param postId The post ID to reschedule
+     * @param userId The user ID (for authorization)
+     * @param newScheduledAt The new scheduled time (ISO 8601)
+     * @returns The updated post object
+     * @throws Error if validation fails
+     */
+    async reschedulePost(
+        postId: string,
+        userId: string,
+        newScheduledAt: Date
+    ): Promise<ScheduledPostResponse> {
+        // 1. Verify post exists and belongs to user
+        const post = await this.getScheduledPost(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        if (post.userId !== userId) {
+            throw new Error("Unauthorized: post does not belong to this user");
+        }
+
+        // 2. Check if post is already posted
+        if (post.status === "posted") {
+            throw new Error("Cannot reschedule a post that has already been posted");
+        }
+
+        // 3. Validate new scheduled time
+        const now = new Date();
+        const minTime = new Date(now.getTime() + 60 * 1000); // now + 1 minute
+        const maxTime = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000); // now + 90 days
+
+        if (newScheduledAt < minTime) {
+            throw new Error("Scheduled time must be at least 1 minute in the future");
+        }
+
+        if (newScheduledAt > maxTime) {
+            throw new Error("Scheduled time cannot be more than 90 days in the future");
+        }
+
+        // 4. Update the post
+        let newStatus = post.status;
+        if (post.status === "queued" || post.status === "failed") {
+            newStatus = "pending";
+        }
+
+        const updated = await this.db
+            .update(scheduledPost)
+            .set({
+                scheduledAt: newScheduledAt,
+                status: newStatus,
+                syncedToQStash: false, // Mark for re-sync if it was queued
+            })
+            .where(eq(scheduledPost.id, postId))
+            .returning();
+
+        if (!updated || updated.length === 0) {
+            throw new Error("Failed to update post");
+        }
+
+        const result = updated[0]!;
+        return {
+            id: result.id,
+            content: result.content,
+            scheduledAt: result.scheduledAt,
+            status: result.status,
+            tweetId: result.tweetId,
+            errorMessage: result.errorMessage,
+            createdAt: result.createdAt,
+        };
+    }
+
+    /**
+     * Cancel a post (soft delete).
+     * Task 1.3: Used by POST /api/posts/{id}/cancel endpoint.
+     * 
+     * Validates that:
+     * - Post exists and belongs to user
+     * - Post status is 'pending' or 'failed' (reject if 'queued' or 'posted')
+     * - Sets status to 'cancelled'
+     * 
+     * @param postId The post ID to cancel
+     * @param userId The user ID (for authorization)
+     * @returns The updated post object with status='cancelled'
+     * @throws Error if validation fails
+     */
+    async cancelPost(
+        postId: string,
+        userId: string
+    ): Promise<ScheduledPostResponse> {
+        // 1. Verify post exists and belongs to user
+        const post = await this.getScheduledPost(postId);
+        if (!post) {
+            throw new Error("Post not found");
+        }
+
+        if (post.userId !== userId) {
+            throw new Error("Unauthorized: post does not belong to this user");
+        }
+
+        // 2. Check if post status allows cancellation
+        if (post.status === "queued" || post.status === "posted") {
+            throw new Error(
+                `Cannot cancel a post with status '${post.status}'. ` +
+                "Only pending or failed posts can be cancelled."
+            );
+        }
+
+        // 3. Set status to cancelled
+        const updated = await this.db
+            .update(scheduledPost)
+            .set({
+                status: "cancelled",
+            })
+            .where(eq(scheduledPost.id, postId))
+            .returning();
+
+        if (!updated || updated.length === 0) {
+            throw new Error("Failed to cancel post");
+        }
+
+        const result = updated[0]!;
+        return {
+            id: result.id,
+            content: result.content,
+            scheduledAt: result.scheduledAt,
+            status: result.status,
+            tweetId: result.tweetId,
+            errorMessage: result.errorMessage,
+            createdAt: result.createdAt,
+        };
+    }
+
+    /**
+     * Get posts by status.
+     * Task 1.4: Helper method used by other endpoints and crons.
+     * 
+     * @param userId The user ID to filter posts by
+     * @param status The status to filter by
+     * @returns Array of posts with the specified status
+     */
+    async getPostsByStatus(
+        userId: string,
+        status: string
+    ): Promise<ScheduledPostResponse[]> {
+        const posts = await this.db.query.scheduledPost.findMany({
+            where: (post, { and, eq }) =>
+                and(
+                    eq(post.userId, userId),
+                    eq(post.status, status)
+                ),
+            orderBy: [desc(scheduledPost.scheduledAt)],
+        });
+
+        return posts.map((post) => ({
+            id: post.id,
+            content: post.content,
+            scheduledAt: post.scheduledAt,
+            status: post.status,
+            tweetId: post.tweetId,
+            errorMessage: post.errorMessage,
+            createdAt: post.createdAt,
+        }));
     }
 }
 

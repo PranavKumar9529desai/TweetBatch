@@ -85,10 +85,14 @@ export const scheduledPost = pgTable(
             .notNull()
             .references(() => user.id, { onDelete: "cascade" }),
         content: text("content").notNull(),
-        scheduledAt: timestamp("scheduled_at").notNull(),
+        scheduledAt: timestamp("scheduled_at"),
 
-        // Status: pending → queued → posted/failed/cancelled
-        status: text("status").default("pending").notNull(),
+        // Status: draft → pending → queued → posted/failed/cancelled
+        // draft: created in create-tweet, not yet scheduled in kanban
+        // pending: scheduled time set in kanban, ready to sync to QStash
+        // queued: synced to QStash, awaiting delivery
+        // posted/failed/cancelled: terminal states
+        status: text("status").default("draft").notNull(),
 
         // QStash tracking
         syncedToQStash: boolean("synced_to_qstash").default(false).notNull(),

@@ -44,14 +44,45 @@ export class ScheduledPostService {
                 id,
                 userId: input.userId,
                 content: input.content,
-                scheduledAt: input.scheduledAt,
-                status: "pending",
+                scheduledAt: input.scheduledAt || null,
+                status: "draft",
                 syncedToQStash: false,
                 retryCount: 0,
             })
             .returning();
 
         return post;
+    }
+
+    /**
+     * Transition a draft post to pending status.
+     * Called when user sets scheduled time in kanban/manage-tweet view.
+     * Requires scheduledAt to be set.
+     */
+    async draftToPending(postId: string, scheduledAt: Date) {
+        if (scheduledAt <= new Date()) {
+            throw new Error("Scheduled time must be in the future");
+        }
+
+        const existing = await this.getScheduledPost(postId);
+        if (!existing) {
+            throw new Error(`Post ${postId} not found`);
+        }
+
+        if (existing.status !== "draft") {
+            throw new Error(`Cannot transition post with status '${existing.status}' to pending. Only drafts can be scheduled.`);
+        }
+
+        const [updated] = await this.db
+            .update(scheduledPost)
+            .set({
+                status: "pending",
+                scheduledAt: scheduledAt,
+            })
+            .where(eq(scheduledPost.id, postId))
+            .returning();
+
+        return updated;
     }
 
     /**

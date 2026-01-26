@@ -6,6 +6,10 @@ import { MobileFrame } from "@/components/create-tweet/mobile-frame";
 import { Title } from "@/components/title";
 import { apiclient } from "@/lib/api.client";
 import { toast } from "@repo/ui/components/ui/sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@repo/ui/components/ui/dialog";
+import { Button } from "@repo/ui/components/ui/button";
+import { Calendar as CalendarUI } from "@repo/ui/components/ui/calendar";
+import { format } from "date-fns";
 
 export const Route = createFileRoute("/dashboard/create-tweet")({
   component: CreateTweetPage,
@@ -18,6 +22,9 @@ function CreateTweetPage() {
     Array<{ id: string; url: string; type: "image" | "gif" | "video" }>
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
+  const [scheduleDate, setScheduleDate] = useState<Date | undefined>();
   const { auth } = Route.useRouteContext();
   const user = auth.user;
 
@@ -35,7 +42,7 @@ function CreateTweetPage() {
     setIsSubmitting(true);
     try {
       if (isScheduled && scheduledAt) {
-        // Use posts API for scheduling
+        // Use posts API for scheduling (transitions from draft to pending in kanban)
         const res = await apiclient.posts.$post({
           json: {
             userId: user.id,
@@ -46,14 +53,16 @@ function CreateTweetPage() {
 
         const data = await res.json();
         if (data.success) {
-          toast.success(`Tweet scheduled for ${scheduledAt.toLocaleDateString()}`);
+          toast.success(`Draft scheduled for ${scheduledAt.toLocaleDateString()}`);
           setContent("");
+          setShowScheduleDialog(false);
+          setScheduleDate(undefined);
         } else {
-          toast.error(data.error || "Failed to schedule tweet");
+          toast.error(data.error || "Failed to schedule draft");
         }
       } else {
-        // Use direct tweet API for immediate posting
-        const res = await apiclient.tweet.$post({
+        // Create a draft post (no scheduled time yet)
+        const res = await apiclient.posts.$post({
           json: {
             userId: user.id,
             content: content,
@@ -62,10 +71,11 @@ function CreateTweetPage() {
 
         const data = await res.json();
         if (data.success) {
-          toast.success("Tweet posted successfully!");
+          toast.success("Draft created! Manage it in the kanban board.");
           setContent("");
+          setShowConfirmDialog(false);
         } else {
-          toast.error(data.error || "Failed to post tweet");
+          toast.error(data.error || "Failed to create draft");
         }
       }
     } catch (e) {
@@ -74,6 +84,15 @@ function CreateTweetPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePostClick = (isScheduled: boolean, scheduledAt?: Date) => {
+    // Always show confirmation dialog to ask if they want to schedule or post now
+    if (!scheduledAt) {
+      setShowConfirmDialog(true);
+      return;
+    }
+    handlePost(isScheduled, scheduledAt);
   };
 
   return (
@@ -88,7 +107,7 @@ function CreateTweetPage() {
           onChange={setContent}
           media={media}
           onMediaChange={setMedia}
-          onPost={handlePost}
+          onPost={handlePostClick}
           isSubmitting={isSubmitting}
           className="flex-1"
         />
@@ -110,6 +129,109 @@ function CreateTweetPage() {
           </MobileFrame>
         </div>
       </div>
+
+      {/* Schedule Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="w-[95vw] sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Schedule Draft</DialogTitle>
+            <DialogDescription>
+              Select a date and time to schedule your draft.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 items-center">
+            <CalendarUI
+              mode="single"
+              selected={scheduleDate}
+              onSelect={(date) => {
+                if (date) {
+                  const newDate = new Date(date);
+                  if (scheduleDate) {
+                    newDate.setHours(scheduleDate.getHours());
+                    newDate.setMinutes(scheduleDate.getMinutes());
+                  } else {
+                    // Default to next hour if nothing set
+                    const nextHour = new Date();
+                    nextHour.setHours(nextHour.getHours() + 1);
+                    newDate.setHours(nextHour.getHours());
+                    newDate.setMinutes(0);
+                  }
+                  setScheduleDate(newDate);
+                }
+              }}
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              initialFocus
+            />
+            {scheduleDate && (
+              <div className="flex flex-col gap-2">
+                <label htmlFor="tweet-time" className="text-sm font-medium">Time</label>
+                <input
+                  id="tweet-time"
+                  type="time"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={format(scheduleDate, "HH:mm")}
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(":").map(Number);
+                    const newDate = new Date(scheduleDate);
+                    newDate.setHours(hours);
+                    newDate.setMinutes(minutes);
+                    setScheduleDate(newDate);
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Scheduling for: <span className="font-medium text-foreground">{format(scheduleDate, "PPP 'at' HH:mm")}</span>
+                </p>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowScheduleDialog(false);
+                setScheduleDate(undefined);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => handlePost(true, scheduleDate)}
+              disabled={!scheduleDate || isSubmitting}
+            >
+              {isSubmitting ? "Scheduling..." : "Schedule Draft"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog - Ask if user wants to create draft or schedule */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create as Draft?</DialogTitle>
+            <DialogDescription>
+              Create this as a draft (to be scheduled later in Manage Tweets) or schedule it now?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmDialog(false);
+                setShowScheduleDialog(true);
+              }}
+            >
+              Schedule Now
+            </Button>
+            <Button
+              onClick={() => handlePost(false)}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creating..." : "Create Draft"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

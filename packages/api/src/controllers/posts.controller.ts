@@ -42,24 +42,17 @@ export const postsRoute = app
 
     /**
      * POST /
-     * Create a single scheduled post.
+     * Create a single scheduled post (draft or scheduled).
+     * If scheduledAt is provided, creates pending post ready for sync.
+     * If scheduledAt is omitted, creates draft post to be scheduled later in kanban.
      */
     .post("/", async (c) => {
         const env = c.env;
-        const body = await c.req.json<{ userId: string; content: string; scheduledAt: string }>();
+        const body = await c.req.json<{ userId: string; content: string; scheduledAt?: string }>();
         const { userId, content, scheduledAt } = body;
         console.log("body", body);
-        if (!userId || !content || !scheduledAt) {
-            return c.json({ success: false, error: "Missing required fields" }, 400);
-        }
-
-        const scheduledDate = new Date(scheduledAt);
-        if (isNaN(scheduledDate.getTime())) {
-            return c.json({ success: false, error: "Invalid scheduledAt date" }, 400);
-        }
-
-        if (scheduledDate <= new Date()) {
-            return c.json({ success: false, error: "Scheduled time must be in the future" }, 400);
+        if (!userId || !content) {
+            return c.json({ success: false, error: "Missing userId or content" }, 400);
         }
 
         if (content.length > 280) {
@@ -68,19 +61,39 @@ export const postsRoute = app
 
         const { postService, rateLimitService } = getServices(env);
 
-        // Check rate limits
-        const limits = await rateLimitService.validateBulkImportLimits(userId, [{ content, scheduledAt: scheduledDate }]);
-        if (!limits.valid) {
-            return c.json({ success: false, error: "Rate limit exceeded", violations: limits.violations }, 400);
+        let scheduledDate: Date | null = null;
+        
+        // If scheduledAt is provided, validate it and prepare for immediate sync
+        if (scheduledAt) {
+            scheduledDate = new Date(scheduledAt);
+            if (isNaN(scheduledDate.getTime())) {
+                return c.json({ success: false, error: "Invalid scheduledAt date" }, 400);
+            }
+
+            if (scheduledDate <= new Date()) {
+                return c.json({ success: false, error: "Scheduled time must be in the future" }, 400);
+            }
+
+            // Check rate limits only if scheduling immediately
+            const limits = await rateLimitService.validateBulkImportLimits(userId, [{ content, scheduledAt: scheduledDate }]);
+            if (!limits.valid) {
+                return c.json({ success: false, error: "Rate limit exceeded", violations: limits.violations }, 400);
+            }
         }
 
         const post = await postService.createScheduledPost({
             userId,
             content,
-            scheduledAt: scheduledDate,
+            scheduledAt: scheduledDate || new Date(),
         });
 
-        return c.json({ success: true, post });
+        return c.json({ 
+            success: true, 
+            post: {
+                ...post,
+                message: scheduledDate ? "Post scheduled successfully" : "Post created as draft. Schedule it in Manage Tweets."
+            }
+        });
     })
 
     /**

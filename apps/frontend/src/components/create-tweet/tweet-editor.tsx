@@ -259,7 +259,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
                         disabled={editor.storage.characterCount.characters() === 0 || charsLeft < 0 || isSubmitting}
                         onClick={() => onPost(!!scheduledAt, scheduledAt)}
                     >
-                        {isSubmitting ? "Posting..." : (scheduledAt ? "Schedule" : "Post")}
+                        {isSubmitting ? "Creating..." : (scheduledAt ? "Schedule" : "Draft")}
                     </Button>
                 </div>
             </div>

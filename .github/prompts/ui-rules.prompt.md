@@ -1,4 +1,4 @@
 ---
 agent: agent
 ---
-Define the task to achieve, including specific requirements, constraints, and success criteria.
+This rule set enforces strict UI consistency across the application. All UI must be built using shadcn/ui components only, with components sourced from the shared packages/ui package. Custom components should not be created when a shadcn alternative exists. All colors must use shadcn/Tailwind theme variables instead of raw color values to ensure proper theming and dark-mode support. If a required shadcn component is missing, it must be added to packages/ui using bunx shadcn@latest add <component-name>. For large or layout-heavy cards, the predefined custom card variant borderlesscard must always be used.

@@ -3,13 +3,6 @@
   "workspaces": {
     "": {
       "name": "twitter-scheduler",
-      "dependencies": {
-        "@dnd-kit/core": "^6.3.1",
-        "@dnd-kit/modifiers": "^9.0.0",
-        "@dnd-kit/sortable": "^10.0.0",
-        "@dnd-kit/utilities": "^3.2.2",
-        "@tanstack/react-query": "^5.90.20",
-      },
       "devDependencies": {
         "prettier": "^3.7.4",
         "turbo": "^2.7.5",
@@ -31,8 +24,13 @@
       "name": "frontend",
       "version": "0.0.0",
       "dependencies": {
+        "@dnd-kit/core": "^6.3.1",
+        "@dnd-kit/modifiers": "^9.0.0",
+        "@dnd-kit/sortable": "^10.0.0",
+        "@dnd-kit/utilities": "^3.2.2",
         "@repo/api": "workspace:*",
         "@repo/ui": "workspace:*",
+        "@tanstack/react-query": "^5.90.20",
         "@tanstack/react-router": "^1.154.12",
         "@tiptap/extension-character-count": "^3.17.1",
         "@tiptap/extension-placeholder": "^3.17.1",
@@ -71,6 +69,7 @@
       "name": "@repo/api",
       "version": "0.0.0",
       "dependencies": {
+        "@hono/zod-validator": "^0.7.6",
         "@repo/auth": "workspace:*",
         "@repo/db": "workspace:*",
         "@upstash/qstash": "^2.8.4",
@@ -79,6 +78,7 @@
         "drizzle-orm": "0.45.1",
         "hono": "^4.6.14",
         "twitter-api-v2": "^1.15.0",
+        "zod": "^4.3.6",
       },
       "devDependencies": {
         "@repo/typescript-config": "*",
@@ -413,6 +413,8 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.6", "", { "dependencies": { "@floating-ui/dom": "^1.7.4" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-4JX6rEatQEvlmgU80wZyq9RT96HZJa88q8hp0pBd+LrczeDI4o6uA2M+uvxngVHo4Ihr8uibXxH6+70zhAFrVw=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
+
+    "@hono/zod-validator": ["@hono/zod-validator@0.7.6", "", { "peerDependencies": { "hono": ">=3.9.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-Io1B6d011Gj1KknV4rXYz4le5+5EubcWEU/speUjuw9XMMIaP3n78yXLhjd2A3PXaXaUwEAluOiAyLqhBEJgsw=="],
 
     "@humanfs/core": ["@humanfs/core@0.19.1", "", {}, "sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA=="],
 

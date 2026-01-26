@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
-import { DndContext } from '@dnd-kit/core';
-import { CalendarProvider } from './calendar-context';
-import { createDndSensors } from './dnd-setup';
+import { DndContext, type DragEndEvent, type DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { useState } from 'react';
+import { CalendarProvider, useCalendarContext } from './calendar-context';
+import { useManageTweets, type ScheduledPost } from '../../hooks/use-manage-tweets';
+import { useDndSensors } from './dnd-setup';
+import { TweetCard } from './tweet-card';
 import { Toaster } from '@repo/ui/components/ui/sonner';
 
 interface CalendarContextWrapperProps {
@@ -21,17 +24,85 @@ interface CalendarContextWrapperProps {
 export function CalendarContextWrapper({
     children,
 }: CalendarContextWrapperProps) {
-    const sensors = createDndSensors();
-
     return (
         <CalendarProvider>
-            <DndContext
-                sensors={sensors}
-            >
+            <CalendarDnDHandler>
                 {children}
-            </DndContext>
+            </CalendarDnDHandler>
             <Toaster />
         </CalendarProvider>
+    );
+}
+
+function CalendarDnDHandler({ children }: { children: ReactNode }) {
+    const sensors = useDndSensors();
+    const { reschedulePost } = useManageTweets({});
+    const { currentWeekStart } = useCalendarContext();
+    const [activePost, setActivePost] = useState<ScheduledPost | null>(null);
+
+    const handleDragStart = (event: DragStartEvent) => {
+        if (event.active.data.current?.post) {
+            setActivePost(event.active.data.current.post as ScheduledPost);
+        }
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        // Reset active post always
+        setActivePost(null);
+
+        if (!over) return;
+
+        const overId = over.id as string;
+
+        // Parse drop target ID (format: cell-{dayIndex}-{hour})
+        if (overId.startsWith('cell-')) {
+            const parts = overId.split('-');
+            if (parts.length !== 3) return;
+
+            const dayIndex = parseInt(parts[1], 10);
+            const hour = parseInt(parts[2], 10);
+
+            // Calculate target date
+            const targetDate = new Date(currentWeekStart);
+            targetDate.setDate(targetDate.getDate() + dayIndex);
+            targetDate.setHours(hour, 0, 0, 0);
+
+            // Verify the dragged item is a post
+            const post = active.data.current?.post as ScheduledPost;
+            if (!post) return;
+
+            // Only reschedule if the time actually changed
+            const currentScheduledAt = post.scheduledAt ? new Date(post.scheduledAt) : null;
+            if (
+                currentScheduledAt &&
+                currentScheduledAt.getTime() === targetDate.getTime()
+            ) {
+                return;
+            }
+
+            reschedulePost.mutate({
+                postId: post.id,
+                scheduledAt: targetDate,
+            });
+        }
+    };
+
+    return (
+        <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+            {children}
+            <DragOverlay dropAnimation={{
+                duration: 250,
+                easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+            }}>
+                {activePost ? (
+                    <div className="w-[300px] shadow-2xl scale-105 cursor-grabbing">
+                        <TweetCard post={activePost} />
+                    </div>
+                ) : null}
+            </DragOverlay>
+        </DndContext>
     );
 }
 

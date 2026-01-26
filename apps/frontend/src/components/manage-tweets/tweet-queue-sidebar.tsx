@@ -24,15 +24,13 @@ export function TweetQueueSidebar() {
 
     // Get posts without a scheduledAt time (drafts)
     const { posts } = useManageTweets({
-        startDate: new Date(0), // Get all
-        endDate: new Date(8640000000000000), // Far future
         search: searchQuery,
     });
 
     const draftPosts = useMemo(() => {
         return posts.filter(
             (post) =>
-                !post.scheduledAt && // No scheduled time = draft
+                (post.status === 'draft' || !post.scheduledAt) && // Draft status OR no time
                 post.status !== 'cancelled' && // Not cancelled
                 post.status !== 'posted' // Not already posted
         );

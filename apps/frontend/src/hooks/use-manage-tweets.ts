@@ -3,24 +3,33 @@ import { apiclient } from '@/lib/api.client';
 import type { scheduledPost } from '@repo/db';
 import { toast } from '@repo/ui/components/ui/sonner';
 
-export type ScheduledPost = typeof scheduledPost.$inferSelect;
+// export type ScheduledPost = typeof scheduledPost.$inferSelect;
+export interface ScheduledPost {
+  id: string;
+  content: string;
+  scheduledAt: string | null; // API returns ISO string
+  status: 'draft' | 'pending' | 'queued' | 'posted' | 'failed' | 'cancelled';
+  tweetId: string | null;
+  errorMessage: string | null;
+  createdAt: string; // API returns ISO string
+}
 
 // Query key factory
 const queryKeys = {
   all: ['posts'] as const,
-  search: (startDate: Date, endDate: Date, search?: string) => [
+  search: (startDate?: Date, endDate?: Date, search?: string) => [
     ...queryKeys.all,
     'search',
-    startDate.toISOString(),
-    endDate.toISOString(),
+    startDate ? startDate.toISOString() : 'all',
+    endDate ? endDate.toISOString() : 'all',
     search,
   ] as const,
   detail: (id: string) => [...queryKeys.all, 'detail', id] as const,
 };
 
 interface UseManageTweetsOptions {
-  startDate: Date;
-  endDate: Date;
+  startDate?: Date;
+  endDate?: Date;
   search?: string;
 }
 
@@ -61,12 +70,13 @@ export function useManageTweets({
   } = useQuery({
     queryKey: queryKeys.search(startDate, endDate, search),
     queryFn: async () => {
+      const queryParams: any = {};
+      if (startDate) queryParams.startDate = startDate.toISOString().split('T')[0];
+      if (endDate) queryParams.endDate = endDate.toISOString().split('T')[0];
+      if (search) queryParams.search = search;
+
       const response = await apiclient.posts.search.$get({
-        query: {
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
-          ...(search && { search }),
-        },
+        query: queryParams,
       });
 
       if (!response.ok) {
@@ -74,7 +84,9 @@ export function useManageTweets({
       }
 
       const data = await response.json();
+      // @ts-ignore - TS doesn't know about error field in success union
       if (!data.success) {
+        // @ts-ignore
         throw new Error(data.error || 'Failed to fetch posts');
       }
 
@@ -86,21 +98,21 @@ export function useManageTweets({
   // Mutation: Reschedule post with optimistic updates
   const reschedulePostMutation = useMutation({
     mutationFn: async ({ postId, scheduledAt }: { postId: string; scheduledAt: Date }) => {
-      const response = await apiclient.posts[':id'].reschedule.$post(
-        { id: postId },
-        {
-          json: {
-            scheduledAt: scheduledAt.toISOString(),
-          },
-        }
-      );
+      const response = await apiclient.posts[':id'].reschedule.$post({
+        param: { id: postId },
+        json: {
+          scheduledAt: scheduledAt.toISOString(),
+        },
+      });
 
       if (!response.ok) {
         throw new Error('Failed to reschedule post');
       }
 
       const data = await response.json();
+      // @ts-ignore
       if (!data.success) {
+        // @ts-ignore
         throw new Error(data.error || 'Failed to reschedule post');
       }
 
@@ -131,13 +143,11 @@ export function useManageTweets({
       return { previousPosts };
     },
     onSuccess: (updatedPost) => {
-      toast({
-        title: 'Success',
-        description: 'Post rescheduled successfully',
-        duration: 3000,
-      });
+      toast.success('Post rescheduled successfully');
       // Update the detail cache if it exists
       queryClient.setQueryData(queryKeys.detail(updatedPost.id), updatedPost);
+      // Invalidate all lists to ensure queue/calendar sync
+      queryClient.invalidateQueries({ queryKey: queryKeys.all });
     },
     onError: (error, _variables, context) => {
       // Rollback on error
@@ -148,29 +158,25 @@ export function useManageTweets({
         );
       }
 
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to reschedule post',
-        variant: 'destructive',
-        duration: 3000,
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to reschedule post');
     },
   });
 
   // Mutation: Cancel post with optimistic updates
   const cancelPostMutation = useMutation({
     mutationFn: async (postId: string) => {
-      const response = await apiclient.posts[':id'].cancel.$post(
-        { id: postId },
-        {}
-      );
+      const response = await apiclient.posts[':id'].cancel.$post({
+        param: { id: postId },
+      });
 
       if (!response.ok) {
         throw new Error('Failed to cancel post');
       }
 
       const data = await response.json();
+      // @ts-ignore
       if (!data.success) {
+        // @ts-ignore
         throw new Error(data.error || 'Failed to cancel post');
       }
 
@@ -201,13 +207,11 @@ export function useManageTweets({
       return { previousPosts };
     },
     onSuccess: (cancelledPost) => {
-      toast({
-        title: 'Success',
-        description: 'Post cancelled successfully',
-        duration: 3000,
-      });
+      toast.success('Post cancelled successfully');
       // Update the detail cache if it exists
       queryClient.setQueryData(queryKeys.detail(cancelledPost.id), cancelledPost);
+      // Invalidate all lists to ensure queue/calendar sync
+      queryClient.invalidateQueries({ queryKey: queryKeys.all });
     },
     onError: (error, _variables, context) => {
       // Rollback on error
@@ -218,12 +222,7 @@ export function useManageTweets({
         );
       }
 
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to cancel post',
-        variant: 'destructive',
-        duration: 3000,
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to cancel post');
     },
   });
 

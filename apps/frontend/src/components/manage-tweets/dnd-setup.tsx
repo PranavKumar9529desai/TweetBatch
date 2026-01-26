@@ -1,27 +1,31 @@
 import {
   DndContext as DndContextComponent,
-  DndContextProps,
   DragOverlay as DragOverlayComponent,
-} from '@dnd-kit/core';
-import {
   PointerSensor,
   KeyboardSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import React, { type ReactNode } from 'react';
+import { type ReactNode, type ComponentProps } from 'react';
+
+interface DndContextWrapperProps
+  extends Omit<ComponentProps<typeof DndContextComponent>, 'children'> {
+  children: ReactNode;
+}
 
 /**
- * Create sensors for drag and drop interactions
- * Includes pointer sensor (mouse/touch) and keyboard sensor
+ * DndContext wrapper with pre-configured sensors
+ * Usage: Wrap your draggable components with this context
  */
-export function createDndSensors() {
+export function useDndSensors() {
   return useSensors(
     useSensor(PointerSensor, {
-      distance: 8, // Minimum distance before starting drag
+      activationConstraint: {
+        distance: 8, // Minimum distance before starting drag
+      },
     }),
     useSensor(KeyboardSensor, {
-      coordinateGetter: function (event, { currentCoordinates }) {
+      coordinateGetter: (event, { currentCoordinates }) => {
         switch (event.code) {
           case 'ArrowRight':
             return {
@@ -51,10 +55,6 @@ export function createDndSensors() {
   );
 }
 
-interface DndContextWrapperProps extends Omit<DndContextProps, 'children'> {
-  children: ReactNode;
-}
-
 /**
  * DndContext wrapper with pre-configured sensors
  * Usage: Wrap your draggable components with this context
@@ -63,7 +63,7 @@ export function DndContextWrapper({
   children,
   ...props
 }: DndContextWrapperProps) {
-  const sensors = createDndSensors();
+  const sensors = useDndSensors();
 
   return (
     <DndContextComponent sensors={sensors} {...props}>
@@ -77,13 +77,3 @@ export function DndContextWrapper({
  * Usage: Use this to render the dragged item preview
  */
 export { DragOverlayComponent as DragOverlay };
-
-/**
- * Re-export core dnd-kit utilities for flexibility
- */
-export {
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';

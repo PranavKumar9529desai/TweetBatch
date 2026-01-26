@@ -400,17 +400,33 @@ export class ScheduledPostService {
      * @param searchQuery Optional search term for case-insensitive content matching
      * @returns Array of posts matching the criteria, sorted by scheduledAt ascending
      */
-    async getPostsByDateRange(
+    /**
+     * Search posts by date range and query.
+     * Task 1.1: Used by GET /api/posts endpoint.
+     * 
+     * @param userId The user ID to filter posts by
+     * @param startDate Optional start of date range (inclusive)
+     * @param endDate Optional end of date range (inclusive)
+     * @param searchQuery Optional search term for case-insensitive content matching
+     * @returns Array of posts matching the criteria, sorted by scheduledAt ascending
+     */
+    async searchPosts(
         userId: string,
-        startDate: Date,
-        endDate: Date,
+        startDate?: Date,
+        endDate?: Date,
         searchQuery?: string
     ): Promise<ScheduledPostResponse[]> {
         const conditions = [
             eq(scheduledPost.userId, userId),
-            gte(scheduledPost.scheduledAt, startDate),
-            lte(scheduledPost.scheduledAt, endDate),
         ];
+
+        if (startDate) {
+            conditions.push(gte(scheduledPost.scheduledAt, startDate));
+        }
+
+        if (endDate) {
+            conditions.push(lte(scheduledPost.scheduledAt, endDate));
+        }
 
         if (searchQuery) {
             conditions.push(

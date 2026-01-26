@@ -35,6 +35,15 @@
 - Schema definitions in `src/db/schema.ts`.
 - Environment variables accessed via `env` (Hono Context), not `process.env`.
 
+## Package Management
+- **Primary Tool:** Always use `bun` for package management and script execution.
+- **Prohibited:** Do NOT use `npm`, `yarn`, or `pnpm`.
+
+## UI Guidelines
+- **Components:** Always use shadcn/ui components from `@repo/ui` (located in `packages/ui`).
+- **Styling:** Use the color variables and utility classes defined in `packages/ui`.
+- **Consistency:** Maintain visual consistency with the existing design system.
+
 ## Common Commands
 - Run Dev: `bun run dev` (or `wrangler dev`)
 - Generate Migrations: `bun run drizzle-kit generate`

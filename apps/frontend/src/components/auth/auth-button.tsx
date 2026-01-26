@@ -19,7 +19,7 @@ export function AuthButton({
     return (
         <Button
             variant="outline"
-            className={cn("w-full h-12", className)}
+            className={cn("w-full h-12 border-gray-300 dark:border-input", className)}
             disabled={disabled || isLoading}
             {...props}
         >

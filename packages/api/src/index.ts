@@ -18,7 +18,7 @@ app.use("/tweet", authMiddleware);
 const routes = app
   .route("/posts", postsRoute)
   .route("/notifications", notificationsRoute)
-  .route("/webhooks/qstash", qstashWebhookRoute);
+  .route("/webhooks/qstash", qstashWebhookRoute)
 
 // Export types and services
 export * from "./types";

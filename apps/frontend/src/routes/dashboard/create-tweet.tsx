@@ -4,6 +4,9 @@ import { TweetEditor } from "@/components/create-tweet/tweet-editor";
 import { TweetPreview } from "@/components/create-tweet/tweet-preview";
 import { MobileFrame } from "@/components/create-tweet/mobile-frame";
 import { Title } from "@/components/title";
+import { apiclient } from "@/lib/api.client";
+import { authClient } from "@/lib/auth.client";
+import { toast } from "@repo/ui/components/ui/sonner";
 
 export const Route = createFileRoute("/dashboard/create-tweet")({
   component: CreateTweetPage,
@@ -14,6 +17,63 @@ function CreateTweetPage() {
   const [media, setMedia] = useState<
     Array<{ id: string; url: string; type: "image" | "gif" | "video" }>
   >([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: session } = authClient.useSession();
+
+  const handlePost = async (isScheduled: boolean, scheduledAt?: Date) => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to post");
+      return;
+    }
+
+    if (!content.trim()) {
+      toast.error("Content cannot be empty");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (isScheduled && scheduledAt) {
+        // Use posts API for scheduling
+        const res = await apiclient.posts.$post({
+          json: {
+            userId: session.user.id,
+            content: content,
+            scheduledAt: scheduledAt.toISOString(),
+          }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          toast.success(`Tweet scheduled for ${scheduledAt.toLocaleDateString()}`);
+          setContent("");
+        } else {
+          toast.error(data.error || "Failed to schedule tweet");
+        }
+      } else {
+        // Use direct tweet API for immediate posting
+        const res = await apiclient.tweet.$post({
+          json: {
+            userId: session.user.id,
+            content: content,
+          }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          toast.success("Tweet posted successfully!");
+          setContent("");
+        } else {
+          toast.error(data.error || "Failed to post tweet");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to connect to API");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row container mx-auto p-4 lg:py-10 max-w-[100rem] pb-32">
@@ -27,6 +87,8 @@ function CreateTweetPage() {
           onChange={setContent}
           media={media}
           onMediaChange={setMedia}
+          onPost={handlePost}
+          isSubmitting={isSubmitting}
           className="flex-1"
         />
       </div>

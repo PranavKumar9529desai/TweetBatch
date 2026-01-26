@@ -7,7 +7,7 @@ export const postTweet = async (c: Context<{ Bindings: Bindings }>) => {
     const { userId, content } = await c.req.json();
 
     if (!userId || !content) {
-        return c.json({ error: "Missing userId or content" }, 400);
+        return c.json({ success: false, error: "Missing userId or content" }, 400);
     }
 
     const db = createDb(c.env.DATABASE_URL);

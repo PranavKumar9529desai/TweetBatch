@@ -10,7 +10,7 @@ export function AppBottomNavigation() {
     <div className="md:hidden">
       <BottomNavigation
         currentPath={location.pathname}
-        onNavigate={(path) => navigate({ to: path })}
+        onNavigate={(path) => navigate({ to: path as any })}
         items={[
           {
             label: "Dashboard",

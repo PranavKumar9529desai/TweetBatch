@@ -74,7 +74,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, className
         },
         editorProps: {
             attributes: {
-                class: "prose dark:prose-invert focus:outline-none min-h-[150px] max-w-none text-lg placeholder:text-muted-foreground/50"
+                class: "prose dark:prose-invert focus:outline-none min-h-[200px] md:min-h-[150px] max-w-none text-base md:text-lg placeholder:text-muted-foreground/50"
             }
         }
     });
@@ -87,7 +87,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, className
     const charsLeft = LIMIT - editor.storage.characterCount.characters();
 
     return (
-        <div className={clsx("flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm", className)}>
+        <div className={clsx("flex flex-col gap-3 md:gap-4 rounded-xl border bg-card p-3 md:p-4 shadow-sm", className)}>
             <div className="flex-1">
                 <EditorContent editor={editor} />
             </div>
@@ -127,12 +127,12 @@ export function TweetEditor({ content, onChange, media, onMediaChange, className
                     </Button>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
-                        <span className="tabular-nums">
+                <div className="flex items-center gap-2 md:gap-4">
+                    <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs font-medium text-muted-foreground">
+                        <span className="tabular-nums hidden xs:inline">
                             {editor.storage.characterCount.words()} words
                         </span>
-                        <Separator orientation="vertical" className="h-4" />
+                        <Separator orientation="vertical" className="h-4 hidden xs:block" />
                         <span className={clsx("tabular-nums", {
                             "text-destructive": charsLeft < 0,
                             "text-muted-foreground": charsLeft >= 0
@@ -178,7 +178,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, className
                     </div>
 
                     <Button
-                        className="rounded-full font-bold px-6"
+                        className="rounded-full font-bold px-4 md:px-6 h-8 md:h-10 text-sm md:text-base"
                         disabled={editor.storage.characterCount.characters() === 0 || charsLeft < 0}
                     >
                         Post

@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { TweetEditor } from "@/components/create-tweet/tweet-editor";
 import { TweetPreview } from "@/components/create-tweet/tweet-preview";
 import { MobileFrame } from "@/components/create-tweet/mobile-frame";
+import { Title } from "@/components/title";
 
 export const Route = createFileRoute("/dashboard/create-tweet")({
   component: CreateTweetPage,
@@ -15,26 +16,25 @@ function CreateTweetPage() {
   >([]);
 
   return (
-    <div className="flex container mx-auto py-10 max-w-[100rem]">
+    <div className="flex flex-col lg:flex-row container mx-auto p-4 lg:py-10 max-w-[100rem] pb-32">
       {/* Left Column: Editor */}
-      <div className="flex-1 flex flex-col gap-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Tweet</h1>
-          <p className="text-muted-foreground">Draft and schedule your tweets.</p>
+      <div className="flex-1 flex flex-col gap-6 w-full">
+        <div className="w-full justify-center sm:text-left p-2">
+          <Title title="Create Tweet" subtitle="Draft and schedule your tweets." />
         </div>
-
         <TweetEditor
           content={content}
           onChange={setContent}
           media={media}
           onMediaChange={setMedia}
-          className="flex-1 min-h-[400px]"
+          className="flex-1"
         />
       </div>
 
       {/* Right Column: Mobile Preview */}
-      <div className="w-[400px] flex-shrink-0 flex items-center justify-center rounded-3xl  p-10 gap-12 hidden xl:flex">
-        <div className="scale-[0.85] origin-center -my-20">
+
+      <div className="w-full lg:w-[400px] flex-shrink-0 flex items-center justify-center rounded-3xl p-4 lg:p-10 gap-12 mt-8 lg:mt-0">
+        <div className="scale-[0.75] xs:scale-[0.85] lg:scale-[0.85] origin-bottom lg:origin-center -my-36 lg:-my-20">
           <MobileFrame>
             <div className="min-h-full "> {/* Add top padding for status bar */}
               <TweetPreview

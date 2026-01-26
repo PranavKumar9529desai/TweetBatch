@@ -10,10 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@repo/auth": "workspace:*",
+    "@repo/api": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-router": "^1.154.12",
     "date-fns": "^4.1.0",
+    "hono": "^4.11.5",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

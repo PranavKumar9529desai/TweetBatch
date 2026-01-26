@@ -18,6 +18,7 @@ export const Route = createFileRoute('/dashboard/')({
 })
 
 function DashboardIndex() {
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">

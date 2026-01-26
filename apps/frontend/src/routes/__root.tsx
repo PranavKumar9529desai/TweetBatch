@@ -1,7 +1,7 @@
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { ThemeProvider } from "../components/theme-provider";
 import { Toaster } from "@repo/ui/components/ui/sonner";
-import { authClient } from "../utils/auth/auth-client";
+import { authClient } from "@/lib/auth.client";
 
 type UserType = typeof authClient.$Infer.Session.user;
 type SessionType = typeof authClient.$Infer.Session;

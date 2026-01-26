@@ -3,7 +3,7 @@ import { AuthButton } from "@/components/auth/auth-button";
 import { Input } from "@repo/ui/components/ui/input";
 import { Label } from "@repo/ui/components/ui/label";
 import { Separator } from "@repo/ui/components/ui/separator";
-import { authClient } from "@/utils/auth/auth-client";
+import { authClient } from "@/lib/auth.client";
 import { useState } from "react";
 import { toast } from "@repo/ui/components/ui/sonner";
 

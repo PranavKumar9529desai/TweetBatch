@@ -11,7 +11,7 @@ import { useSidebar } from "@repo/ui/components/ui/sidebar";
 import { cn } from "@repo/ui/lib/utils";
 import { ChevronsUpDown, LogOut, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../theme-provider";
-import { authClient } from "@repo/auth/client";
+import { authClient } from "@/lib/auth.client";
 import { useRouter } from "@tanstack/react-router";
 
 import { toast } from "@repo/ui/components/ui/sonner";

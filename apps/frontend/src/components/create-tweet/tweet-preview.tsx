@@ -27,7 +27,7 @@ export function TweetPreview({
     // Tiptap outputs <p>text</p>. Twitter renders text directly but handling blocks is fine.
 
     return (
-        <div className="w-full bg-background p-4 font-sans text-foreground">
+        <div className="w-full bg-background p-4 font-sans text-foreground ">
             {/* Header */}
             <div className="flex gap-3">
                 <Avatar className="h-10 w-10 border border-border">

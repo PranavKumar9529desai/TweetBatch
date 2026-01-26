@@ -56,38 +56,75 @@ export function TweetEditor({ content, onChange, className }: TweetEditorProps) 
             {/* Toolbar */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-primary">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10" onClick={() => editor.chain().focus().toggleBold().run()}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted" onClick={() => editor.chain().focus().toggleBold().run()}>
                         <Bold className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10" onClick={() => editor.chain().focus().toggleItalic().run()}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted" onClick={() => editor.chain().focus().toggleItalic().run()}>
                         <Italic className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10" onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted" onClick={() => editor.chain().focus().toggleOrderedList().run()}>
                         <ListOrdered className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted">
                         <Smile className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-sky-500 hover:text-sky-600 hover:bg-sky-500/10">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted">
                         <ImageIcon className="h-4 w-4" />
                     </Button>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    {/* Circular Progress (Simple Implementation) */}
-                    <div className="flex items-center gap-2 text-sm">
-                        <div className={clsx("h-5 w-5 rounded-full border-2 flex items-center justify-center text-[10px]", {
-                            "border-sky-500 text-sky-500": percentage <= 80,
-                            "border-yellow-500 text-yellow-500": percentage > 80 && percentage < 100,
-                            "border-red-500 text-red-500": percentage >= 100,
+                    <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
+                        <span className="tabular-nums">
+                            {editor.storage.characterCount.words()} words
+                        </span>
+                        <Separator orientation="vertical" className="h-4" />
+                        <span className={clsx("tabular-nums", {
+                            "text-destructive": charsLeft < 0,
+                            "text-muted-foreground": charsLeft >= 0
                         })}>
-                            {charsLeft <= 20 && charsLeft}
-                        </div>
-                        {charsLeft < 0 && <span className="text-red-500 font-medium whitespace-nowrap">{charsLeft}</span>}
+                            {editor.storage.characterCount.characters()} / {LIMIT}
+                        </span>
+                    </div>
+
+                    {/* Circular Progress SVG */}
+                    <div className="relative h-6 w-6 flex items-center justify-center">
+                        <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 36 36">
+                            {/* Background Circle */}
+                            <path
+                                className="text-muted/30"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            />
+                            {/* Progress Circle */}
+                            <path
+                                className={clsx("transition-all duration-300 ease-out", {
+                                    "text-primary": percentage <= 80,
+                                    "text-yellow-500": percentage > 80 && percentage <= 100,
+                                    "text-destructive": percentage > 100
+                                })}
+                                strokeDasharray={`${Math.min(percentage, 100)}, 100`}
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                            />
+                        </svg>
+                        {/* Text for warning/error states inside or near bubble */}
+                        {charsLeft <= 20 && (
+                            <span className={clsx("absolute text-[10px] font-bold tabular-nums", {
+                                "text-destructive": charsLeft <= 0,
+                                "text-yellow-500": charsLeft > 0
+                            })}>
+                                {charsLeft}
+                            </span>
+                        )}
                     </div>
 
                     <Button
-                        className="bg-sky-500 hover:bg-sky-600 text-white rounded-full font-bold px-6"
+                        className="rounded-full font-bold px-6"
                         disabled={editor.storage.characterCount.characters() === 0 || charsLeft < 0}
                     >
                         Post

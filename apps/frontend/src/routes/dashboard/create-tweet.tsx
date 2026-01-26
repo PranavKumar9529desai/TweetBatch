@@ -12,7 +12,7 @@ function CreateTweetPage() {
   const [content, setContent] = useState("");
 
   return (
-    <div className="flex h-full w-full gap-6 p-6">
+    <div className="flex container mx-auto py-10 max-w-[100rem]">
       {/* Left Column: Editor */}
       <div className="flex-1 flex flex-col gap-6">
         <div>
@@ -28,10 +28,10 @@ function CreateTweetPage() {
       </div>
 
       {/* Right Column: Mobile Preview */}
-      <div className="w-[400px] flex-shrink-0 flex items-center justify-center bg-gray-50/50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800 p-8 hidden xl:flex">
+      <div className="w-[400px] flex-shrink-0 flex items-center justify-center rounded-3xl  p-10 gap-12 hidden xl:flex">
         <div className="scale-[0.85] origin-center -my-20">
           <MobileFrame>
-            <div className="min-h-full bg-white dark:bg-black pt-10"> {/* Add top padding for status bar */}
+            <div className="min-h-full "> {/* Add top padding for status bar */}
               <TweetPreview
                 content={content}
                 authorHandle="pranav"
@@ -39,7 +39,6 @@ function CreateTweetPage() {
               />
             </div>
           </MobileFrame>
-          <p className="text-center mt-6 text-sm text-gray-400 font-medium">Mobile Live Preview</p>
         </div>
       </div>
     </div>

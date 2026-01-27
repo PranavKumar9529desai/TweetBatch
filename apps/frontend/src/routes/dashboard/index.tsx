@@ -120,7 +120,7 @@ function DashboardIndex() {
                             <p className="text-sm text-muted-foreground">Detailed view of your posting volume over time</p>
                         </div>
 
-                        <div className="w-full">
+                        <div className="w-full min-h-0 min-w-0">
                             <ChartContainer
                                 config={{
                                     posted: { label: "Posted", color: "hsl(var(--chart-1))" },

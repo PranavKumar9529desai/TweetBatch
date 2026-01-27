@@ -4,6 +4,7 @@ import { Toaster } from "@repo/ui/components/ui/sonner";
 import { authClient } from "@/lib/auth.client";
 import { QueryClient } from "@tanstack/react-query";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { NotFound } from "@/components/not-found";
 
 type UserType = typeof authClient.$Infer.Session.user;
 type SessionType = typeof authClient.$Infer.Session;
@@ -34,6 +35,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     };
   },
+  notFoundComponent: NotFound,
   component: () => (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Outlet />

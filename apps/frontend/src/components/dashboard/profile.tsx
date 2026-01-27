@@ -110,7 +110,10 @@ export function Profile({ setIsLocked, user, stats }: ProfileProps) {
                     </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+                <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    onClick={(e) => setTheme(theme === "dark" ? "light" : "dark", e)}
+                >
                     {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
                     Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
                 </DropdownMenuItem>

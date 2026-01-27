@@ -10,7 +10,7 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: Theme, event?: React.MouseEvent) => void;
 };
 
 const initialState: ThemeProviderState = {
@@ -49,9 +49,48 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (theme: Theme, event?: React.MouseEvent) => {
+      const isAppearanceTransition =
+        (document as any).startViewTransition &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!isAppearanceTransition || !event) {
+        localStorage.setItem(storageKey, theme);
+        setTheme(theme);
+        return;
+      }
+
+      const x = event.clientX;
+      const y = event.clientY;
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+
+      const transition = (document as any).startViewTransition(async () => {
+        localStorage.setItem(storageKey, theme);
+        setTheme(theme);
+      });
+
+      const isMobile = window.innerWidth < 768;
+
+      transition.ready.then(() => {
+        const clipPath = [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ];
+
+        document.documentElement.animate(
+          {
+            clipPath: clipPath,
+          },
+          {
+            duration: isMobile ? 300 : 400,
+            easing: "ease-in-out",
+            pseudoElement: "::view-transition-new(root)",
+          },
+        );
+      });
     },
   };
 

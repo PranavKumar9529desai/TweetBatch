@@ -16,10 +16,32 @@ import { useRouter } from "@tanstack/react-router";
 
 import { toast } from "@repo/ui/components/ui/sonner";
 
-export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }) {
+export interface ProfileProps {
+    setIsLocked: (val: boolean) => void;
+    user: {
+        name: string;
+        email: string;
+        image?: string | null;
+    } | null;
+    stats?: {
+        stats: Array<{
+            status: string;
+            count: number;
+        }>;
+    } | null;
+}
+
+export function Profile({ setIsLocked, user, stats }: ProfileProps) {
     const { open } = useSidebar();
     const { setTheme, theme } = useTheme();
     const router = useRouter();
+
+    const userName = user?.name || "User";
+    const userEmail = user?.email || "";
+    const userImage = user?.image || undefined;
+    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+    const totalPosted = stats?.stats.find(s => s.status === 'posted')?.count || 0;
 
     const handleLogout = async () => {
         const toastId = toast.loading("Logging out...");
@@ -44,15 +66,15 @@ export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }
                     )}
                 >
                     <Avatar className="h-8 w-8 rounded-lg">
-                        <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                        <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                        <AvatarImage src={userImage} alt={userName} />
+                        <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                     </Avatar>
 
                     {open && (
                         <>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">shadcn</span>
-                                <span className="truncate text-xs">m@example.com</span>
+                                <span className="truncate font-semibold">{userName}</span>
+                                <span className="truncate text-xs">{userEmail}</span>
                             </div>
                             <ChevronsUpDown className="ml-auto size-4" />
                         </>
@@ -68,19 +90,24 @@ export function Profile({ setIsLocked }: { setIsLocked: (val: boolean) => void }
                 <DropdownMenuLabel className="p-0 font-normal">
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                         <Avatar className="h-8 w-8 rounded-lg">
-                            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                            <AvatarImage src={userImage} alt={userName} />
+                            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                         </Avatar>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-semibold">shadcn</span>
-                            <span className="truncate text-xs">m@example.com</span>
+                            <span className="truncate font-semibold">{userName}</span>
+                            <span className="truncate text-xs">{userEmail}</span>
                         </div>
                     </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                <DropdownMenuItem className="flex items-center justify-between">
+                    <div className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Total Posted
+                    </div>
+                    <span className="text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                        {totalPosted}
+                    </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>

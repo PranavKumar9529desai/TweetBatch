@@ -3,7 +3,7 @@ import { apiclient } from "../lib/api.client";
 import { useRouteContext } from "@tanstack/react-router";
 
 export function useDashboardStats() {
-    const { auth } = useRouteContext({ from: '/dashboard/' });
+    const { auth } = useRouteContext({ from: '__root__' });
     const userId = auth.user?.id;
 
     return useQuery({

@@ -6,12 +6,16 @@ import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { LayoutDashboard } from "lucide-react";
 import { Profile } from "./profile";
+import { useRouteContext } from "@tanstack/react-router";
+import { useDashboardStats } from "../../hooks/use-dashboard-stats";
 
 import { Separator } from "@repo/ui/components/ui/separator";
 
 export function AppSidebar() {
     const [open, setOpen] = useState(false);
     const [locked, setLocked] = useState(false);
+    const { auth } = useRouteContext({ from: '__root__' });
+    const { data: stats } = useDashboardStats();
 
     const handleSetOpen = (value: boolean | ((prevState: boolean) => boolean)) => {
         if (typeof value === "boolean") {
@@ -49,7 +53,7 @@ export function AppSidebar() {
                     </div>
                 </div>
                 <div>
-                    <Profile setIsLocked={setLocked} />
+                    <Profile setIsLocked={setLocked} user={auth.user} stats={stats} />
                 </div>
             </SidebarBody>
         </Sidebar>

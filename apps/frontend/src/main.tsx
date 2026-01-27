@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { MyRouterContext } from './routes/__root'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import '@repo/ui/globals.css'
 
@@ -38,8 +37,6 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <TanStackRouterDevtools />
-
         <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>,

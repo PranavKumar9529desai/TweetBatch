@@ -41,7 +41,7 @@ export function DesktopLayout() {
                         </Breadcrumb>
                     </div>
                 </header>
-                <div className="">
+                <div className="" style={{ viewTransitionName: 'page-content' }}>
                     <Outlet />
                 </div>
             </div>

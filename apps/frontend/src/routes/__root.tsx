@@ -17,8 +17,15 @@ export interface MyRouterContext {
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
-  beforeLoad: async () => {
-    const { data } = await authClient.getSession();
+  beforeLoad: async ({ context }) => {
+    const data = await context.queryClient.ensureQueryData({
+      queryKey: ['auth', 'session'],
+      queryFn: async () => {
+        const { data } = await authClient.getSession();
+        return data;
+      },
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    });
     console.log("data from the beforeload in Root.tsx", data);
     return {
       auth: {

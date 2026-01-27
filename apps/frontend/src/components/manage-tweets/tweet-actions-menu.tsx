@@ -34,8 +34,7 @@ interface TweetActionsMenuProps {
 export function TweetActionsMenu({ post, children }: TweetActionsMenuProps) {
     const navigate = useNavigate();
     const { cancelPost } = useManageTweets({
-        startDate: new Date(),
-        endDate: new Date(),
+        enabled: false,
     });
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 

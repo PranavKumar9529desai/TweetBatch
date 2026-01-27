@@ -15,6 +15,8 @@ interface CalendarContextType {
   // New: Centralized Data Access
   getPostsForSlot: (dayIndex: number, hour: number) => ScheduledPost[];
   isLoading: boolean;
+  reschedulePost: (variables: { postId: string; scheduledAt: Date }) => void;
+  cancelPost: (postId: string) => void;
 }
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
@@ -48,7 +50,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     return end;
   }, [currentWeekStart]);
 
-  const { posts, isLoading } = useManageTweets({
+  const { posts, isLoading, reschedulePost, cancelPost } = useManageTweets({
     startDate: currentWeekStart,
     endDate: currentWeekEnd,
     search: searchQuery,
@@ -101,6 +103,8 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     setSelectedPost,
     getPostsForSlot,
     isLoading,
+    reschedulePost: reschedulePost.mutate,
+    cancelPost: cancelPost.mutate,
   }), [
     currentWeekStart,
     searchQuery,
@@ -108,7 +112,9 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     hoveredCell,
     selectedPost,
     getPostsForSlot,
-    isLoading
+    isLoading,
+    reschedulePost.mutate,
+    cancelPost.mutate
   ]);
 
   return (

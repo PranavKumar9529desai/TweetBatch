@@ -31,6 +31,7 @@ interface UseManageTweetsOptions {
   startDate?: Date;
   endDate?: Date;
   search?: string;
+  enabled?: boolean;
 }
 
 interface UseManageTweetsReturn {
@@ -57,8 +58,13 @@ export function useManageTweets({
   startDate,
   endDate,
   search,
+  enabled = true,
 }: UseManageTweetsOptions): UseManageTweetsReturn {
   const queryClient = useQueryClient();
+
+  // Memoize date strings to ensure query key stability
+  const startStr = startDate ? startDate.toISOString() : 'all';
+  const endStr = endDate ? endDate.toISOString() : 'all';
 
   // Query: Fetch posts by date range
   const {
@@ -68,11 +74,11 @@ export function useManageTweets({
     error,
     refetch: refetchPosts,
   } = useQuery({
-    queryKey: queryKeys.search(startDate, endDate, search),
+    queryKey: [...queryKeys.all, 'search', startStr, endStr, search],
     queryFn: async () => {
       const queryParams: any = {};
-      if (startDate) queryParams.startDate = startDate.toISOString();
-      if (endDate) queryParams.endDate = endDate.toISOString();
+      if (startDate) queryParams.startDate = startStr;
+      if (endDate) queryParams.endDate = endStr;
       if (search) queryParams.search = search;
 
       const response = await apiclient.posts.search.$get({
@@ -92,7 +98,9 @@ export function useManageTweets({
 
       return (data.posts as ScheduledPost[]) || [];
     },
-    enabled: true,
+    enabled: enabled,
+    staleTime: 5000, // Keep data fresh for 5 seconds to avoid rapid refetches
+    refetchOnWindowFocus: false, // Disable refetch on window focus for stability
   });
 
   // Mutation: Reschedule post with optimistic updates

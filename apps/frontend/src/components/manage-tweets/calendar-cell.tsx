@@ -26,6 +26,7 @@ export function CalendarCell({ dayIndex, hour, date }: CalendarCellProps) {
     const { getPostsForSlot, searchQuery } = useCalendarContext();
     const { reschedulePost } = useManageTweets({
         search: searchQuery,
+        enabled: false,
     }); // We only keep this for the mutation ability
 
     const [isLoadingDrop, setIsLoadingDrop] = useState(false);

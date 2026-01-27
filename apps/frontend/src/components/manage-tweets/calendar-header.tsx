@@ -3,7 +3,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCalendarContext } from './calendar-context';
 import { Input } from '@repo/ui/components/ui/input';
 import { Button } from '@repo/ui/components/ui/button';
-import { useManageTweets } from '../../hooks/use-manage-tweets';
 
 /**
  * CalendarHeader
@@ -18,11 +17,6 @@ import { useManageTweets } from '../../hooks/use-manage-tweets';
 export function CalendarHeader() {
     const { currentWeekStart, setCurrentWeekStart, searchQuery, setSearchQuery } = useCalendarContext();
     const [searchInput, setSearchInput] = useState(searchQuery);
-    const { refetch: refetchPosts } = useManageTweets({
-        startDate: currentWeekStart,
-        endDate: new Date(currentWeekStart.getTime() + 7 * 24 * 60 * 60 * 1000),
-        search: searchQuery,
-    });
 
     // Debounce search input
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -35,9 +29,8 @@ export function CalendarHeader() {
 
         debounceTimer.current = setTimeout(() => {
             setSearchQuery(value);
-            refetchPosts();
         }, 500);
-    }, [setSearchQuery, refetchPosts]);
+    }, [setSearchQuery]);
 
     // Calculate week end date
     const weekEnd = useMemo(() => {

@@ -77,12 +77,12 @@ export function CalendarGrid() {
     return (
         <div className="flex flex-col h-full bg-background">
             {/* Header: Days and dates */}
-            <div className="flex border-b border-border sticky top-0 z-40 bg-background">
+            <div className="flex border-b border-border sticky top-0 z-40 bg-background overflow-x-auto no-scrollbar">
                 {/* Time column header (empty) */}
-                <div className="w-20 flex-shrink-0 border-r border-border p-2 text-xs font-semibold text-muted-foreground bg-background" />
+                <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border p-2 text-xs font-semibold text-muted-foreground bg-background sticky left-0 z-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" />
 
                 {/* Day headers */}
-                <div className="flex flex-1 divide-x divide-border">
+                <div className="flex flex-1 divide-x divide-border min-w-[700px] md:min-w-0">
                     {weekDays.map((date, idx) => {
                         const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
                         const dateStr = formatDate(date);
@@ -92,8 +92,8 @@ export function CalendarGrid() {
                             <div
                                 key={`header-${idx}`}
                                 className={`flex-1 p-2 text-center min-w-0 ${isToday
-                                        ? 'bg-primary/10 border-b-2 border-primary'
-                                        : ''
+                                    ? 'bg-primary/10 border-b-2 border-primary'
+                                    : ''
                                     }`}
                             >
                                 <div className="text-xs font-semibold text-foreground">
@@ -111,11 +111,11 @@ export function CalendarGrid() {
             {/* Body: Grid with time slots */}
             <div className="flex flex-1 overflow-hidden bg-background relative">
                 {/* Time column (sticky left) */}
-                <div className="w-20 flex-shrink-0 border-r border-border bg-background sticky left-0 z-30 overflow-y-auto">
+                <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border bg-background sticky left-0 z-30 overflow-y-auto">
                     {hours.map((hour) => (
                         <div
                             key={`time-${hour}`}
-                            className="h-[60px] flex items-start justify-end pr-2 pt-1 text-xs text-muted-foreground font-medium border-b border-border"
+                            className="h-[60px] flex items-start justify-end pr-1 sm:pr-2 pt-1 text-[10px] sm:text-xs text-muted-foreground font-medium border-b border-border"
                         >
                             {formatTime(hour)}
                         </div>
@@ -124,7 +124,7 @@ export function CalendarGrid() {
 
                 {/* Grid cells (scrollable) */}
                 <div className="flex flex-1 overflow-auto">
-                    <div className="flex flex-1 divide-x divide-border relative">
+                    <div className="flex flex-1 divide-x divide-border relative min-w-[700px] md:min-w-0">
                         {weekDays.map((date, dayIdx) => (
                             <div
                                 key={`day-${dayIdx}`}

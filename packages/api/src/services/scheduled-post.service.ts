@@ -414,7 +414,9 @@ export class ScheduledPostService {
         userId: string,
         startDate?: Date,
         endDate?: Date,
-        searchQuery?: string
+        searchQuery?: string,
+        limit: number = 50,
+        offset: number = 0
     ): Promise<ScheduledPostResponse[]> {
         const conditions = [
             eq(scheduledPost.userId, userId),
@@ -437,6 +439,8 @@ export class ScheduledPostService {
         const posts = await this.db.query.scheduledPost.findMany({
             where: and(...conditions),
             orderBy: [scheduledPost.scheduledAt],
+            limit,
+            offset,
         });
 
         return posts.map((post) => ({

@@ -12,6 +12,8 @@ interface CalendarContextType {
   setHoveredCell: (cell: { day: number; hour: number } | null) => void;
   selectedPost: ScheduledPost | null;
   setSelectedPost: (post: ScheduledPost | null) => void;
+  isQueueDrawerOpen: boolean;
+  setQueueDrawerOpen: (open: boolean) => void;
   // New: Centralized Data Access
   getPostsForSlot: (dayIndex: number, hour: number) => ScheduledPost[];
   isLoading: boolean;
@@ -40,6 +42,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   const [draggedPostId, setDraggedPostId] = useState<string | null>(null);
   const [hoveredCell, setHoveredCell] = useState<{ day: number; hour: number } | null>(null);
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
+  const [isQueueDrawerOpen, setQueueDrawerOpen] = useState(false);
 
   // FETCH DATA CENTRALLY
   // Calculate end of the week (Start + 7 days)
@@ -101,6 +104,8 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     setHoveredCell,
     selectedPost,
     setSelectedPost,
+    isQueueDrawerOpen,
+    setQueueDrawerOpen,
     getPostsForSlot,
     isLoading,
     reschedulePost: reschedulePost.mutate,
@@ -111,6 +116,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     draggedPostId,
     hoveredCell,
     selectedPost,
+    isQueueDrawerOpen,
     getPostsForSlot,
     isLoading,
     reschedulePost.mutate,

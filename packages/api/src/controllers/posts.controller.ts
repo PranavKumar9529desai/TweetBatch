@@ -151,6 +151,8 @@ export const postsRoute = app
         const startDateStr = c.req.query("startDate");
         const endDateStr = c.req.query("endDate");
         const searchQuery = c.req.query("search");
+        const limit = parseInt(c.req.query("limit") || "50");
+        const offset = parseInt(c.req.query("offset") || "0");
 
         let startDate: Date | undefined;
         let endDate: Date | undefined;
@@ -195,7 +197,9 @@ export const postsRoute = app
                 user.id,
                 startDate,
                 endDate,
-                searchQuery
+                searchQuery,
+                limit,
+                offset
             );
 
             return c.json({ success: true, posts });

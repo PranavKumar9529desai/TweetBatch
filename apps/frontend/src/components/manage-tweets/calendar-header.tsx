@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ListMusic } from 'lucide-react';
 import { useCalendarContext } from './calendar-context';
 import { Input } from '@repo/ui/components/ui/input';
 import { Button } from '@repo/ui/components/ui/button';
@@ -15,7 +15,13 @@ import { Button } from '@repo/ui/components/ui/button';
  * - Auto-refetch posts on date range change
  */
 export function CalendarHeader() {
-    const { currentWeekStart, setCurrentWeekStart, searchQuery, setSearchQuery } = useCalendarContext();
+    const {
+        currentWeekStart,
+        setCurrentWeekStart,
+        searchQuery,
+        setSearchQuery,
+        setQueueDrawerOpen
+    } = useCalendarContext();
     const [searchInput, setSearchInput] = useState(searchQuery);
 
     // Debounce search input
@@ -81,52 +87,67 @@ export function CalendarHeader() {
     };
 
     return (
-        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-border bg-background">
-            {/* Navigation buttons */}
-            <div className="flex items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handlePreviousWeek}
-                    className="h-8 w-8"
-                    title="Previous week"
-                >
-                    <ChevronLeft className="h-4 w-4" />
-                </Button>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-background">
+            <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+                {/* Navigation buttons */}
+                <div className="flex items-center gap-1 sm:gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handlePreviousWeek}
+                        className="h-8 w-8"
+                        title="Previous week"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
 
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleToday}
+                        className="px-2 sm:px-3 h-8"
+                    >
+                        Today
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={handleNextWeek}
+                        className="h-8 w-8"
+                        title="Next week"
+                    >
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+
+                {/* Mobile Queue Toggle */}
                 <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleToday}
-                    className="px-3"
+                    onClick={() => setQueueDrawerOpen(true)}
+                    className="md:hidden flex items-center gap-2 h-8"
                 >
-                    Today
-                </Button>
-
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleNextWeek}
-                    className="h-8 w-8"
-                    title="Next week"
-                >
-                    <ChevronRight className="h-4 w-4" />
+                    <ListMusic className="h-4 w-4" />
+                    <span>Queue</span>
                 </Button>
             </div>
 
             {/* Date range display */}
-            <div className="text-sm font-medium text-foreground min-w-fit">
+            <div className="text-sm font-semibold text-foreground min-w-fit order-first sm:order-none">
                 {dateRangeText}
             </div>
 
             {/* Search input */}
-            <Input
-                type="text"
-                placeholder="Search tweets..."
-                value={searchInput}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="max-w-xs"
-            />
+            <div className="w-full sm:w-auto sm:max-w-xs">
+                <Input
+                    type="text"
+                    placeholder="Search tweets..."
+                    value={searchInput}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    className="h-9"
+                />
+            </div>
         </div>
     );
 }

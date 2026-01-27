@@ -14,16 +14,13 @@ export interface ScheduledPost {
   createdAt: string; // API returns ISO string
 }
 
-// Query key factory
 const queryKeys = {
   all: ['posts'] as const,
-  search: (startDate?: Date, endDate?: Date, search?: string) => [
-    ...queryKeys.all,
-    'search',
-    startDate ? startDate.toISOString() : 'all',
-    endDate ? endDate.toISOString() : 'all',
-    search,
-  ] as const,
+  search: (startDate?: Date, endDate?: Date, search?: string, limit: number = 50, offset: number = 0) => {
+    const startStr = startDate ? startDate.toISOString() : 'all';
+    const endStr = endDate ? endDate.toISOString() : 'all';
+    return [...queryKeys.all, 'search', startStr, endStr, search, limit, offset] as const;
+  },
   detail: (id: string) => [...queryKeys.all, 'detail', id] as const,
 };
 
@@ -31,6 +28,8 @@ interface UseManageTweetsOptions {
   startDate?: Date;
   endDate?: Date;
   search?: string;
+  limit?: number;
+  offset?: number;
   enabled?: boolean;
 }
 
@@ -58,6 +57,8 @@ export function useManageTweets({
   startDate,
   endDate,
   search,
+  limit = 50,
+  offset = 0,
   enabled = true,
 }: UseManageTweetsOptions): UseManageTweetsReturn {
   const queryClient = useQueryClient();
@@ -74,12 +75,14 @@ export function useManageTweets({
     error,
     refetch: refetchPosts,
   } = useQuery({
-    queryKey: [...queryKeys.all, 'search', startStr, endStr, search],
+    queryKey: queryKeys.search(startDate, endDate, search, limit, offset),
     queryFn: async () => {
       const queryParams: any = {};
       if (startDate) queryParams.startDate = startStr;
       if (endDate) queryParams.endDate = endStr;
       if (search) queryParams.search = search;
+      queryParams.limit = limit.toString();
+      queryParams.offset = offset.toString();
 
       const response = await apiclient.posts.search.$get({
         query: queryParams,
@@ -127,54 +130,25 @@ export function useManageTweets({
       return data.post as ScheduledPost;
     },
     onMutate: async ({ postId, scheduledAt }) => {
-      // Cancel ongoing queries
+      // Cancel ongoing queries to avoid overwriting our optimistic update
       await queryClient.cancelQueries({
-        queryKey: queryKeys.search(startDate, endDate, search),
+        queryKey: queryKeys.all,
       });
 
-      // Get previous data
-      const previousPosts = queryClient.getQueryData<ScheduledPost[]>(
-        queryKeys.search(startDate, endDate, search)
-      );
+      // Optimistically update all search queries
+      queryClient.setQueriesData<ScheduledPost[]>({ queryKey: [...queryKeys.all, 'search'] }, (oldPosts) => {
+        if (!oldPosts) return oldPosts;
 
-      // Optimistically update the cache
-      if (previousPosts) {
-        const updatedPosts = previousPosts.map((post) =>
-          post.id === postId ? { ...post, scheduledAt: scheduledAt.toISOString(), status: 'pending' as const } : post
+        return oldPosts.map((post) =>
+          post.id === postId ? {
+            ...post,
+            scheduledAt: scheduledAt.toISOString(),
+            status: 'pending' as const
+          } : post
         );
-        queryClient.setQueryData(
-          queryKeys.search(startDate, endDate, search),
-          updatedPosts
-        );
-      }
+      });
 
-      // Also update the target date's query (for CalendarCell)
-      const targetStart = new Date(scheduledAt.getFullYear(), scheduledAt.getMonth(), scheduledAt.getDate());
-      const targetEnd = new Date(targetStart);
-      const targetKey = queryKeys.search(targetStart, targetEnd, search);
-
-      // We need to find the post data to add it to the target list
-      // It might be in previousPosts (if it was in the source list)
-      const sourcePost = previousPosts?.find((p) => p.id === postId);
-
-      if (sourcePost) {
-        const newPost: ScheduledPost = {
-          ...sourcePost,
-          scheduledAt: scheduledAt.toISOString(),
-          status: 'pending' as const
-        };
-
-        queryClient.setQueryData<ScheduledPost[]>(targetKey, (oldPosts) => {
-          if (!oldPosts) return [newPost];
-          // Check if it already exists to avoid duplicates
-          if (oldPosts.some(p => p.id === postId)) {
-            return oldPosts.map(p => p.id === postId ? newPost : p);
-          }
-          return [...oldPosts, newPost];
-        });
-      }
-
-      return { previousPosts };
+      return {};
     },
     onSuccess: (updatedPost) => {
       toast.success('Post rescheduled successfully');
@@ -182,46 +156,31 @@ export function useManageTweets({
       // Update the detail cache if it exists
       queryClient.setQueryData(queryKeys.detail(updatedPost.id), updatedPost);
 
-      // Manually update the search list cache to prevent "vanishing" post
-      // This relies on the mutation response being authoritative
-      queryClient.setQueryData<ScheduledPost[]>(
-        queryKeys.search(startDate, endDate, search),
-        (oldPosts) => {
-          if (!oldPosts) return [updatedPost];
+      //AUTHORITATIVE UPDATE: Update all search queries with the real data from server
+      queryClient.setQueriesData<ScheduledPost[]>({ queryKey: [...queryKeys.all, 'search'] }, (oldPosts) => {
+        if (!oldPosts) return oldPosts;
 
-          // Remove the old version of the post if it exists to avoid duplicates
-          const filtered = oldPosts.filter(p => p.id !== updatedPost.id);
+        const exists = oldPosts.some(p => p.id === updatedPost.id);
 
-          // Add the updated post from server
-          return [...filtered, updatedPost];
+        // If it exists in this specific query result, update it
+        if (exists) {
+          return oldPosts.map(p => p.id === updatedPost.id ? updatedPost : p);
         }
-      );
 
-      // NOTE: We deliberately DO NOT invalidate queryKeys.all here.
-      // Invalidating immediately causes a race condition where the backend search index
-      // might not have updated yet, causing the post to disappear from the list.
-      // queryClient.invalidateQueries({ queryKey: queryKeys.all });
-
-      // Synchronize Queue (Drafts) Cache
-      // The Queue sidebar uses the 'all'/'all' query (undefined dates)
-      // We must remove the post from there so it doesn't appear as a duplicate
-      const queueKey = queryKeys.search(undefined, undefined, search);
-
-      queryClient.setQueryData<ScheduledPost[]>(queueKey, (oldPosts) => {
-        if (!oldPosts) return [];
-        // Remove the post from the queue as it is now scheduled
-        return oldPosts.filter(p => p.id !== updatedPost.id);
+        // If it doesn't exist, we might need to ADD it if it belongs to this query's range
+        // However, determining if it "belongs" here requires parsing the query key dates.
+        // For now, updating existing occurrences is the safest way to avoid duplicates across paginated lists.
+        return oldPosts;
       });
-    },
-    onError: (error, _variables, context) => {
-      // Rollback on error
-      if (context?.previousPosts) {
-        queryClient.setQueryData(
-          queryKeys.search(startDate, endDate, search),
-          context.previousPosts
-        );
-      }
 
+      // Also update the "Queue" specifically by removing it if it's no longer a draft
+      // (The above map handles update, but if it was a draft and now it's scheduled, 
+      // some queries might want it removed, and others might want it added).
+      // TanStack Query's setQueriesData is powerful here.
+    },
+    onError: (error) => {
+      // Invalidate on error to ensure consistency
+      queryClient.invalidateQueries({ queryKey: queryKeys.all });
       toast.error(error instanceof Error ? error.message : 'Failed to reschedule post');
     },
   });
@@ -231,6 +190,7 @@ export function useManageTweets({
     mutationFn: async (postId: string) => {
       const response = await apiclient.posts[':id'].cancel.$post({
         param: { id: postId },
+        json: {},
       });
 
       if (!response.ok) {
@@ -249,43 +209,34 @@ export function useManageTweets({
     onMutate: async (postId) => {
       // Cancel ongoing queries
       await queryClient.cancelQueries({
-        queryKey: queryKeys.search(startDate, endDate, search),
+        queryKey: queryKeys.all,
       });
 
-      // Get previous data
-      const previousPosts = queryClient.getQueryData<ScheduledPost[]>(
-        queryKeys.search(startDate, endDate, search)
-      );
-
-      // Optimistically update the cache
-      if (previousPosts) {
-        const updatedPosts = previousPosts.map((post) =>
-          post.id === postId ? { ...post, status: 'cancelled' } : post
+      // Optimistically update all search queries
+      queryClient.setQueriesData<ScheduledPost[]>({ queryKey: [...queryKeys.all, 'search'] }, (oldPosts) => {
+        if (!oldPosts) return oldPosts;
+        return oldPosts.map((post) =>
+          post.id === postId ? { ...post, status: 'cancelled' as const } : post
         );
-        queryClient.setQueryData(
-          queryKeys.search(startDate, endDate, search),
-          updatedPosts
-        );
-      }
+      });
 
-      return { previousPosts };
+      return {};
     },
     onSuccess: (cancelledPost) => {
       toast.success('Post cancelled successfully');
+
       // Update the detail cache if it exists
       queryClient.setQueryData(queryKeys.detail(cancelledPost.id), cancelledPost);
-      // Invalidate all lists to ensure queue/calendar sync
-      queryClient.invalidateQueries({ queryKey: queryKeys.all });
-    },
-    onError: (error, _variables, context) => {
-      // Rollback on error
-      if (context?.previousPosts) {
-        queryClient.setQueryData(
-          queryKeys.search(startDate, endDate, search),
-          context.previousPosts
-        );
-      }
 
+      // Authoritative update across all search caches
+      queryClient.setQueriesData<ScheduledPost[]>({ queryKey: [...queryKeys.all, 'search'] }, (oldPosts) => {
+        if (!oldPosts) return oldPosts;
+        return oldPosts.map(p => p.id === cancelledPost.id ? cancelledPost : p);
+      });
+    },
+    onError: (error) => {
+      // Invalidate on error to ensure consistency
+      queryClient.invalidateQueries({ queryKey: queryKeys.all });
       toast.error(error instanceof Error ? error.message : 'Failed to cancel post');
     },
   });

@@ -27,7 +27,9 @@ function RouteComponent() {
           TweetBatch
         </span>
       </div>
-      <Outlet />
+      <div className='p-4 sm:p-2'>
+        <Outlet />
+      </div>
     </section>
   )
 }

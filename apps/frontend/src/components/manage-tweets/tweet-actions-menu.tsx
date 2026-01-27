@@ -5,6 +5,12 @@ import { useManageTweets, type ScheduledPost } from '@/hooks/use-manage-tweets';
 import { toast } from '@repo/ui/components/ui/sonner';
 import { Button } from '@repo/ui/components/ui/button';
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@repo/ui/components/ui/dropdown-menu';
+import {
     Dialog,
     DialogContent,
     DialogDescription,
@@ -16,19 +22,16 @@ import { cn } from '@repo/ui/lib/utils';
 
 interface TweetActionsMenuProps {
     post: ScheduledPost;
-    onClose: () => void;
+    children: React.ReactNode;
 }
 
 /**
  * TweetActionsMenu
  * 
- * Three-dot dropdown menu using shadcn/ui patterns
- * Menu options:
- * - Edit (navigate to /dashboard/create with postId, only if status pending)
- * - Delete (open delete confirmation, only if status pending or failed)
- * - Copy (copy content to clipboard, always enabled)
+ * Three-dot dropdown menu using shadcn/ui DropdownMenu (Radix UI)
+ * Uses Portals to avoid being cropped by calendar cells.
  */
-export function TweetActionsMenu({ post, onClose }: TweetActionsMenuProps) {
+export function TweetActionsMenu({ post, children }: TweetActionsMenuProps) {
     const navigate = useNavigate();
     const { cancelPost } = useManageTweets({
         startDate: new Date(),
@@ -39,116 +42,114 @@ export function TweetActionsMenu({ post, onClose }: TweetActionsMenuProps) {
     const canEdit = post.status === 'pending';
     const canDelete = post.status === 'pending' || post.status === 'failed';
 
-    const handleEdit = () => {
+    const handleEdit = (e: Event) => {
+        // Prevent default behavior if needed, but navigate should work
         navigate({
             to: '/dashboard/create-tweet',
-            search: { postId: post.id } as any,
+            search: { postId: post.id, mode: 'edit' } as any,
         });
     };
-    const handleDelete = () => {
+
+    const handleView = () => {
+        navigate({
+            to: '/dashboard/create-tweet',
+            search: { postId: post.id, mode: 'view' } as any,
+        });
+    };
+
+    const handleDeleteClick = (e: Event) => {
+        e.preventDefault(); // Keep dropdown open? No, we want it to close but open dialog
         setShowDeleteConfirm(true);
     };
 
     const confirmDelete = async () => {
         cancelPost.mutate(post.id);
         setShowDeleteConfirm(false);
-        onClose();
     };
 
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(post.content || '');
             toast.success('Tweet content copied to clipboard');
-            onClose();
         } catch {
             toast.error('Failed to copy to clipboard');
-            return (
-                <>
-                    {/* Menu dropdown */}
-                    <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-md shadow-md py-1 z-50 min-w-[160px]">
-                        {/* Edit option */}
-                        <button
-                            onClick={handleEdit}
-                            disabled={!canEdit}
-                            className={cn(
-                                'flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-colors',
-                                canEdit
-                                    ? 'hover:bg-muted cursor-pointer text-foreground'
-                                    : 'text-muted-foreground cursor-not-allowed opacity-50'
-                            )}
-                            title={!canEdit ? 'Only pending tweets can be edited' : ''}
-                        >
-                            <Edit2 className="h-3 w-3" />
-                            Edit
-                        </button>
+        }
+    };
 
-                        {/* Delete option */}
-                        <button
-                            onClick={handleDelete}
-                            disabled={!canDelete}
-                            className={cn(
-                                'flex items-center gap-2 w-full px-3 py-2 text-xs text-left transition-colors',
-                                canDelete
-                                    ? 'hover:bg-red-500/10 hover:text-red-700 cursor-pointer text-foreground'
-                                    : 'text-muted-foreground cursor-not-allowed opacity-50'
-                            )}
-                            title={!canDelete ? 'Only pending or failed tweets can be deleted' : ''}
-                        >
-                            <Trash2 className="h-3 w-3" />
-                            Delete
-                        </button>
+    return (
+        <>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    {children}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[160px]">
+                    <DropdownMenuItem onClick={handleView} className="cursor-pointer">
+                        <Edit2 className="mr-2 h-3.5 w-3.5" />
+                        <span>View</span>
+                    </DropdownMenuItem>
 
-                        {/* Copy option (always enabled) */}
-                        <button
-                            onClick={handleCopy}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-xs text-left hover:bg-muted transition-colors text-foreground cursor-pointer border-t border-border"
-                        >
-                            <Copy className="h-3 w-3" />
-                            Copy
-                        </button>
+                    <DropdownMenuItem
+                        onClick={handleEdit}
+                        disabled={!canEdit}
+                        className="cursor-pointer"
+                    >
+                        <Edit2 className="mr-2 h-3.5 w-3.5" />
+                        <span>Edit</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                        onClick={handleDeleteClick}
+                        disabled={!canDelete}
+                        className="text-red-600 focus:text-red-600 cursor-pointer"
+                    >
+                        <Trash2 className="mr-2 h-3.5 w-3.5" />
+                        <span>Delete</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem onClick={handleCopy} className="cursor-pointer">
+                        <Copy className="mr-2 h-3.5 w-3.5" />
+                        <span>Copy</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Delete confirmation dialog */}
+            <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-red-500" />
+                            Delete Tweet
+                        </DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this tweet? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {/* Preview of tweet being deleted */}
+                    <div className="bg-muted rounded-md p-3 my-3">
+                        <p className="text-sm text-foreground line-clamp-3">
+                            {post.content}
+                        </p>
                     </div>
 
-                    {/* Delete confirmation dialog */}
-                    {showDeleteConfirm && (
-                        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-                            <DialogContent className="max-w-sm">
-                                <DialogHeader>
-                                    <DialogTitle className="flex items-center gap-2">
-                                        <AlertCircle className="h-5 w-5 text-red-500" />
-                                        Delete Tweet
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        Are you sure you want to delete this tweet? This action cannot be undone.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                {/* Preview of tweet being deleted */}
-                                <div className="bg-muted rounded-md p-3 my-3">
-                                    <p className="text-sm text-foreground line-clamp-3">
-                                        {post.content}
-                                    </p>
-                                </div>
-
-                                <DialogFooter>
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setShowDeleteConfirm(false)}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={confirmDelete}
-                                        disabled={cancelPost.isPending}
-                                    >
-                                        {cancelPost.isPending ? 'Deleting...' : 'Delete'}
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
-                </>
-            );
-        }
-    }
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowDeleteConfirm(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            disabled={cancelPost.isPending}
+                        >
+                            {cancelPost.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
+    );
 }

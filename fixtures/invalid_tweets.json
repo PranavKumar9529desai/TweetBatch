@@ -1,0 +1,29 @@
+[
+    {
+        "content": "This is a valid tweet that should be imported correctly.",
+        "scheduledAt": "2026-03-01T12:00:00Z"
+    },
+    {
+        "content": "This tweet has a past date and should fail validation.",
+        "scheduledAt": "2020-01-01T12:00:00Z"
+    },
+    {
+        "content": "This tweet is missing a scheduled date."
+    },
+    {
+        "scheduledAt": "2026-03-02T12:00:00Z",
+        "error": "This tweet is missing content."
+    },
+    {
+        "content": "This tweet is way too long and should definitely fail validation because it exceeds the character limit of 280 characters. We are just typing and typing to make sure it gets really long. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        "scheduledAt": "2026-03-03T12:00:00Z"
+    },
+    {
+        "content": "Another valid tweet to ensure mixed results work.",
+        "scheduledAt": "2026-03-04T09:00:00Z"
+    },
+    {
+        "content": "Invalid date format test.",
+        "scheduledAt": "not-a-date"
+    }
+]

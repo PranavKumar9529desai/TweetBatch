@@ -1,6 +1,5 @@
-import type { ReactNode } from 'react';
 import { DndContext, type DragEndEvent, type DragStartEvent, DragOverlay } from '@dnd-kit/core';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CalendarProvider, useCalendarContext } from './calendar-context';
 import { useManageTweets, type ScheduledPost } from '../../hooks/use-manage-tweets';
 import { useDndSensors } from './dnd-setup';
@@ -40,9 +39,12 @@ function CalendarDnDHandler({ children }: { children: ReactNode }) {
 
     // Calculate end of the week (Start + 7 days) to match CalendarProvider's fetch
     // This ensures the manual cache update in useManageTweets targets the correct query key
-    const currentWeekEnd = new Date(currentWeekStart);
-    currentWeekEnd.setDate(currentWeekEnd.getDate() + 7);
-    currentWeekEnd.setHours(23, 59, 59, 999);
+    const currentWeekEnd = useMemo(() => {
+        const end = new Date(currentWeekStart);
+        end.setDate(end.getDate() + 7);
+        end.setHours(23, 59, 59, 999);
+        return end;
+    }, [currentWeekStart]);
 
     const { reschedulePost } = useManageTweets({
         startDate: currentWeekStart,

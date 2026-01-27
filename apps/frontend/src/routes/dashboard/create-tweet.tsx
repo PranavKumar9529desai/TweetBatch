@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { TweetEditor } from "@/components/create-tweet/tweet-editor";
 import { TweetPreview } from "@/components/create-tweet/tweet-preview";
@@ -10,23 +10,63 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from "@repo/ui/components/ui/button";
 import { Calendar as CalendarUI } from "@repo/ui/components/ui/calendar";
 import { format } from "date-fns";
+import { z } from "zod";
+
+const createTweetSearchSchema = z.object({
+  postId: z.string().optional(),
+  mode: z.enum(["view", "edit"]).optional(),
+});
 
 export const Route = createFileRoute("/dashboard/create-tweet")({
+  validateSearch: (search) => createTweetSearchSchema.parse(search),
+  loaderDeps: ({ search }) => ({ search }),
+  loader: async ({ deps: { search } }) => {
+    if (!search.postId) return null;
+    try {
+      const res = await apiclient.posts[":id"].$get({
+        param: { id: search.postId },
+      });
+      const data = await res.json();
+      if (data.success && data.post) {
+        return data.post;
+      }
+    } catch (error) {
+      console.error("Error fetching post:", error);
+    }
+    return null;
+  },
   component: CreateTweetPage,
 });
 
 function CreateTweetPage() {
+  const { postId, mode } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const initialPost = Route.useLoaderData();
 
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialPost?.content || "");
   const [media, setMedia] = useState<
     Array<{ id: string; url: string; type: "image" | "gif" | "video" }>
   >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showScheduleDialog, setShowScheduleDialog] = useState(false);
-  const [scheduleDate, setScheduleDate] = useState<Date | undefined>();
+  const [scheduleDate, setScheduleDate] = useState<Date | undefined>(
+    initialPost?.scheduledAt ? new Date(initialPost.scheduledAt) : undefined
+  );
+
   const { auth } = Route.useRouteContext();
   const user = auth.user;
+  const isViewMode = mode === "view";
+
+  useEffect(() => {
+    if (initialPost) {
+      setContent(initialPost.content);
+      setScheduleDate(initialPost.scheduledAt ? new Date(initialPost.scheduledAt) : undefined);
+    } else {
+      setContent("");
+      setScheduleDate(undefined);
+    }
+  }, [initialPost]);
 
   const handlePost = async (isScheduled: boolean, scheduledAt?: Date) => {
     if (!user?.id) {
@@ -41,41 +81,64 @@ function CreateTweetPage() {
 
     setIsSubmitting(true);
     try {
-      if (isScheduled && scheduledAt) {
-        // Use posts API for scheduling (transitions from draft to pending in kanban)
-        const res = await apiclient.posts.$post({
+      if (postId) {
+        // Update existing post
+        const res = await apiclient.posts[":id"].$patch({
+          param: { id: postId },
           json: {
-            userId: user.id,
             content: content,
-            scheduledAt: scheduledAt.toISOString(),
+            scheduledAt: isScheduled && scheduledAt ? scheduledAt.toISOString() : undefined,
           }
         });
 
         const data = await res.json();
         if (data.success) {
-          toast.success(`Draft scheduled for ${scheduledAt.toLocaleDateString()}`);
-          setContent("");
+          toast.success(isScheduled ? `Draft rescheduled for ${scheduledAt?.toLocaleDateString()}` : "Draft updated!");
+          // If we just updated, maybe we want to redirect or just stay here?
+          // For now, let's just close dialogs
           setShowScheduleDialog(false);
-          setScheduleDate(undefined);
-        } else {
-          toast.error(data.error || "Failed to schedule draft");
-        }
-      } else {
-        // Create a draft post (no scheduled time yet)
-        const res = await apiclient.posts.$post({
-          json: {
-            userId: user.id,
-            content: content,
-          }
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          toast.success("Draft created! Manage it in the kanban board.");
-          setContent("");
           setShowConfirmDialog(false);
         } else {
-          toast.error(data.error || "Failed to create draft");
+          toast.error(data.error || "Failed to update draft");
+        }
+      } else {
+        // Create new post
+        if (isScheduled && scheduledAt) {
+          // Use posts API for scheduling (transitions from draft to pending in kanban)
+          const res = await apiclient.posts.$post({
+            json: {
+              userId: user.id,
+              content: content,
+              scheduledAt: scheduledAt.toISOString(),
+            }
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            toast.success(`Draft scheduled for ${scheduledAt.toLocaleDateString()}`);
+            setContent("");
+            setShowScheduleDialog(false);
+            setScheduleDate(undefined);
+          } else {
+            toast.error(data.error || "Failed to schedule draft");
+          }
+        } else {
+          // Create a draft post (no scheduled time yet)
+          const res = await apiclient.posts.$post({
+            json: {
+              userId: user.id,
+              content: content,
+            }
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            toast.success("Draft created! Manage it in the kanban board.");
+            setContent("");
+            setShowConfirmDialog(false);
+          } else {
+            toast.error(data.error || "Failed to create draft");
+          }
         }
       }
     } catch (e) {
@@ -87,7 +150,7 @@ function CreateTweetPage() {
   };
 
   const handlePostClick = (isScheduled: boolean, scheduledAt?: Date) => {
-    // Always show confirmation dialog to ask if they want to schedule or post now
+    // If it's already an existing post (edit mode) or if we are scheduling
     if (!scheduledAt) {
       setShowConfirmDialog(true);
       return;
@@ -95,12 +158,14 @@ function CreateTweetPage() {
     handlePost(isScheduled, scheduledAt);
   };
 
+
+
   return (
     <div className="flex flex-col lg:flex-row container mx-auto p-4 lg:py-10 max-w-[100rem] pb-32">
       {/* Left Column: Editor */}
       <div className="flex-1 flex flex-col gap-6 w-full">
         <div className="w-full justify-center sm:text-left p-2">
-          <Title title="Create Tweet" subtitle="Draft and schedule your tweets." />
+          <Title title={postId ? isViewMode ? "View Tweet" : "Edit Tweet" : "Create Tweet"} subtitle={postId ? isViewMode ? "View your draft." : "Update your draft." : "Draft and schedule your tweets."} />
         </div>
         <TweetEditor
           content={content}
@@ -110,6 +175,9 @@ function CreateTweetPage() {
           onPost={handlePostClick}
           isSubmitting={isSubmitting}
           className="flex-1"
+          readOnly={isViewMode}
+          actionLabel={isViewMode ? "Edit" : undefined}
+          onAction={isViewMode ? () => navigate({ search: { postId, mode: 'edit' } }) : undefined}
         />
       </div>
 
@@ -134,7 +202,7 @@ function CreateTweetPage() {
       <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
         <DialogContent className="w-[95vw] sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Schedule Draft</DialogTitle>
+            <DialogTitle>{postId ? "Reschedule Draft" : "Schedule Draft"}</DialogTitle>
             <DialogDescription>
               Select a date and time to schedule your draft.
             </DialogDescription>
@@ -198,7 +266,7 @@ function CreateTweetPage() {
               onClick={() => handlePost(true, scheduleDate)}
               disabled={!scheduleDate || isSubmitting}
             >
-              {isSubmitting ? "Scheduling..." : "Schedule Draft"}
+              {isSubmitting ? "Scheduling..." : (postId ? "Update Schedule" : "Schedule Draft")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -208,9 +276,12 @@ function CreateTweetPage() {
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent className="w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create as Draft?</DialogTitle>
+            <DialogTitle>{postId ? "Update Draft?" : "Create as Draft?"}</DialogTitle>
             <DialogDescription>
-              Create this as a draft (to be scheduled later in Manage Tweets) or schedule it now?
+              {postId
+                ? "Update this draft or reschedule it?"
+                : "Create this as a draft (to be scheduled later in Manage Tweets) or schedule it now?"
+              }
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -221,13 +292,13 @@ function CreateTweetPage() {
                 setShowScheduleDialog(true);
               }}
             >
-              Schedule Now
+              {postId ? "Reschedule" : "Schedule Now"}
             </Button>
             <Button
               onClick={() => handlePost(false)}
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Creating..." : "Create Draft"}
+              {isSubmitting ? (postId ? "Updating..." : "Creating...") : (postId ? "Update Draft" : "Create Draft")}
             </Button>
           </DialogFooter>
         </DialogContent>

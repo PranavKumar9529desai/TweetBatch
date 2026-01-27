@@ -11,8 +11,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
     <div
       ref={ref}
       className={cn(
-        "rounded-lg bg-card text-card-foreground shadow-sm",
-        variant === "default" && "border",
+        "rounded-lg text-card-foreground",
+        variant === "default" && "bg-card shadow-sm border",
+        variant === "borderless" && "bg-transparent shadow-none border-none",
         className
       )}
       {...props}

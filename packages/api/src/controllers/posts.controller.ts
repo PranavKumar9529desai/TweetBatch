@@ -226,35 +226,49 @@ export const postsRoute = app
      * PATCH /:id
      * Update a scheduled post.
      */
-    .patch("/:id", async (c) => {
-        const env = c.env;
-        const id = c.req.param("id");
-        const body = await c.req.json<{ content?: string; scheduledAt?: string }>();
-        const { postService, qstashService } = getServices(env);
+    /**
+     * PATCH /:id
+     * Update a scheduled post.
+     */
+    .patch(
+        "/:id",
+        zValidator(
+            "json",
+            z.object({
+                content: z.string().max(280).optional(),
+                scheduledAt: z.string().datetime().optional(),
+            })
+        ),
+        async (c) => {
+            const env = c.env;
+            const id = c.req.param("id");
+            const { content, scheduledAt } = c.req.valid("json");
+            const { postService, qstashService } = getServices(env);
 
-        const updateData: any = {};
-        if (body.content) updateData.content = body.content;
-        if (body.scheduledAt) {
-            const date = new Date(body.scheduledAt);
-            if (isNaN(date.getTime())) return c.json({ success: false, error: "Invalid date" }, 400);
-            if (date <= new Date()) return c.json({ success: false, error: "Time must be in future" }, 400);
-            updateData.scheduledAt = date;
-        }
-
-        try {
-            const result = await postService.updateScheduledPost(id, updateData);
-
-            // If we updated the time and it was synced, cancel the old message
-            if (result.needsQStashCancel && result.oldMessageId) {
-                await qstashService.cancelMessage(result.oldMessageId);
-                console.log(`Cancelled QStash message ${result.oldMessageId} for updated post ${id}`);
+            const updateData: any = {};
+            if (content) updateData.content = content;
+            if (scheduledAt) {
+                const date = new Date(scheduledAt);
+                if (isNaN(date.getTime())) return c.json({ success: false, error: "Invalid date" }, 400);
+                if (date <= new Date()) return c.json({ success: false, error: "Time must be in future" }, 400);
+                updateData.scheduledAt = date;
             }
 
-            return c.json({ success: true, post: result.updated });
-        } catch (error: any) {
-            return c.json({ success: false, error: error.message }, 400);
+            try {
+                const result = await postService.updateScheduledPost(id, updateData);
+
+                // If we updated the time and it was synced, cancel the old message
+                if (result.needsQStashCancel && result.oldMessageId) {
+                    await qstashService.cancelMessage(result.oldMessageId);
+                    console.log(`Cancelled QStash message ${result.oldMessageId} for updated post ${id}`);
+                }
+
+                return c.json({ success: true, post: result.updated });
+            } catch (error: any) {
+                return c.json({ success: false, error: error.message }, 400);
+            }
         }
-    })
+    )
 
     /**
      * DELETE /:id

@@ -26,11 +26,28 @@ interface TweetEditorProps {
     onPost: (isScheduled: boolean, scheduledAt?: Date) => void;
     isSubmitting?: boolean;
     className?: string;
+    // New props for View/Edit modes
+    readOnly?: boolean;
+    actionLabel?: string;
+    onAction?: () => void;
+    hideAction?: boolean;
 }
 
 const LIMIT = 280;
 
-export function TweetEditor({ content, onChange, media, onMediaChange, onPost, isSubmitting, className }: TweetEditorProps) {
+export function TweetEditor({
+    content,
+    onChange,
+    media,
+    onMediaChange,
+    onPost,
+    isSubmitting,
+    className,
+    readOnly = false,
+    actionLabel,
+    onAction,
+    hideAction = false
+}: TweetEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [scheduledAt, setScheduledAt] = useState<Date | undefined>();
 
@@ -60,10 +77,12 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
     };
 
     const triggerFileSelect = () => {
+        if (readOnly) return;
         fileInputRef.current?.click();
     };
 
     const editor = useEditor({
+        editable: !readOnly,
         extensions: [
             StarterKit,
             Placeholder.configure({
@@ -80,10 +99,18 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
         },
         editorProps: {
             attributes: {
-                class: "prose dark:prose-invert focus:outline-none min-h-[200px] md:min-h-[150px] max-w-none text-base md:text-lg placeholder:text-muted-foreground/50"
+                class: clsx(
+                    "prose dark:prose-invert focus:outline-none min-h-[200px] md:min-h-[150px] max-w-none text-base md:text-lg placeholder:text-muted-foreground/50",
+                    readOnly && "cursor-default"
+                )
             }
         }
     });
+
+    // Update editable state when prop changes
+    if (editor && editor.isEditable !== !readOnly) {
+        editor.setEditable(!readOnly);
+    }
 
     if (!editor) {
         return null;
@@ -91,6 +118,19 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
 
     const percentage = editor.storage.characterCount.characters() / LIMIT * 100;
     const charsLeft = LIMIT - editor.storage.characterCount.characters();
+
+    // Check if we should use the custom action handler
+    const handleMainAction = () => {
+        if (onAction) {
+            onAction();
+        } else {
+            onPost(!!scheduledAt, scheduledAt);
+        }
+    };
+
+    const mainButtonLabel = isSubmitting
+        ? (actionLabel ? `${actionLabel.replace(/e$/, '')}ing...` : "Creating...")
+        : (actionLabel || (scheduledAt ? "Schedule" : "Draft"));
 
     return (
         <div className={clsx("flex flex-col gap-3 md:gap-4 rounded-xl border bg-card p-3 md:p-4 shadow-sm", className)}>
@@ -102,7 +142,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
 
             {/* Toolbar */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1 text-primary">
+                <div className={clsx("flex items-center gap-1 text-primary", readOnly && "opacity-50 pointer-events-none")}>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-muted" onClick={() => editor.chain().focus().toggleBold().run()}>
                         <Bold className="h-4 w-4" />
                     </Button>
@@ -133,7 +173,7 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
                     </Button>
 
                     <Popover>
-                        <PopoverTrigger asChild>
+                        <PopoverTrigger asChild disabled={readOnly}>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -254,13 +294,15 @@ export function TweetEditor({ content, onChange, media, onMediaChange, onPost, i
                         )}
                     </div>
 
-                    <Button
-                        className="rounded-full font-bold px-4 md:px-6 h-8 md:h-10 text-sm md:text-base"
-                        disabled={editor.storage.characterCount.characters() === 0 || charsLeft < 0 || isSubmitting}
-                        onClick={() => onPost(!!scheduledAt, scheduledAt)}
-                    >
-                        {isSubmitting ? "Creating..." : (scheduledAt ? "Schedule" : "Draft")}
-                    </Button>
+                    {!hideAction && (
+                        <Button
+                            className="rounded-full font-bold px-4 md:px-6 h-8 md:h-10 text-sm md:text-base"
+                            disabled={editor.storage.characterCount.characters() === 0 || charsLeft < 0 || isSubmitting}
+                            onClick={handleMainAction}
+                        >
+                            {mainButtonLabel}
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

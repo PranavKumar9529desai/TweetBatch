@@ -1,8 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
-import type { scheduledPost } from '@repo/db';
-import { useManageTweets } from '../../hooks/use-manage-tweets';
-
-export type ScheduledPost = typeof scheduledPost.$inferSelect;
+import { createContext, useContext, useState, type ReactNode, useMemo, useCallback } from 'react';
+import { useManageTweets, type ScheduledPost } from '../../hooks/use-manage-tweets';
 
 interface CalendarContextType {
   currentWeekStart: Date;
@@ -87,11 +84,11 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   }, [posts, currentWeekStart]);
 
   // HELPER TO ACCESS DATA
-  const getPostsForSlot = (dayIndex: number, hour: number) => {
+  const getPostsForSlot = useCallback((dayIndex: number, hour: number) => {
     return postsBySlot.get(`${dayIndex}-${hour}`) || [];
-  };
+  }, [postsBySlot]);
 
-  const value: CalendarContextType = {
+  const value: CalendarContextType = useMemo(() => ({
     currentWeekStart,
     setCurrentWeekStart,
     searchQuery,
@@ -104,7 +101,15 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     setSelectedPost,
     getPostsForSlot,
     isLoading,
-  };
+  }), [
+    currentWeekStart,
+    searchQuery,
+    draggedPostId,
+    hoveredCell,
+    selectedPost,
+    getPostsForSlot,
+    isLoading
+  ]);
 
   return (
     <CalendarContext.Provider value={value}>

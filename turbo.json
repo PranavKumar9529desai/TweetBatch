@@ -44,6 +44,17 @@
         "FRONTEND_URL",
         "BACKEND_URL"
       ]
+    },
+    "deploy": {
+      "dependsOn": [
+        "build",
+        "^build"
+      ],
+      "cache": false,
+      "env": [
+        "CLOUDFLARE_API_TOKEN",
+        "CLOUDFLARE_ACCOUNT_ID"
+      ]
     }
   }
 }

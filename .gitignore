@@ -38,3 +38,5 @@ yarn-error.log*
 *.pem
 apps/frontend/stats.html
 .wrangler
+apps/frontend/.env.production
+apps/frontend/stats.html

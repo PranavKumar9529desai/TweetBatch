@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "backend",
+  "name": "tweetbatch-backend",
   "main": "src/index.ts",
   "compatibility_date": "2026-01-22",
   "compatibility_flags": [
@@ -45,7 +45,6 @@
   // "ai": {
   //   "binding": "AI"
   // },
-  ,
   "observability": {
     "logs": {
       "enabled": false,

@@ -11,6 +11,7 @@ import { Button } from "@repo/ui/components/ui/button";
 import { Calendar as CalendarUI } from "@repo/ui/components/ui/calendar";
 import { format } from "date-fns";
 import { z } from "zod";
+import { CreateTweetSkeleton } from "@/components/dashboard/skeletons";
 
 const createTweetSearchSchema = z.object({
   postId: z.string().optional(),
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/dashboard/create-tweet")({
     }
     return null;
   },
+  pendingComponent: CreateTweetSkeleton,
   component: CreateTweetPage,
 });
 

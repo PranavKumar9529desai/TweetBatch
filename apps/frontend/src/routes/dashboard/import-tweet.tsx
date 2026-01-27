@@ -12,8 +12,10 @@ import { Badge } from '@repo/ui/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/ui/tabs"
 import { apiclient } from '@/lib/api.client'
 import { Title } from "@/components/title"
+import { ImportTweetSkeleton } from "@/components/dashboard/skeletons"
 
 export const Route = createFileRoute('/dashboard/import-tweet')({
+  pendingComponent: ImportTweetSkeleton,
   component: ImportTweetPage,
 })
 

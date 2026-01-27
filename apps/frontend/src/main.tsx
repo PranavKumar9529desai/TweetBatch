@@ -5,8 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { MyRouterContext } from './routes/__root'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import '@repo/ui/globals.css'
+
+// Create a client
+const queryClient = new QueryClient()
 
 // Create a new router instance
 const router = createRouter({
@@ -15,7 +19,8 @@ const router = createRouter({
     auth: {
       user: null,
       session: null
-    }
+    },
+    queryClient
   } as MyRouterContext
 })
 
@@ -26,8 +31,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// Create a client
-const queryClient = new QueryClient()
 
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
@@ -35,6 +38,8 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
+        <TanStackRouterDevtools />
+
         <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>,

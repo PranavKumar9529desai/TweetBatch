@@ -21,20 +21,32 @@ import {
     Zap,
     ArrowUpRight
 } from 'lucide-react'
-import { Skeleton } from '@repo/ui/components/ui/skeleton'
 import { Title } from '../../components/title'
 import { PostsTable } from '../../components/dashboard/posts-table'
+import { DashboardHomeSkeleton } from '../../components/dashboard/skeletons'
+import { apiclient } from '../../lib/api.client'
 
 export const Route = createFileRoute('/dashboard/')({
+    loader: async ({ context }) => {
+        const { queryClient, auth } = context;
+        if (!auth.user?.id) return;
+
+        await queryClient.ensureQueryData({
+            queryKey: ["dashboard-stats", auth.user.id],
+            queryFn: async () => {
+                const res = await apiclient.analytics.dashboard.$get();
+                if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+                const data = await res.json();
+                return data.data;
+            },
+        });
+    },
+    pendingComponent: DashboardHomeSkeleton,
     component: DashboardIndex,
 })
 
 function DashboardIndex() {
-    const { data, isLoading } = useDashboardStats();
-
-    if (isLoading) {
-        return <DashboardSkeleton />;
-    }
+    const { data } = useDashboardStats();
 
     const stats = data?.stats || [];
     const history = data?.history || [];
@@ -204,22 +216,3 @@ function StatCard({ title, value, icon, description, trend, colorVar }: { title:
     )
 }
 
-function DashboardSkeleton() {
-    return (
-        <div className="space-y-10 p-2">
-            <div className="space-y-3">
-                <Skeleton className="h-10 w-64 bg-primary/10" />
-                <Skeleton className="h-4 w-96 opacity-50" />
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-44 w-full rounded-xl bg-card/20" />
-                ))}
-            </div>
-            <div className="space-y-6">
-                <Skeleton className="h-[450px] w-full rounded-2xl bg-card/10" />
-                <Skeleton className="h-[400px] w-full rounded-2xl bg-card/10" />
-            </div>
-        </div>
-    );
-}

@@ -6,7 +6,45 @@ import { TweetQueueSidebar } from '@/components/manage-tweets/tweet-queue-sideba
 import { useCalendarContext } from '@/components/manage-tweets/calendar-context'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@repo/ui/components/ui/sheet'
 
+import { ManageTweetSkeleton } from '@/components/dashboard/skeletons'
+import { apiclient } from '@/lib/api.client'
+
 export const Route = createFileRoute('/dashboard/manage-tweet')({
+  loader: async ({ context }) => {
+    const { queryClient, auth } = context;
+    if (!auth.user?.id) return;
+
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const diff = today.getDate() - dayOfWeek;
+    const currentWeekStart = new Date(today.setDate(diff));
+    currentWeekStart.setHours(0, 0, 0, 0);
+
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekEnd.getDate() + 7);
+    currentWeekEnd.setHours(23, 59, 59, 999);
+
+    await queryClient.ensureQueryData({
+      queryKey: ['posts', 'search', currentWeekStart.toISOString(), currentWeekEnd.toISOString(), '', 50, 0],
+      queryFn: async () => {
+        const response = await apiclient.posts.search.$get({
+          query: {
+            startDate: currentWeekStart.toISOString(),
+            endDate: currentWeekEnd.toISOString(),
+            search: '',
+            limit: '50',
+            offset: '0'
+          },
+        });
+        if (!response.ok) throw new Error('Failed to fetch posts');
+        const data = await response.json();
+        // @ts-ignore
+        if (!data.success) throw new Error(data.error || 'Failed to fetch posts');
+        return data.posts || [];
+      }
+    });
+  },
+  pendingComponent: ManageTweetSkeleton,
   component: RouteComponent,
 })
 

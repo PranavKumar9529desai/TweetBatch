@@ -2,6 +2,7 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { ThemeProvider } from "../components/theme-provider";
 import { Toaster } from "@repo/ui/components/ui/sonner";
 import { authClient } from "@/lib/auth.client";
+import { QueryClient } from "@tanstack/react-query";
 
 type UserType = typeof authClient.$Infer.Session.user;
 type SessionType = typeof authClient.$Infer.Session;
@@ -11,6 +12,7 @@ export interface MyRouterContext {
     user: UserType | null;
     session: SessionType | null;
   };
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

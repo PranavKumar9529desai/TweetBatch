@@ -12,14 +12,14 @@
   // - 00:30 UTC = 06:00 IST (sync posts for 06:00-12:00 IST)
   // - 06:30 UTC = 12:00 IST (sync posts for 12:00-18:00 IST)
   // - 12:30 UTC = 18:00 IST (sync posts for 18:00-00:00 IST)
-  "triggers": {
-    "crons": [
-      "30 18 * * *",
-      "30 0 * * *",
-      "30 6 * * *",
-      "30 12 * * *"
-    ]
-  }
+  // "triggers": {
+  //   "crons": [
+  //     "30 18 * * *",
+  //     "30 0 * * *",
+  //     "30 6 * * *",
+  //     "30 12 * * *"
+  //   ]
+  // }
   // "vars": {
   //   "MY_VAR": "my-variable"
   // },
@@ -45,8 +45,11 @@
   // "ai": {
   //   "binding": "AI"
   // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  ,
+  "observability": {
+    "logs": {
+      "enabled": false,
+      "invocation_logs": true
+    }
+  }
 }

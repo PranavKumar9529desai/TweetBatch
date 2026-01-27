@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiclient } from '@/lib/api.client';
-import type { scheduledPost } from '@repo/db';
+
 import { toast } from '@repo/ui/components/ui/sonner';
 
 // export type ScheduledPost = typeof scheduledPost.$inferSelect;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { useCalendarContext } from './calendar-context';
 import { useManageTweets, type ScheduledPost } from '../../hooks/use-manage-tweets';

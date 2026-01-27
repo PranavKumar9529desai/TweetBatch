@@ -20,7 +20,11 @@ const router = createRouter({
       session: null
     },
     queryClient
-  } as MyRouterContext
+  } as MyRouterContext,
+  defaultPreload: 'intent',
+  // Since we're using React Query, we don't want the loader calls to stale too quickly
+  // so we can use a stale time of 0 or essentially rely on the intent
+  defaultPreloadStaleTime: 0,
 })
 
 // Register the router instance for type safety

@@ -15,22 +15,22 @@ export function AppBottomNavigation() {
           {
             label: "Dashboard",
             path: "/dashboard",
-            icon: LayoutDashboard,
+            icon: LayoutDashboard as any,
           },
           {
             label: "Create",
             path: "/dashboard/create-tweet",
-            icon: SquarePlus,
+            icon: SquarePlus as any,
           },
           {
             label: "Import",
             path: "/dashboard/import-tweet",
-            icon: Database,
+            icon: Database as any,
           },
           {
             label: "Manage",
             path: "/dashboard/manage-tweet",
-            icon: List,
+            icon: List as any,
           },
         ]}
       />

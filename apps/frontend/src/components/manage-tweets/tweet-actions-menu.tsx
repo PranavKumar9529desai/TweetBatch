@@ -18,7 +18,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@repo/ui/components/ui/dialog';
-import { cn } from '@repo/ui/lib/utils';
+
 
 interface TweetActionsMenuProps {
     post: ScheduledPost;
@@ -41,7 +41,7 @@ export function TweetActionsMenu({ post, children }: TweetActionsMenuProps) {
     const canEdit = post.status === 'pending';
     const canDelete = post.status === 'pending' || post.status === 'failed';
 
-    const handleEdit = (e: Event) => {
+    const handleEdit = () => {
         // Prevent default behavior if needed, but navigate should work
         navigate({
             to: '/dashboard/create-tweet',
@@ -56,7 +56,7 @@ export function TweetActionsMenu({ post, children }: TweetActionsMenuProps) {
         });
     };
 
-    const handleDeleteClick = (e: Event) => {
+    const handleDeleteClick = (e: React.MouseEvent) => {
         e.preventDefault(); // Keep dropdown open? No, we want it to close but open dialog
         setShowDeleteConfirm(true);
     };

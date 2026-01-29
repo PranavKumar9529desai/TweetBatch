@@ -47,18 +47,18 @@ export function PostsTable() {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-                <div className="relative flex-1 max-w-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                <div className="relative flex-1 sm:max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search posts..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-9 bg-transparent border-border/40 focus:bg-background/50 transition-colors"
+                        className="pl-9 bg-transparent border-border/40 focus:bg-background/50 transition-colors w-full"
                     />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[180px] bg-transparent border-border/40">
+                    <SelectTrigger className="w-full sm:w-[180px] bg-transparent border-border/40">
                         <SelectValue placeholder="Filter by status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -77,11 +77,11 @@ export function PostsTable() {
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow className="border-border/40">
-                            <TableHead className="w-[400px]">Content</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Scheduled For</TableHead>
-                            <TableHead>Created</TableHead>
-                            <TableHead className="text-right w-[100px]">Actions</TableHead>
+                            <TableHead className="min-w-[200px] w-auto">Content</TableHead>
+                            <TableHead className="w-[120px]">Status</TableHead>
+                            <TableHead className="hidden md:table-cell w-[200px]">Scheduled For</TableHead>
+                            <TableHead className="hidden lg:table-cell w-[150px]">Created</TableHead>
+                            <TableHead className="text-right w-[80px]">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -105,19 +105,24 @@ export function PostsTable() {
                                 <TableRow key={post.id} className="border-border/40 hover:bg-muted/30 transition-colors">
                                     <TableCell className="font-medium">
                                         <p className="line-clamp-2 text-sm leading-relaxed">{post.content}</p>
+                                        <div className="md:hidden mt-1 text-[10px] text-muted-foreground flex items-center gap-2">
+                                            {post.scheduledAt && (
+                                                <span>Scheduled: {format(new Date(post.scheduledAt), "MMM d, p")}</span>
+                                            )}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <Badge
                                             variant="outline"
-                                            className={cn("capitalize font-semibold", statusConfig[post.status]?.className)}
+                                            className={cn("capitalize font-semibold text-[10px] sm:text-xs px-1.5 py-0 h-5 sm:h-auto", statusConfig[post.status]?.className)}
                                         >
                                             {statusConfig[post.status]?.label || post.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground text-sm">
+                                    <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                                         {post.scheduledAt ? format(new Date(post.scheduledAt), "PPP p") : "Not scheduled"}
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground text-xs font-mono">
+                                    <TableCell className="text-muted-foreground text-xs font-mono hidden lg:table-cell">
                                         {format(new Date(post.createdAt), "MMM d, HH:mm")}
                                     </TableCell>
                                     <TableCell className="text-right">

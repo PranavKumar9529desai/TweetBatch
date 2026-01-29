@@ -67,7 +67,7 @@ function DashboardIndex() {
     }, {}));
 
     return (
-        <div className="space-y-12 p-6 md:p-10 pb-20 max-w-[1600px] mx-auto">
+        <div className="space-y-12 p-6 md:p-10 pb-20 max-w-[1600px] mx-auto ">
             <Title
                 title="Analytics Center"
                 subtitle="Track your content reaching the world. Real-time insights from your scheduling pipeline."

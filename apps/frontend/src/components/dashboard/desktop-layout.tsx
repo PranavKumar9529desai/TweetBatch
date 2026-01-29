@@ -20,11 +20,11 @@ export function DesktopLayout() {
         .replace(/\b\w/g, (l) => l.toUpperCase()) || 'Dashboard'
 
     return (
-        <div className="flex flex-row w-full flex-1 mx-auto border border-neutral-200 overflow-hidden h-screen">
+        <div className="flex flex-row w-full flex-1 mx-auto border border-neutral-200 overflow-x-hidden h-screen">
             <div className="hidden md:block">
                 <AppSidebar />
             </div>
-            <div className="flex flex-1 flex-col p-4 pt-0 w-full h-full overflow-hidden">
+            <div className="flex flex-1 flex-col p-4 pt-0 w-full h-full">
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
                     <div className="flex items-center gap-2 px-4">
                         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -41,7 +41,7 @@ export function DesktopLayout() {
                         </Breadcrumb>
                     </div>
                 </header>
-                <div className="flex-1 overflow-hidden" style={{ viewTransitionName: 'page-content' }}>
+                <div className="flex-1 overflow-y-auto subtle-scrollbar" style={{ viewTransitionName: 'page-content' }}>
                     <Outlet />
                 </div>
             </div>

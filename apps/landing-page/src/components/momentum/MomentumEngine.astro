@@ -6,8 +6,8 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 
 <section id="momentum-engine" class="relative z-20 w-full h-screen bg-background overflow-hidden">
   <!-- Background Grid (Streaming) -->
-  <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
-    <div id="momentum-grid" class="absolute inset-0 opacity-40">
+  <div class="absolute inset-0 -z-10 pointer-events-none">
+    <div id="momentum-grid" class="absolute inset-0 opacity-40 grid-pattern">
         <WarpTunnel />
     </div>
   </div>
@@ -45,7 +45,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
     background-image: 
         radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
     background-size: 40px 40px;
-    color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--foreground) / 0.15);
   }
 
   #momentum-engine {

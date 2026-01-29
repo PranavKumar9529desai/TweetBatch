@@ -63,7 +63,7 @@
 
         if (alpha > 0) {
             ctx.beginPath();
-            ctx.fillStyle = `hsla(var(--primary), ${alpha})`;
+            ctx.fillStyle = `hsla(var(--foreground), ${alpha})`;
             ctx.arc(x, y, size, 0, Math.PI * 2);
             ctx.fill();
         }
@@ -96,7 +96,7 @@
       const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.5);
       // We read CSS var outside loop for perf usually, but inside is safer for theme switch.
       // Optimization: Assuming theme doesn't switch 60fps.
-      gradient.addColorStop(0, "hsla(var(--primary), 0.1)");
+      gradient.addColorStop(0, "hsla(var(--foreground), 0.1)");
       gradient.addColorStop(1, "transparent");
       ctx.fillStyle = gradient;
       ctx.fillRect(0,0,width,height);

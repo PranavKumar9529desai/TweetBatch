@@ -4,7 +4,7 @@ import FeatureEditor from "./FeatureEditor.astro";
 import FeatureSchedule from "./FeatureSchedule.astro";
 import FeatureAnalytics from "./FeatureAnalytics.astro";
 ---
-<section id="features-flow" class="relative z-10 w-full bg-background overflow-hidden" style="height: 350vh;">
+<section id="features-flow" class="relative z-10 w-full h-screen bg-background overflow-hidden">
   <!-- Background Elements (Magnetic Grid) -->
   <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
      <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"></canvas>
@@ -12,8 +12,8 @@ import FeatureAnalytics from "./FeatureAnalytics.astro";
      <div class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"></div>
   </div>
 
-  <!-- Sticky Container -->
-  <div class="sticky top-0 h-screen w-full overflow-hidden flex flex-col items-center justify-center">
+  <!-- Container (GSAP will pin the section) -->
+  <div class="h-full w-full overflow-hidden flex flex-col items-center justify-center">
     
     <!-- MAIN STAGE -->
     <div class="feature-stage relative w-full max-w-7xl px-6 py-12 h-full flex items-center justify-center">
@@ -259,8 +259,8 @@ import FeatureAnalytics from "./FeatureAnalytics.astro";
             scrollTrigger: {
                 trigger: section,
                 start: "top top",
-                end: "+=500%", // Further increased scroll distance
-                scrub: 0.5, // Smoother scrubbing
+                end: "+=400%", // Pin for 4 viewports worth of scroll
+                scrub: 0.5, 
                 pin: true,
                 anticipatePin: 1
             }

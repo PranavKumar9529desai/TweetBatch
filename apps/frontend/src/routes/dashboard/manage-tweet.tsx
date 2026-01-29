@@ -61,7 +61,7 @@ function ManageTweetContent() {
   const { isQueueDrawerOpen, setQueueDrawerOpen } = useCalendarContext();
 
   return (
-    <div className="h-screen max-h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-full bg-background flex flex-col overflow-hidden">
       <CalendarHeader />
       <div className="flex flex-1 overflow-hidden relative">
         <div className="flex-1 relative min-w-0 h-full overflow-hidden">
@@ -69,7 +69,7 @@ function ManageTweetContent() {
           <div className="hidden md:block h-full overflow-hidden">
             <CalendarGrid />
           </div>
-          
+
           {/* Mobile View */}
           <div className="block md:hidden h-full overflow-hidden">
             <MobileAgendaView />

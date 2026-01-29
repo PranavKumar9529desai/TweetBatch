@@ -56,7 +56,7 @@ export function TweetQueueSidebar() {
             </div>
 
             {/* List of drafts */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto no-scrollbar">
                 {filteredDrafts.length > 0 ? (
                     <div className="divide-y divide-border p-2">
                         {filteredDrafts.map((post, idx) => (

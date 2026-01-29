@@ -75,55 +75,56 @@ export function CalendarGrid() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-background">
-            {/* Header: Days and dates */}
-            <div className="flex border-b border-border sticky top-0 z-40 bg-background overflow-x-auto no-scrollbar">
-                {/* Time column header (empty) */}
-                <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border p-2 text-xs font-semibold text-muted-foreground bg-background sticky left-0 z-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" />
+        <div className="flex flex-col h-full bg-background overflow-hidden border border-border rounded-lg">
+            {/* Unified Scroll Container */}
+            <div className="flex-1 overflow-auto relative no-scrollbar">
+                {/* Header: Days and dates (Sticky Top) */}
+                <div className="flex sticky top-0 z-50 bg-background border-b border-border">
+                    {/* Time column header (Sticky Top and Left) */}
+                    <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border p-2 text-xs font-semibold text-muted-foreground bg-background sticky left-0 z-[60] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]" />
 
-                {/* Day headers */}
-                <div className="flex flex-1 divide-x divide-border min-w-[700px] md:min-w-0">
-                    {weekDays.map((date, idx) => {
-                        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                        const dateStr = formatDate(date);
-                        const isToday = idx === currentDayIndex;
+                    {/* Day headers */}
+                    <div className="flex flex-1 divide-x divide-border min-w-[700px] md:min-w-0 bg-background">
+                        {weekDays.map((date, idx) => {
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                            const dateStr = formatDate(date);
+                            const isToday = idx === currentDayIndex;
 
-                        return (
+                            return (
+                                <div
+                                    key={`header-${idx}`}
+                                    className={`flex-1 p-2 text-center min-w-0 ${isToday
+                                        ? 'bg-primary/10 border-b-2 border-primary'
+                                        : ''
+                                        }`}
+                                >
+                                    <div className="text-xs font-semibold text-foreground">
+                                        {dayName}
+                                    </div>
+                                    <div className={`text-xs ${isToday ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
+                                        {dateStr}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Body: Grid Content */}
+                <div className="flex bg-background relative min-h-fit">
+                    {/* Time column (Sticky Left) */}
+                    <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border bg-background sticky left-0 z-40">
+                        {hours.map((hour) => (
                             <div
-                                key={`header-${idx}`}
-                                className={`flex-1 p-2 text-center min-w-0 ${isToday
-                                    ? 'bg-primary/10 border-b-2 border-primary'
-                                    : ''
-                                    }`}
+                                key={`time-${hour}`}
+                                className="h-[60px] flex items-start justify-end pr-1 sm:pr-2 pt-1 text-[10px] sm:text-xs text-muted-foreground font-medium border-b border-border"
                             >
-                                <div className="text-xs font-semibold text-foreground">
-                                    {dayName}
-                                </div>
-                                <div className={`text-xs ${isToday ? 'text-primary font-bold' : 'text-muted-foreground'}`}>
-                                    {dateStr}
-                                </div>
+                                {formatTime(hour)}
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
+                        ))}
+                    </div>
 
-            {/* Body: Grid with time slots */}
-            <div className="flex flex-1 overflow-hidden bg-background relative">
-                {/* Time column (sticky left) */}
-                <div className="w-14 sm:w-20 flex-shrink-0 border-r border-border bg-background sticky left-0 z-30 overflow-y-auto">
-                    {hours.map((hour) => (
-                        <div
-                            key={`time-${hour}`}
-                            className="h-[60px] flex items-start justify-end pr-1 sm:pr-2 pt-1 text-[10px] sm:text-xs text-muted-foreground font-medium border-b border-border"
-                        >
-                            {formatTime(hour)}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Grid cells (scrollable) */}
-                <div className="flex flex-1 overflow-auto">
+                    {/* Grid cells */}
                     <div className="flex flex-1 divide-x divide-border relative min-w-[700px] md:min-w-0">
                         {weekDays.map((date, dayIdx) => (
                             <div

@@ -45,13 +45,13 @@ const tweets = [
 ];
 ---
 
-<section id="kinetic-feed" class="relative z-20 w-full min-h-[400vh] bg-background">
+<section id="kinetic-feed" class="relative z-20 w-full h-screen bg-background">
   <!-- Dynamic Background Glow -->
   <div class="fixed inset-0 pointer-events-none">
     <div id="feed-glow" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] bg-primary/5 rounded-full blur-[100px] opacity-0 transition-opacity duration-700"></div>
   </div>
 
-  <div class="sticky top-0 h-screen w-full flex flex-col items-center justify-center overflow-hidden pt-20">
+  <div class="h-full w-full flex flex-col items-center justify-center overflow-hidden pt-20">
     
     <!-- Title Section -->
     <div class="absolute top-10 md:top-20 text-center z-10 px-4 w-full">
@@ -76,7 +76,7 @@ const tweets = [
         {tweets.map((tweet, i) => (
           <div 
             class={cn(
-              "feed-card absolute w-[calc(100%-3rem)] md:w-[28rem] p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-md shadow-lg opacity-0 translate-y-20 origin-center",
+              "feed-card absolute w-[calc(100%-3rem)] md:w-[28rem] p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-md shadow-lg opacity-0 translate-y-20 origin-center will-change-transform will-change-opacity",
               /* Mobile: Always offset from left line */
               "left-12 top-1/2 -translate-y-1/2",
               /* Desktop: Alternate sides */
@@ -147,9 +147,9 @@ const tweets = [
       scrollTrigger: {
         trigger: section,
         start: "top top",
-        end: "bottom bottom",
+        end: "+=2500", // Virtual height
         scrub: 1, // Smooth interaction
-        pin: true, // IMPORTANT: Pin the content while scrolling through
+        pin: true, // Auto-pinning
       }
     });
 
@@ -163,46 +163,47 @@ const tweets = [
     cards.forEach((card, i) => {
       const element = card as HTMLElement;
       
-      // Calculate stagger timings
-      // e.g. Card 1: 0 -> 2
-      // Card 2: 2 -> 4 ...
-      // Overlap slightly for better flow
-      const step = 2; // Time unit per card
+      // Adjusted Timing for cleaner overlap
+      // Increased step slightly to separate dots during transition
+      const step = 2.5; 
       const startTime = i * step; 
-      const stayTime = 1; // How long it stays fully visible
+      
+      const entryDuration = 1.5;
+      const stayDuration = 1.5;
+      const exitDuration = 1.5;
       
       // Entry
       tl.fromTo(element, 
         { 
-          y: 400, 
+          yPercent: 120, // Start lower down (relative to card height)
           opacity: 0, 
           scale: 0.8,
           filter: "blur(10px)",
-          display: 'block' // Ensure it's rendered
+          display: 'block',
+          force3D: true // Hardware acceleration hint
         },
         { 
-          y: -50, // Slight upward movement while active to mimic flow
+          yPercent: -10, // Slight upward move to center
           opacity: 1, 
           scale: 1,
           filter: "blur(0px)",
-          duration: 1.5,
+          duration: entryDuration,
           ease: "power2.out"
         },
         startTime
       );
 
       // Exit (Fly up and fade out)
-      // Don't exit the last card immediately if we want it to stay a bit, but for now let's just exit all to clear screen.
       tl.to(element, 
         {
-          y: -400,
+          yPercent: -120, // Exit upwards
           opacity: 0,
           scale: 0.8,
           filter: "blur(10px)",
-          duration: 1.5,
+          duration: exitDuration,
           ease: "power2.in"
         },
-        startTime + 1.5 + stayTime // Enter duration + stay duration
+        startTime + entryDuration + stayDuration
       );
     });
 

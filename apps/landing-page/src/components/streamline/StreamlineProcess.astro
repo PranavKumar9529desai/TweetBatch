@@ -1,0 +1,226 @@
+---
+import { cn } from "@repo/ui/lib/utils";
+---
+
+<section id="streamline-engine" class="relative z-20 w-full py-20 -mt-20 bg-background overflow-hidden">
+  <div class="container mx-auto px-4 relative">
+    
+    <!-- Title -->
+    <div class="text-center mb-20 relative z-10">
+      <h2 class="text-4xl md:text-7xl font-black tracking-tighter mb-6">
+        CHAOS TO <span class="text-primary">CLARITY</span>
+      </h2>
+      <p class="text-muted-foreground text-xl max-w-2xl mx-auto">
+        Transform scattered ideas into a symphony of scheduled content.
+      </p>
+    </div>
+
+    <!-- The Engine Canvas -->
+    <div class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-card/30 rounded-3xl border border-white/10 backdrop-blur-sm overflow-hidden shadow-2xl">
+      
+      <!-- Grid Background -->
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+      <svg id="streamline-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          
+          <linearGradient id="trace-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="hsl(var(--primary))" stop-opacity="0" />
+            <stop offset="50%" stop-color="hsl(var(--primary))" stop-opacity="1" />
+            <stop offset="100%" stop-color="hsl(var(--primary))" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <!-- SVG Text (Scales with graphic) -->
+        <text x="50" y="300" fill="currentColor" class="text-muted-foreground font-mono text-2xl tracking-widest opacity-50 select-none">RAW IDEAS</text>
+        <text x="1150" y="300" text-anchor="end" fill="hsl(var(--primary))" class="font-mono text-2xl font-bold tracking-widest select-none">SCHEDULED</text>
+
+        <!-- 1. Input Paths (Chaotic) -->
+        <!-- Added stroke-linecap round for seamless joining -->
+        <g id="input-traces" class="trace-group" stroke="hsl(var(--primary))" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#glow-filter)">
+           <!-- Top Left In -->
+           <path d="M-50,100 C150,100 150,250 300,250" class="circuit-trace" />
+           <!-- Bottom Left In -->
+           <path d="M-50,500 C150,500 150,350 300,350" class="circuit-trace" />
+           <!-- Mid Left In -->
+           <path d="M-50,300 C100,300 200,300 300,300" class="circuit-trace" />
+        </g>
+
+        <!-- 2. The Processor (Central Core) -->
+        <g id="processor-core" transform="translate(600, 300)">
+          <!-- Outer Ring -->
+          <circle r="80" fill="none" stroke="hsl(var(--primary)/0.3)" stroke-width="2" stroke-dasharray="10 5" class="animate-spin-slow" />
+          <!-- Inner Hex -->
+          <path d="M0,-60 L52,-30 L52,30 L0,60 L-52,30 L-52,-30 Z" fill="hsl(var(--background))" stroke="hsl(var(--primary))" stroke-width="4" filter="url(#glow-filter)" />
+          <!-- Core Light -->
+          <circle r="25" fill="hsl(var(--primary))" filter="url(#glow-filter)" class="core-pulse" />
+        </g>
+
+        <!-- 3. Connection Lines (Core Input) -->
+        <g id="core-feeds" class="trace-group" stroke="hsl(var(--primary))" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#glow-filter)">
+           <path d="M300,250 C400,250 500,300 520,300" class="circuit-trace" />
+           <path d="M300,350 C400,350 500,300 520,300" class="circuit-trace" />
+           <path d="M300,300 C400,300 500,300 520,300" class="circuit-trace" />
+        </g>
+
+        <!-- 4. Output Lines (Organized) -->
+        <g id="output-traces" class="trace-group" stroke="hsl(var(--primary))" stroke-width="5" fill="none" stroke-linecap="round" filter="url(#glow-filter)">
+           <line x1="680" y1="300" x2="1250" y2="300" class="circuit-trace" />
+        </g>
+
+        <!-- Moving Packets (Will be animated along paths) -->
+        <g id="packets">
+           <!-- Chaos Packets -->
+           <circle r="8" fill="white" class="packet-input opacity-0" filter="url(#glow-filter)" />
+           <circle r="8" fill="white" class="packet-input opacity-0" filter="url(#glow-filter)" />
+           <circle r="8" fill="white" class="packet-input opacity-0" filter="url(#glow-filter)" />
+           
+           <!-- Output Packets (Scheduled) -->
+           <rect width="40" height="12" rx="4" fill="hsl(var(--primary))" class="packet-output opacity-0" x="-20" y="-6" filter="url(#glow-filter)" />
+           <rect width="40" height="12" rx="4" fill="hsl(var(--primary))" class="packet-output opacity-0" x="-20" y="-6" filter="url(#glow-filter)" />
+           <rect width="40" height="12" rx="4" fill="hsl(var(--primary))" class="packet-output opacity-0" x="-20" y="-6" filter="url(#glow-filter)" />
+        </g>
+
+      </svg>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Fix FOUC - Hide traces initially */
+  .circuit-trace {
+    opacity: 0;
+  }
+
+  .animate-spin-slow {
+    animation: spin 30s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+
+  gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
+
+  const initStreamline = () => {
+    const svg = document.getElementById('streamline-svg');
+    if (!svg) return;
+
+    const traces = document.querySelectorAll('.circuit-trace');
+    const inputPackets = document.querySelectorAll('.packet-input');
+    const outputPackets = document.querySelectorAll('.packet-output');
+
+    // 1. Setup "DrawSVG" effect manually
+    // We set opacity to 0 in CSS to prevent FOUC, now we prepare them
+    traces.forEach(path => {
+       const el = path as SVGGeometryElement; 
+       const len = el.getTotalLength ? el.getTotalLength() : 1000;
+       el.style.strokeDasharray = `${len}`;
+       el.style.strokeDashoffset = `${len}`;
+       el.style.opacity = '1'; // Make visible but offset hidden
+    });
+
+    // 2. Main Timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '#streamline-engine',
+        start: "top 75%", // Trigger earlier
+        end: "bottom center",
+        toggleActions: "play none none reverse"
+      }
+    });
+
+    // Step A: Draw the lines
+    tl.to(traces, {
+      strokeDashoffset: 0,
+      duration: 2,
+      stagger: 0.1,
+      ease: "power2.out"
+    });
+
+    // Step B: Animate Input Packets (Chaos -> Core)
+    const inputPaths = [
+      "M-50,100 C150,100 150,250 300,250 C400,250 500,300 520,300", 
+      "M-50,500 C150,500 150,350 300,350 C400,350 500,300 520,300", 
+      "M-50,300 C100,300 200,300 300,300 C400,300 500,300 520,300"  
+    ];
+
+    inputPackets.forEach((packet, i) => {
+        gsap.to(packet, {
+          motionPath: {
+            path: inputPaths[i % inputPaths.length],
+            // align removed to prevent invalid selector crash
+            alignOrigin: [0.5, 0.5], // Center of circle
+            autoRotate: true,
+            start: 0,
+            end: 1
+          },
+          duration: 2.5,
+          repeat: -1,
+          ease: "power1.inOut",
+          delay: i * 0.8,
+          keyframes: {
+             "0%": { opacity: 0, scale: 0.5 },
+             "10%": { opacity: 1, scale: 1 },
+             "90%": { opacity: 1, scale: 1 },
+             "100%": { opacity: 0, scale: 0.1 } 
+          }
+        });
+    });
+
+    // Step C: Animate Output Packets (Core -> Out)
+    outputPackets.forEach((packet, i) => {
+        const path = "M680,300 L1250,300";
+        gsap.to(packet, {
+          motionPath: {
+            path: path,
+            // align removed
+            alignOrigin: [0.5, 0.5],
+            autoRotate: false,
+            start: 0,
+            end: 1
+          },
+          duration: 2.5,
+          repeat: -1,
+          ease: "none", 
+          delay: 1.5 + (i * 0.8), // Sync with output
+          keyframes: {
+             "0%": { opacity: 0, scale: 0.2 },
+             "10%": { opacity: 1, scale: 1 }, // Pop out
+             "90%": { opacity: 1 },
+             "100%": { opacity: 0 }
+          }
+        });
+    });
+
+    // Step D: Pulse Core
+    const pulse = gsap.to(".core-pulse", {
+        scale: 1.4,
+        opacity: 0.7,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+    });
+  };
+
+  document.addEventListener('astro:page-load', initStreamline);
+  // Dev mode HMR fallback
+  if (import.meta.env.DEV) {
+      setTimeout(initStreamline, 500); 
+  }
+</script>

@@ -1,0 +1,301 @@
+---
+import { cn } from "@repo/ui/lib/utils";
+
+const cards = [
+  { id: 1, text: "The first rule of consistency is showing up. #BuildInPublic", user: "@alex_creatives", color: "from-blue-500/20" },
+  { id: 2, text: "Just scheduled 50 tweets in 2 minutes. This is life-changing. 🚀", user: "@growth_hacker", color: "from-purple-500/20" },
+  { id: 3, text: "Quality > Quantity, but Quantity helps you find Quality. 🧵 1/10", user: "@tweet_master", color: "from-orange-500/20" },
+  { id: 4, text: "Your audience is waiting. Don't let them down. #SocialMediaStrategy", user: "@marketing_guru", color: "from-emerald-500/20" },
+  { id: 5, text: "Bulk scheduling is the ultimate productivity hack for creators. 🛠️", user: "@indie_dev", color: "from-pink-500/20" },
+  { id: 6, text: "Stop tweeting manually. Start building systems. #TweetBatch", user: "@systems_mindset", color: "from-cyan-500/20" },
+  { id: 7, text: "The algorithm rewards the persistent. Scale your output today.", user: "@algo_optimist", color: "from-amber-500/20" },
+  { id: 8, text: "Scheduling is not just about saving time; it's about peace of mind.", user: "@zen_creator", color: "from-indigo-500/20" },
+];
+---
+
+<section id="time-weaver" class="relative z-20 min-h-[500vh] w-full bg-background overflow-x-hidden">
+  <!-- Sticky Container -->
+  <div class="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+    
+    <!-- Central Singularity (The Vortex Core) -->
+    <div id="vortex-core" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-0 w-0">
+        <div class="absolute inset-0 h-[2px] w-[2px] bg-primary shadow-[0_0_100px_40px_hsl(var(--primary))] animate-pulse"></div>
+        <div class="absolute inset-0 h-[1px] w-[1px] bg-white shadow-[0_0_40px_10px_white]"></div>
+    </div>
+
+    <!-- Light Threads Canvas -->
+    <canvas id="threads-canvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-40 mix-blend-screen dark:mix-blend-lighten"></canvas>
+
+    <!-- Center Content (Reveal on scroll) -->
+    <div id="weaver-content" class="relative z-50 text-center max-w-4xl px-4 pointer-events-none">
+      <h2 id="weaver-title" class="text-6xl md:text-9xl font-black tracking-tighter mb-4 opacity-0 scale-150 blur-xl">
+        TIME <br/> <span class="text-primary italic">VORTEX</span>
+      </h2>
+      <p id="weaver-subtitle" class="text-muted-foreground text-xl md:text-2xl max-w-xl mx-auto opacity-0 translate-y-20">
+        Unleash the chronological pulse of your social empire.
+      </p>
+    </div>
+
+    <!-- 3D Card Stage -->
+    <div id="card-stage" class="absolute inset-0 perspective-[1500px] pointer-events-none">
+      {cards.map((card, idx) => (
+        <div 
+          class="weaver-card absolute top-1/2 left-1/2 w-72 md:w-80 p-6 rounded-3xl border border-white/10 dark:border-white/5 bg-gradient-to-br from-white/10 to-transparent dark:from-white/5 backdrop-blur-[20px] shadow-2xl pointer-events-auto cursor-pointer"
+          data-index={idx}
+        >
+          <!-- Premium Sparkle Border -->
+          <div class="absolute inset-0 rounded-3xl border border-primary/20 opacity-40 pointer-events-none"></div>
+          
+          <div class="flex items-center gap-3 mb-4">
+            <div class={cn("h-10 w-10 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold shadow-lg", card.color.replace('from-', 'to-').replace('/20', ''), card.color.replace('/20', ''))}>
+              {card.user[1].toUpperCase()}
+            </div>
+            <div>
+              <p class="text-sm font-bold leading-none tracking-tight">{card.user}</p>
+              <div class="flex items-center gap-1.5 mt-1">
+                <span class="h-1.5 w-1.5 rounded-full bg-primary animate-pulse"></span>
+                <p class="text-[10px] text-muted-foreground uppercase tracking-widest">Scheduled</p>
+              </div>
+            </div>
+          </div>
+          <p class="text-base text-foreground/90 leading-relaxed mb-6 font-medium">
+            "{card.text}"
+          </p>
+          <div class="flex items-center justify-between">
+            <div class="flex -space-x-2">
+                {[1,2,3].map(i => <div class="h-6 w-6 rounded-full border-2 border-background bg-muted"></div>)}
+            </div>
+            <div class="text-[10px] font-bold text-primary px-2 py-0.5 rounded-md bg-primary/10">PREMIUM SLOT</div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .perspective-[1500px] {
+    perspective: 1500px;
+    transform-style: preserve-3d;
+  }
+  
+  .weaver-card {
+    will-change: transform, opacity;
+    transform: translate(-50%, -50%) translateZ(-3000px);
+    opacity: 0;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .weaver-card:hover {
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 50px -10px hsl(var(--primary) / 0.4);
+    z-index: 100 !important;
+  }
+</style>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  class TimeVortex {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    threads: Thread[] = [];
+    threadCount = 40;
+    
+    constructor() {
+        const el = document.getElementById('threads-canvas');
+        if (!el) return;
+        this.canvas = el as HTMLCanvasElement;
+        this.ctx = this.canvas.getContext('2d')!;
+        this.resize();
+        this.initThreads();
+        this.setupAnimations();
+        
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.ctx.scale(dpr, dpr);
+        this.canvas.style.width = `${window.innerWidth}px`;
+        this.canvas.style.height = `${window.innerHeight}px`;
+    }
+
+    initThreads() {
+        for (let i = 0; i < this.threadCount; i++) {
+            this.threads.push(new Thread());
+        }
+    }
+
+    setupAnimations() {
+        const section = document.getElementById('time-weaver');
+        const cards = gsap.utils.toArray('.weaver-card');
+        const title = document.getElementById('weaver-title');
+        const subtitle = document.getElementById('weaver-subtitle');
+
+        if (!section) return;
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: section,
+                start: "top top",
+                end: "bottom bottom",
+                scrub: 1,
+            }
+        });
+
+        // 1. Reveal Content Stagger
+        tl.to(title, { opacity: 1, scale: 1, blur: 0, duration: 2, ease: "power2.out" })
+          .to(subtitle, { opacity: 1, y: 0, duration: 1.5 }, "-=1.5");
+
+        // 2. Spiral Progress Logic
+        cards.forEach((card, i) => {
+            const element = card as HTMLElement;
+            
+            // Generate a logarithmic spiral path
+            // r = a * e^(b * theta)
+            const angleOffset = (i / cards.length) * Math.PI * 4; // Multiple rotations
+            
+            tl.fromTo(element, 
+                { 
+                    z: -3000, 
+                    opacity: 0,
+                    rotation: 0,
+                    x: 0,
+                    y: 0
+                },
+                {
+                    z: 1500, // Pass camera
+                    opacity: 1,
+                    onUpdate: function() {
+                        const progress = this.progress(); 
+                        const theta = angleOffset + progress * Math.PI * 3;
+                        const radius = 50 + progress * 800;
+                        
+                        const x = Math.cos(theta) * radius;
+                        const y = Math.sin(theta) * radius;
+                        const rot = theta * (180 / Math.PI) * 0.1;
+
+                        gsap.set(element, {
+                            x: x,
+                            y: y,
+                            rotation: rot,
+                            // Dynamic fade out
+                            opacity: progress > 0.8 ? 1 - (progress - 0.8) * 5 : (progress < 0.1 ? progress * 10 : 1)
+                        });
+                    },
+                    duration: 10,
+                    ease: "none"
+                },
+                0.5 + i * 0.8
+            );
+        });
+
+        // 3. Canvas Rendering Loop
+        gsap.ticker.add(() => {
+            this.render();
+        });
+
+        // 4. Interactive Card Tilt
+        cards.forEach((card) => {
+            const element = card as HTMLElement;
+            element.addEventListener('mousemove', (e) => {
+                const rect = element.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                gsap.to(element, {
+                    rotationX: -y * 20,
+                    rotationY: x * 20,
+                    scale: 1.1,
+                    duration: 0.4
+                });
+            });
+            element.addEventListener('mouseleave', () => {
+                gsap.to(element, {
+                    rotationX: 0,
+                    rotationY: 0,
+                    scale: 1,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.3)"
+                });
+            });
+        });
+    }
+
+    render() {
+        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        
+        // Get primary color
+        const style = getComputedStyle(document.documentElement);
+        const primary = `hsl(${style.getPropertyValue('--primary')})`;
+
+        this.threads.forEach(t => {
+            t.update();
+            t.draw(this.ctx, centerX, centerY, primary);
+        });
+    }
+  }
+
+  class Thread {
+    points: {x: number, y: number, z: number}[] = [];
+    angle: number;
+    speed: number;
+    radius: number;
+    z: number;
+
+    constructor() {
+        this.angle = Math.random() * Math.PI * 2;
+        this.speed = 0.01 + Math.random() * 0.02;
+        this.radius = 50 + Math.random() * 300;
+        this.z = Math.random() * -2000;
+    }
+
+    update() {
+        this.angle += this.speed;
+        this.z += 10;
+        if (this.z > 1000) this.z = -2000;
+        
+        // Add "wobble"
+        this.radius += Math.sin(Date.now() * 0.001) * 0.5;
+    }
+
+    draw(ctx: CanvasRenderingContext2D, cx: number, cy: number, color: string) {
+        const perspective = 1000 / (1000 - this.z);
+        if (perspective < 0) return;
+
+        const x = cx + Math.cos(this.angle) * this.radius * perspective;
+        const y = cy + Math.sin(this.angle) * this.radius * perspective;
+        const size = 2 * perspective;
+
+        ctx.fillStyle = color;
+        ctx.globalAlpha = Math.max(0, 1 - (this.z / 1000));
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Trail
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size * 0.5;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        const prevPersp = 1000 / (1000 - (this.z - 50));
+        const px = cx + Math.cos(this.angle - this.speed * 5) * this.radius * prevPersp;
+        const py = cy + Math.sin(this.angle - this.speed * 5) * this.radius * prevPersp;
+        ctx.lineTo(px, py);
+        ctx.stroke();
+    }
+  }
+
+  document.addEventListener('astro:page-load', () => new TimeVortex());
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+     new TimeVortex();
+  }
+</script>

@@ -1,6 +1,7 @@
 ---
 import "@repo/ui/globals.css";
 import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
 
 interface Props {
 	title: string;
@@ -37,6 +38,7 @@ const { title, description = "A high-performance Twitter scheduler built for bul
 		<title>{title}</title>
 	</head>
 	<body class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+		<Navbar />
 		<slot />
 
 		<script>

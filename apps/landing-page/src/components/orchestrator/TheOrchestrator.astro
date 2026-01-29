@@ -10,7 +10,7 @@ const accountCount = 6;
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.03)_0%,transparent_70%)] pointer-events-none"></div>
 
   <!-- SVG Overlay for Tendrils -->
-  <svg id="orchestrator-tendrils" class="absolute inset-0 w-full h-full pointer-events-none z-10">
+  <svg id="orchestrator-tendrils" class="absolute inset-0 w-full h-full pointer-events-none z-25 overflow-visible">
     <defs>
       <filter id="glow">
         <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -73,26 +73,32 @@ const accountCount = 6;
     const tendrilSvg = document.getElementById('orchestrator-tendrils');
     const accountCount = orbs.length;
 
-    // Stable path calculation (No random in loop)
+    // Stable path calculation
     const updatePath = (path, orb) => {
       const coreRect = core?.getBoundingClientRect();
       const orbRect = orb.getBoundingClientRect();
       const svgRect = tendrilSvg?.getBoundingClientRect();
-
+    
       if (coreRect && orbRect && svgRect) {
+        // Start from center of core
         const startX = coreRect.left + coreRect.width / 2 - svgRect.left;
         const startY = coreRect.top + coreRect.height / 2 - svgRect.top;
+        
+        // Target center of orb
         const endX = orbRect.left + orbRect.width / 2 - svgRect.left;
         const endY = orbRect.top + orbRect.height / 2 - svgRect.top;
-
-        // Calculate angle based on orb position relative to core
+    
         const angle = Math.atan2(endY - startY, endX - startX);
+        const dist = Math.sqrt((endX - startX)**2 + (endY - startY)**2);
         
-        // Consistent outward curvature: offset perpendicular to the main path vector
-        const curveIntensity = 40;
+        // Dynamic curvature based on distance
+        const curveIntensity = Math.min(dist * 0.2, 50);
+        
+        // Use a cubic bezier for a more "organic" feel if needed, but quadratic is fine for now
+        // Offset control point to create the curve
         const cpX = (startX + endX) / 2 + Math.cos(angle - Math.PI / 2) * curveIntensity;
         const cpY = (startY + endY) / 2 + Math.sin(angle - Math.PI / 2) * curveIntensity;
-
+    
         path.setAttribute("d", `M${startX},${startY} Q${cpX},${cpY} ${endX},${endY}`);
       }
     };
@@ -147,44 +153,57 @@ const accountCount = 6;
       }
     }, "-=1");
 
-    // --- STAGE 4: Sequential Tendril Connectivity (Top -> Right / Clockwise) ---
+    // --- STAGE 4: Sequential Tendril Connectivity (Top -> Top-Left -> Top-Right -> Bottom-Left -> Bottom-Right -> Bottom) ---
     const tendrilGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
     tendrilSvg?.appendChild(tendrilGroup);
 
-    // Ensure we iterate in the correct visual order (0 is top, indices increment clockwise)
-    orbs.forEach((orb, i) => {
+    // Specific order for Top-to-Bottom, Left-to-Right flow
+    // 0: Top, 5: Top-Left, 1: Top-Right, 4: Bottom-Left, 2: Bottom-Right, 3: Bottom
+    const sequence = [0, 5, 1, 4, 2, 3];
+
+    sequence.forEach((index) => {
+      const orb = orbs[index];
+      if (!orb) return;
+
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("class", "tendril-path");
-      path.setAttribute("stroke", "hsl(var(--primary) / 0.4)");
+      path.setAttribute("stroke", "hsl(var(--primary) / 0.6)");
       path.setAttribute("fill", "none");
       path.setAttribute("stroke-width", "2");
       path.setAttribute("filter", "url(#glow)");
+      path.setAttribute("stroke-linecap", "round");
       tendrilGroup.appendChild(path);
 
+      // Initialize path position
+      updatePath(path, orb);
+      const totalLength = 1500; // Safe upper bound for initial state
+      path.style.strokeDasharray = `${totalLength}`;
+      path.style.strokeDashoffset = `${totalLength}`;
+
       // 1. Tendril grows from core to orb
-      tl.fromTo(path, 
-        { strokeDasharray: 1000, strokeDashoffset: 1000 },
-        { 
+      tl.to(path, { 
           strokeDashoffset: 0, 
           duration: 1.2,
-          ease: "power1.inOut",
-          onUpdate: () => updatePath(path, orb),
-        }
-      )
+          ease: "power2.inOut",
+          onUpdate: () => {
+             updatePath(path, orb);
+             // Readjust dasharray to actual length for perfect termination
+             const actualLength = path.getTotalLength();
+             path.style.strokeDasharray = `${actualLength}`;
+          },
+        }, ">-0.4") // Smooth overlap with previous connection
       // 2. Handshake: Visual Feedback exactly when path reaches orb
-      .to(orb.querySelector('.synced-bg'), { opacity: 1, duration: 0.4 }, "-=0.2")
-      .to(orb.querySelector('.synced-glow'), { opacity: 1, scale: 1.2, duration: 0.6 }, "<")
+      .to(orb.querySelector('.synced-bg'), { opacity: 1, duration: 0.6 }, "-=0.2")
+      .to(orb.querySelector('.synced-glow'), { opacity: 1, scale: 1.4, duration: 0.8 }, "<")
       .to(orb.querySelector('.profile-ring'), { 
         borderColor: 'rgb(34 197 94)', 
-        boxShadow: '0 0 20px rgba(34, 197, 94, 0.4)',
-        duration: 0.4 
+        boxShadow: '0 0 30px rgba(34, 197, 94, 0.6)',
+        duration: 0.5 
       }, "<")
-      .to(orb.querySelector('.profile-icon'), { color: 'rgb(34 197 94)', duration: 0.4 }, "<")
-      .to(orb.querySelector('.data-badge'), { opacity: 1, y: 0, scale: 1, duration: 0.4 }, "-=0.2")
+      .to(orb.querySelector('.profile-icon'), { color: 'rgb(34 197 94)', duration: 0.5 }, "<")
+      .to(orb.querySelector('.data-badge'), { opacity: 1, y: 0, scale: 1, duration: 0.5 }, "-=0.3")
       // 3. Pulse effect on core to show power transfer
-      .to(core, { scale: 1.05, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, "<")
-      // Add a tiny bit of overlap to the next connection for a "flowing" feel
-      .addLabel(`sync-${i}`);
+      .to(core, { scale: 1.08, duration: 0.2, yoyo: true, repeat: 1, ease: "power2.out" }, "<");
     });
 
     // Final Sync Message
@@ -199,6 +218,7 @@ const accountCount = 6;
 
 <style>
   .tendril-path {
-    filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.5));
+    /* Relying on SVG filter for better cross-browser SVG rendering */
+    opacity: 0.8;
   }
 </style>

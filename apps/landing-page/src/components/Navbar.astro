@@ -1,5 +1,7 @@
 ---
 import { cn } from "@repo/ui/lib/utils";
+import { Image } from "astro:assets";
+import logo from "../assets/favicon.svg";
 ---
 
 <header
@@ -13,7 +15,7 @@ import { cn } from "@repo/ui/lib/utils";
   <nav class="container mx-auto px-6 h-20 flex items-center justify-between relative z-10">
     <!-- Logo -->
     <a href="#home" class="flex items-center gap-2 group relative z-20" aria-label="TweetBatch Home">
-      <img src="/favicon/favicon.svg" alt="TweetBatch" class="size-9 md:size-12 transition-transform duration-500 rotate-12 group-hover:scale-110" />
+      <Image src={logo} alt="TweetBatch" class="size-9 md:size-12 transition-transform duration-500 rotate-12 group-hover:scale-110" />
       <span class="font-bold text-lg md:text-xl tracking-tight">TweetBatch</span>
     </a>
 

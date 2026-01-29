@@ -1,0 +1,57 @@
+---
+import { Linkedin, Github, Twitter, Mail } from 'lucide-astro';
+
+const socialLinks = [
+  {
+    icon: Linkedin,
+    href: 'https://www.linkedin.com/in/pranavkumar-desai-b27b8a252/',
+    label: 'LinkedIn',
+  },
+  {
+    icon: Github,
+    href: 'https://github.com/PranavKumar9529desai/TweetBatch',
+    label: 'GitHub',
+  },
+  {
+    icon: Twitter,
+    href: 'https://x.com/pranavdesai1549',
+    label: 'X (Twitter)',
+  },
+  {
+    icon: Mail,
+    href: 'mailto:dpranav7756@gmail.com',
+    label: 'Email',
+  },
+];
+---
+
+<footer class="relative mt-20 border-t border-border bg-background/50 backdrop-blur-xl">
+  <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px] pointer-events-none"></div>
+  <div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8 relative z-10">
+    <div class="flex justify-center md:order-2 space-x-6">
+      {
+        socialLinks.map((link) => (
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-muted-foreground hover:text-foreground transition-colors duration-200"
+          >
+            <span class="sr-only">{link.label}</span>
+            <link.icon class="h-5 w-5" />
+          </a>
+        ))
+      }
+    </div>
+    <div class="mt-8 md:order-1 md:mt-0">
+      <div class="text-center md:text-left">
+        <p class="text-sm leading-5 text-muted-foreground">
+          &copy; {new Date().getFullYear()} Pranavkumar Desai
+        </p>
+        <p class="text-xs leading-5 text-muted-foreground/60 mt-1">
+          Lovely Professional University
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

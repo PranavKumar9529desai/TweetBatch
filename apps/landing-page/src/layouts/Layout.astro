@@ -1,0 +1,55 @@
+---
+import "@repo/ui/globals.css";
+import "../styles/global.css";
+
+interface Props {
+	title: string;
+	description?: string;
+}
+
+const { title, description = "A high-performance Twitter scheduler built for bulk management." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+		<slot />
+
+		<script>
+			import Lenis from 'lenis';
+			import gsap from 'gsap';
+			import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+			// Register GSAP plugins
+			gsap.registerPlugin(ScrollTrigger);
+
+			// Initialize Lenis
+			const lenis = new Lenis({
+				duration: 1.2,
+				easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+				touchMultiplier: 2,
+				infinite: false,
+			});
+
+			// Connect Lenis to GSAP ScrollTrigger
+			lenis.on('scroll', ScrollTrigger.update);
+
+			gsap.ticker.add((time) => {
+				lenis.raf(time * 1000);
+			});
+
+			gsap.ticker.lagSmoothing(0);
+
+			// Global Lenis instance for access in other scripts if needed
+			(window as any).lenis = lenis;
+		</script>
+	</body>
+</html>

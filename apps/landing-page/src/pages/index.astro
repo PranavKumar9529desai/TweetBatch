@@ -1,17 +1,48 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="TweetBatch | Scale Your Twitter Presence">
+	<main class="relative">
+		<section class="flex min-h-screen flex-col items-center justify-center p-4">
+			<h1 class="text-4xl font-bold md:text-6xl lg:text-8xl tracking-tighter">
+				TWEET <span class="text-primary italic">BATCH</span>
+			</h1>
+			<p class="mt-4 max-w-2xl text-center text-muted-foreground text-lg md:text-xl">
+				The ultimate bulk scheduler for power users. Built for performance, designed for impact.
+			</p>
+			
+			<div class="mt-12 flex items-center gap-4">
+				<div class="h-px w-12 bg-border"></div>
+				<span class="text-xs uppercase tracking-widest text-muted-foreground">Scroll to explore</span>
+				<div class="h-px w-12 bg-border"></div>
+			</div>
+		</section>
+
+		<!-- Dummy section to test smooth scroll -->
+		<section class="flex min-h-screen flex-col items-center justify-center bg-accent/5">
+			<h2 class="text-3xl font-semibold opacity-20">Smooth Scroll Active</h2>
+		</section>
+	</main>
+</Layout>
+
+<script>
+	import gsap from 'gsap';
+
+	// Simple intro animation to confirm GSAP is working
+	gsap.from('h1', {
+		y: 50,
+		opacity: 0,
+		duration: 1.5,
+		ease: 'expo.out',
+		delay: 0.5
+	});
+
+	gsap.from('p', {
+		y: 20,
+		opacity: 0,
+		duration: 1.2,
+		ease: 'power3.out',
+		delay: 0.8
+	});
+</script>

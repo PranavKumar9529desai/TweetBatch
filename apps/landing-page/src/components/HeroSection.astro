@@ -72,7 +72,6 @@
 		mouseX = -1000;
 		mouseY = -1000;
 		gridSize = 40; 
-        gridColor = 'rgba(150, 150, 150, 0.2)'; // Default fallback
 		
 		constructor(canvasId: string) {
 			const el = document.getElementById(canvasId);
@@ -126,22 +125,25 @@
 			});
 		}
         
-        getGridColor() {
-            // Read CSS variable for muted-foreground
-            const style = getComputedStyle(document.documentElement);
-            const mutedForeground = style.getPropertyValue('--muted-foreground');
-            if (mutedForeground) {
-                return `hsl(${mutedForeground} / 0.3)`; // Add opacity
-            }
-            return 'rgba(150, 150, 150, 0.2)';
-        }
-
 		animate() {
             // Clear using logical dimensions
 			this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 			
-            // Update color on each frame to support live theme switching
-			this.ctx.strokeStyle = this.getGridColor();
+            // Get theme colors once per frame
+            const style = getComputedStyle(document.documentElement);
+            const mutedForeground = style.getPropertyValue('--muted-foreground');
+            const primary = style.getPropertyValue('--primary');
+            const isDark = document.documentElement.classList.contains('dark');
+            const isMobile = window.innerWidth < 768;
+
+            // Config for mobile light mode
+            // We want more visibility on mobile light, specially on corners
+            const isMobileLight = isMobile && !isDark;
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            // Max distance from center to corner
+            const maxDistFromCenter = Math.sqrt(cx*cx + cy*cy) || 1;
+
 			this.ctx.lineWidth = 1;
 
 			this.points.forEach(p => {
@@ -157,36 +159,47 @@
 					// Smooth interpolation could go here, but direct is snappy for "magnetic" feel
 					p.angle = targetAngle;
 				} else {
-					// Slowly return to 0? Or just stay. 
-					// Let's make them slowly rotate back to 0
 					p.angle *= 0.95;
 				}
 
-				this.drawCross(p.x, p.y, p.angle, intensity);
+                // Calculate Opacity for the dot
+                let opacity = 0.3; // Default base opacity for desktop/dark
+                
+                if (isMobileLight) {
+                    const distCenter = Math.sqrt((p.x - cx)**2 + (p.y - cy)**2);
+                    // Base 0.4 + up to 0.4 extra on corners. 
+                    // This creates a subtle vignette where outer dots are clearer.
+                    opacity = 0.4 + (distCenter / maxDistFromCenter) * 0.5;
+                }
+
+				this.drawCross(p.x, p.y, p.angle, intensity, mutedForeground, primary, opacity);
 			});
 
 			requestAnimationFrame(() => this.animate());
 		}
 
-		drawCross(x: number, y: number, angle: number, intensity: number) {
+		drawCross(x: number, y: number, angle: number, intensity: number, mutedColor: string, primaryColor: string, baseOpacity: number) {
 			const size = 3; 
 			this.ctx.save();
 			this.ctx.translate(x, y);
 			this.ctx.rotate(angle);
 			
-			// If active, brighter (and use primary color if possible, or just opaque foreground)
+			// If active, brighter
 			if (intensity > 0) {
-                // We can also make the active color dynamic
-                const style = getComputedStyle(document.documentElement);
-                const primary = style.getPropertyValue('--primary');
-                if (primary) {
-                     this.ctx.strokeStyle = `hsl(${primary} / ${0.2 + intensity * 0.8})`;
+                if (primaryColor) {
+                     this.ctx.strokeStyle = `hsl(${primaryColor} / ${0.2 + intensity * 0.8})`;
                 } else {
 				     this.ctx.strokeStyle = `rgba(100, 100, 100, ${0.2 + intensity * 0.6})`;
                 }
 				this.ctx.lineWidth = 1 + intensity;
 			} else {
-                // strokeStyle is already set globally for the inactive state
+                // Inactive state
+                if (mutedColor) {
+                    this.ctx.strokeStyle = `hsl(${mutedColor} / ${baseOpacity})`;
+                } else {
+                    this.ctx.strokeStyle = `rgba(150, 150, 150, ${baseOpacity})`;
+                }
+                this.ctx.lineWidth = 1;
 			}
 
 			this.ctx.beginPath();

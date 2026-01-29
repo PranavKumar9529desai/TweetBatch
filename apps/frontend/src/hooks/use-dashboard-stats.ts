@@ -3,6 +3,7 @@ import { apiclient } from "../lib/api.client";
 import { useRouteContext } from "@tanstack/react-router";
 
 export function useDashboardStats() {
+    // the route context(data passed) outside the router
     const { auth } = useRouteContext({ from: '__root__' });
     const userId = auth.user?.id;
 
@@ -16,6 +17,7 @@ export function useDashboardStats() {
             const data = await res.json();
             return data.data;
         },
+        // if not userId Do do api call in used in the queryfn
         enabled: !!userId,
     });
 }

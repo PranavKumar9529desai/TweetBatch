@@ -1,6 +1,8 @@
 ---
 import { cn } from "@repo/ui/lib/utils";
-import { Card } from "@repo/ui/components/ui/card";
+import FeatureEditor from "./FeatureEditor.astro";
+import FeatureSchedule from "./FeatureSchedule.astro";
+import FeatureAnalytics from "./FeatureAnalytics.astro";
 ---
 <section id="features-flow" class="relative z-10 w-full bg-background overflow-hidden" style="height: 350vh;">
   <!-- Background Elements (Magnetic Grid) -->
@@ -16,136 +18,10 @@ import { Card } from "@repo/ui/components/ui/card";
     <!-- MAIN STAGE -->
     <div class="feature-stage relative w-full max-w-7xl px-6 py-12 h-full flex items-center justify-center">
       
-      <!-- FEATURE 1: EDITOR (The Creator) -->
-      <div id="stage-editor" class="feature-panel absolute inset-0 flex items-center justify-center opacity-100">
-        <Card className="relative w-full max-w-3xl p-8 rounded-2xl dark:border-white/10 dark:bg-[#0F0F12] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
-            <!-- Top Bar -->
-            <div class="flex items-center justify-between mb-8 pb-4 border-b border-border/40">
-                <div class="flex items-center gap-4">
-                    <div class="flex gap-1.5">
-                        <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-                        <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-muted/50 border border-border/50 dark:bg-white/5 dark:border-white/10">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="text-foreground"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                     <span class="text-[10px] font-medium text-muted-foreground">Draft</span>
-                </div>
-            </div>
-            
-            <!-- Editor Content -->
-            <div class="space-y-6">
-                <!-- User Avatar & Input -->
-                <div class="flex gap-4">
-                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 shadow-lg"></div>
-                     <div class="space-y-3 flex-1">
-                         <div class="h-4 w-32 rounded">elon musk</div>
-                         <div class="h-24 w-full rounded-lg border border-border/40 bg-muted/20 p-4 text-lg text-card-foreground font-medium leading-relaxed dark:border-white/10 dark:bg-white/5">
-                            <span class="text-primary">@TweetBatch</span> Launching the new features today. <br/>
-                            <span class="opacity-50 text-muted-foreground">#productivity #buildinginpublic</span>
-                            <span class="inline-block w-0.5 h-5 ml-1 bg-primary align-middle animate-blink"></span>
-                         </div>
-                     </div>
-                </div>
+      <FeatureEditor />
+      <FeatureSchedule />
+      <FeatureAnalytics />
 
-                <!-- Media Placeholder -->
-                <div class="pl-14">
-                    <div class="w-full h-32 rounded-lg border border-border/40 bg-muted/10 flex items-center justify-center gap-2 text-muted-foreground/60 text-sm border-dashed dark:border-white/10 dark:bg-white/5">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                        Add media
-                    </div>
-                </div>
-            </div>
-
-            <!-- Bottom Actions -->
-            <div class="mt-8 pt-6 border-t border-border/40 flex justify-between items-center pl-14">
-                 <div class="flex gap-4 text-muted-foreground/60">
-                    <div class="w-5 h-5 bg-muted rounded-full"></div>
-                    <div class="w-5 h-5 bg-muted rounded-full"></div>
-                    <div class="w-5 h-5 bg-muted rounded-full"></div>
-                 </div>
-                 <div class="h-9 px-6 bg-foreground text-background font-bold rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform cursor-default dark:bg-white dark:text-black dark:shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)]">
-                    Post
-                 </div>
-            </div>
-        </Card>
-        <div class="absolute bottom-24 left-0 right-0 text-center pointer-events-none">
-            <h2 class="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/40 drop-shadow-2xl">
-                Craft with Focus
-            </h2>
-        </div>
-      </div>
-
-      <!-- FEATURE 2: SCHEDULING (The Architect) -->
-      <div id="stage-schedule" class="feature-panel absolute inset-0 flex items-center justify-center opacity-0 translate-y-[50px]">
-          <!-- 3D Perspective Grid Container -->
-          <div class="relative w-[800px] h-[600px] [perspective:1000px]">
-              <div class="grid grid-cols-3 gap-6 w-full h-full transform rotate-x-12 opacity-100 scale-90">
-                  <!-- Mock Calendar Cells -->
-                  {Array.from({ length: 9 }).map((_, i) => (
-                      <Card className="schedule-grid-card rounded-xl dark:border-white/10 dark:bg-[#161618] p-6 flex flex-col justify-between transition-all duration-500 group hover:border-primary/50 opacity-0 shadow-lg">
-                          <span class="text-muted-foreground text-sm opacity-50 font-mono">{9 + i}:00 AM</span>
-                          <div class="space-y-2 opacity-30">
-                              <div class="h-1.5 w-full bg-foreground/20 rounded-full"></div>
-                              <div class="h-1.5 w-2/3 bg-foreground/20 rounded-full"></div>
-                          </div>
-                      </Card>
-                  ))}
-              </div>
-               <!-- The "Card" that flies in -->
-               <div id="schedule-card" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-48 bg-card border border-border shadow-2xl rounded-2xl flex flex-col p-6 z-20 dark:bg-[#161618] dark:border-white/10 dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary dark:bg-primary/10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-                        </div>
-                        <span class="text-card-foreground font-semibold tracking-tight">Scheduled for Tomorrow</span>
-                    </div>
-                    <div class="space-y-3 pl-11">
-                        <div class="h-2 w-full bg-muted rounded-full"></div>
-                        <div class="h-2 w-3/4 bg-muted rounded-full"></div>
-                    </div>
-                    <div class="mt-auto pl-11 flex gap-2">
-                        <div class="h-5 px-2 bg-green-500/10 text-green-500 text-[10px] font-mono flex items-center justify-center rounded border border-green-500/20 uppercase tracking-wider">Active</div>
-                    </div>
-               </div>
-          </div>
-          <div class="absolute bottom-24 left-0 right-0 text-center pointer-events-none">
-            <h2 class="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/40 drop-shadow-2xl">
-                Schedule with Precision
-            </h2>
-        </div>
-      </div>
-    
-      <!-- FEATURE 3: ANALYTICS (The Strategist) -->
-      <div id="stage-analytics" class="feature-panel absolute inset-0 flex items-center justify-center opacity-0 scale-90">
-         <div class="w-full max-w-5xl h-[500px] flex items-end justify-between px-12 pb-12 gap-6 border-b border-white/10 bg-gradient-to-t from-primary/5 via-transparent to-transparent relative">
-             <!-- Bars -->
-             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Today'].map((day) => (
-                 <div class="w-full h-full flex flex-col justify-end gap-4 group relative">
-                    <!-- Tooltip hint -->
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute top-[20%] left-1/2 -translate-x-1/2 bg-popover px-2 py-1 rounded text-xs text-popover-foreground shadow-md whitespace-nowrap z-10">
-                        {Math.floor(Math.random() * 5000 + 1000)} impressions
-                    </div>
-                    <!-- The Bar -->
-                    <div 
-                        class="analytics-bar w-full rounded-t-sm bg-gradient-to-t from-primary/80 to-primary shadow-[0_0_30px_rgba(var(--primary),0.4)] relative" 
-                        data-height={`${Math.random() * 60 + 20}%`}
-                        style="height: 0%; opacity: 0;"
-                    >
-                         <div class="absolute top-0 left-0 right-0 h-[1px] bg-foreground/20 opacity-50"></div>
-                    </div>
-                    <!-- Label -->
-                    <div class="text-xs text-muted-foreground text-center font-mono uppercase tracking-wider absolute -bottom-8 left-0 right-0">{day}</div>
-                 </div>
-             ))}
-         </div>
-          <div class="absolute bottom-24 left-0 right-0 text-center pointer-events-none">
-            <h2 class="text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/40 drop-shadow-2xl">
-                Analyze with Depth
-            </h2>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -164,28 +40,56 @@ import { Card } from "@repo/ui/components/ui/card";
 		points: { x: number; y: number; angle: number }[] = [];
 		mouseX = -1000;
 		mouseY = -1000;
-		gridSize = 50; // Slightly larger for features
-        
+		gridSize = 50; 
+
+		isVisible = false;
+		isIdle = false;
+		idleTimer: number | null = null;
+		animationFrameId: number | null = null;
+
 		constructor(canvasId: string) {
 			const el = document.getElementById(canvasId);
 			if (!el) return;
 			this.canvas = el as HTMLCanvasElement;
-			const context = this.canvas.getContext('2d');
+			const context = this.canvas.getContext('2d', { alpha: true }); // Optimize for alpha if needed, though standard
 			if (!context) return;
 			this.ctx = context;
 			
 			this.resize();
 			this.initEvents();
-			this.animate();
+			
+			// Start observation
+			this.initObserver();
+		}
+
+		initObserver() {
+			const observer = new IntersectionObserver((entries) => {
+				entries.forEach(entry => {
+					this.isVisible = entry.isIntersecting;
+					if (this.isVisible) {
+						this.startLoop();
+					} else {
+						this.stopLoop();
+					}
+				});
+			}, { threshold: 0 }); // Trigger as soon as 1px is visible
+			
+			// Observe the section, not just the canvas
+			const section = document.getElementById('features-flow');
+			if (section) observer.observe(section);
 		}
 
 		resize() {
+			// Debounce resize if possible, but for now standard is ok
 			this.canvas.width = window.innerWidth;
 			this.canvas.height = window.innerHeight;
             const dpr = window.devicePixelRatio || 1;
-            this.canvas.width = window.innerWidth * dpr;
-            this.canvas.height = window.innerHeight * dpr;
-            this.ctx.scale(dpr, dpr);
+            // Cap DPR for performance on high-res screens
+            const effectiveDpr = Math.min(dpr, 2); 
+            
+            this.canvas.width = window.innerWidth * effectiveDpr;
+            this.canvas.height = window.innerHeight * effectiveDpr;
+            this.ctx.scale(effectiveDpr, effectiveDpr);
             this.canvas.style.width = `${window.innerWidth}px`;
             this.canvas.style.height = `${window.innerHeight}px`;
 			this.createPoints();
@@ -203,11 +107,29 @@ import { Card } from "@repo/ui/components/ui/card";
 		}
 
 		initEvents() {
-			window.addEventListener('resize', () => this.resize());
+			window.addEventListener('resize', () => { 
+                // Simple throttle could be added here
+                this.resize(); 
+            });
+			
 			window.addEventListener('mousemove', (e) => {
+				if (!this.isVisible) return;
+
                 const rect = this.canvas.getBoundingClientRect();
 				this.mouseX = e.clientX - rect.left;
 				this.mouseY = e.clientY - rect.top;
+				
+				// User is interacting: wake up
+				this.isIdle = false;
+				this.startLoop();
+				
+				// Reset idle timer
+				if (this.idleTimer) clearTimeout(this.idleTimer);
+				this.idleTimer = setTimeout(() => {
+					// We only mark as checking for idle, the loop naturally stops when everything settles
+					// But we can force "isIdle" to true if we want to stop strictly
+					// For magnetic effect, we just let it settle.
+				}, 2000);
 			});
 		}
         
@@ -216,57 +138,90 @@ import { Card } from "@repo/ui/components/ui/card";
         }
 
         getPrimaryColor(opacity = 1) {
-            if (typeof window === 'undefined') return `rgba(255, 255, 255, ${opacity})`;
-            
-            // Try to get the variable
-            const style = getComputedStyle(document.documentElement);
-            const primaryVar = style.getPropertyValue('--primary').trim();
-            
-            // If we have a value (e.g. "240 5.9% 10%"), construct HSL
-            if (primaryVar) {
-                // Check if it's comma or space separated and handle accordingly if needed
-                // But generally hsl(val / alpha) works in modern browsers
-                return `hsl(${primaryVar} / ${opacity})`;
-            }
-            
-            return `rgba(255, 255, 255, ${opacity})`;
+             // ... existing method if needed, but we inline below for speed
+             return 'rgba(255, 255, 255, 1)';
         }
 
+		startLoop() {
+			if (!this.animationFrameId) {
+				this.animate();
+			}
+		}
+
+		stopLoop() {
+			if (this.animationFrameId) {
+				cancelAnimationFrame(this.animationFrameId);
+				this.animationFrameId = null;
+			}
+		}
+
 		animate() {
+			if (!this.isVisible) {
+				this.animationFrameId = null;
+				return;
+			}
+
+			// Check if settled (optimization)
+			// If mouse hasn't moved (we can track lastMouse) and all angles are negligible, stop.
+			let needsUpdate = false;
+            
+            // Optimization: Do minimal work if we know we are animating
 			this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 			this.ctx.strokeStyle = this.getGridColor();
 			this.ctx.lineWidth = 1;
             
-            // Cache primary color base if needed, but doing it per frame is okayish for this optimization level
-            // To optimize, could read it once or on resize, but theme switch might happen
-            // We'll read it here to be reactive to theme changes instantly
             const style = getComputedStyle(document.documentElement);
             const primaryVar = style.getPropertyValue('--primary').trim();
+
+            const maxDist = 200;
+            const maxDistSq = maxDist * maxDist; // Use squared distance to avoid sqrt
 
 			this.points.forEach(p => {
 				const dx = this.mouseX - p.x;
 				const dy = this.mouseY - p.y;
-				const dist = Math.sqrt(dx * dx + dy * dy);
-				const maxDist = 200;
+				const distSq = dx * dx + dy * dy;
 				let intensity = 0;
 
-				if (dist < maxDist) {
-					intensity = 1 - (dist / maxDist);
+				if (distSq < maxDistSq) {
+					intensity = 1 - (Math.sqrt(distSq) / maxDist);
 					p.angle = Math.atan2(dy, dx);
+                    needsUpdate = true; // Active interaction
 				} else {
-					p.angle *= 0.95;
+					// Decay
+                    if (Math.abs(p.angle) > 0.01) {
+					    p.angle *= 0.95;
+                        needsUpdate = true; // Still settling
+                    } else {
+                        p.angle = 0;
+                    }
 				}
 
+                // Culling: Only draw if visible or non-zero angle? 
+                // For a grid, we usually draw everything or nothing.
+                // But we can skip "drawCross" transformations if angle is 0 and intensity is 0
+                // HOWEVER, we need to draw the base grid. 
+                // If we want the base grid to be static, we could cache it.
+                // For now, drawing simple lines is cheap.
 				this.drawCross(p.x, p.y, p.angle, intensity, primaryVar);
 			});
-			requestAnimationFrame(() => this.animate());
+            
+            if (needsUpdate || this.isIdle === false) {
+			    this.animationFrameId = requestAnimationFrame(() => this.animate());
+                // If we did a pass and nothing needed update, next time we might stop.
+                // But we need one "clean" pass to ensure everything is at 0.
+                if (!needsUpdate) this.isIdle = true; 
+            } else {
+                this.animationFrameId = null; // Stop the loop
+            }
 		}
 
 		drawCross(x: number, y: number, angle: number, intensity: number, primaryVar: string) {
 			const size = 2; // Smaller crosses
 			this.ctx.save();
 			this.ctx.translate(x, y);
-			this.ctx.rotate(angle);
+            
+            // Only rotate if necessary
+            if (angle !== 0) this.ctx.rotate(angle);
 			
 			if (intensity > 0) {
                 if (primaryVar) {
@@ -322,27 +277,36 @@ import { Card } from "@repo/ui/components/ui/card";
           // Show Schedule Container (but cards are invisible initially)
           .to("#stage-schedule", { opacity: 1, y: 0, duration: 0.1 }, "-=1.5")
           
-          // Waterfall Cards IN (Smooth, Staggered)
-          .fromTo(".schedule-grid-card", 
-              { 
-                  y: 50, 
-                  opacity: 0 
-              },
+          // Grid fades in smoothly (Clean, no waterfall)
+          .to(".schedule-grid-card", 
               { 
                   y: 0, 
                   opacity: 1, 
-                  duration: 0.8, 
-                  stagger: { amount: 0.8, grid: [3, 3], from: "start" }, // Stagger from top-left
-                  ease: "back.out(1.2)"
+                  duration: 1.5, 
+                  stagger: 0.05, 
+                  ease: "power2.out"
               },
               "<" 
           )
           
-          // Animate the "Card" dropping in
+          // "Flip Up" Card Animation (Face Up -> Face Front)
           .fromTo("#schedule-card", 
-                { y: -100, opacity: 0, rotationX: 45, scale: 0.8 }, 
-                { y: "-50%", opacity: 1, rotationX: 0, scale: 1, duration: 3, ease: "back.out(1.7)" }, 
-                "-=0.5" // Start slightly before grid finishes assembling
+                { 
+                    y: 100, // Start slightly below
+                    rotationX: -90, // Lying flat, facing up (negative for natural flip up from bottom)
+                    opacity: 0,
+                    scale: 0.8,
+                    transformPerspective: 1000
+                }, 
+                { 
+                    y: "-50%", 
+                    rotationX: 0, // Face front
+                    opacity: 1,
+                    scale: 1,
+                    duration: 2.0, 
+                    ease: "back.out(1.5)" // Overshoot slightly for 'snap' effect
+                }, 
+                "+=0.2" // Start 0.2s AFTER grid finishes (Grid -> Pause -> Card)
             )
         
         // --- STAGE 2 BUFFER ---

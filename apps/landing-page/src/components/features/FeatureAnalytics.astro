@@ -1,0 +1,32 @@
+---
+---
+
+<div id="stage-analytics" class="feature-panel absolute inset-0 flex items-center justify-center opacity-0 scale-90">
+   <div class="w-full max-w-5xl h-[300px] md:h-[500px] flex items-end justify-between px-4 md:px-12 pb-12 gap-2 md:gap-6 border-b border-white/10 bg-gradient-to-t from-primary/5 via-transparent to-transparent relative">
+       <!-- Bars -->
+       {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Today'].map((day) => (
+           <div class="w-full h-full flex flex-col justify-end gap-4 group relative">
+              <!-- Tooltip hint -->
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity absolute top-[20%] left-1/2 -translate-x-1/2 bg-popover px-2 py-1 rounded text-xs text-popover-foreground shadow-md whitespace-nowrap z-10 will-change-[opacity]">
+                  {Math.floor(Math.random() * 5000 + 1000)} impressions
+              </div>
+              <!-- The Bar -->
+              <div 
+                  class="analytics-bar w-full rounded-t-sm bg-primary/90 border-t border-x border-primary/20 relative will-change-transform overflow-hidden" 
+                  data-height={`${Math.random() * 60 + 20}%`}
+                  style="height: 0%; opacity: 0;"
+              >
+                   <div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent opacity-80"></div>
+                   <div class="absolute top-0 left-0 right-0 h-[1px] bg-primary/50"></div>
+              </div>
+              <!-- Label -->
+              <div class="text-xs text-muted-foreground text-center font-mono uppercase tracking-wider absolute -bottom-8 left-0 right-0">{day}</div>
+           </div>
+       ))}
+   </div>
+    <div class="absolute bottom-24 left-0 right-0 text-center pointer-events-none">
+      <h2 class="text-4xl md:text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/40 drop-shadow-2xl">
+          Analyze with Depth
+      </h2>
+  </div>
+</div>

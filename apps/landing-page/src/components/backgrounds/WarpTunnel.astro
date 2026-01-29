@@ -1,0 +1,121 @@
+---
+---
+
+<canvas id="warp-tunnel-canvas" class="absolute inset-0 w-full h-full -z-10 opacity-40"></canvas>
+
+<script>
+  let animationId: number | null = null;
+  let resizeListener: (() => void) | null = null;
+
+  const initWarpTunnel = () => {
+    const canvas = document.getElementById('warp-tunnel-canvas') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    // Cleanup previous if any (though usually strictly separate, but good safety)
+    if (animationId) cancelAnimationFrame(animationId);
+    if (resizeListener) window.removeEventListener('resize', resizeListener);
+
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    let stars: any[] = []; // Use any or interface
+    
+    // Config
+    const starCount = 400;
+    const speed = 2; // Base speed
+
+    class Star {
+      x: number = 0;
+      y: number = 0;
+      z: number = 0;
+      px: number = 0;
+      py: number = 0;
+
+      constructor() {
+        this.reset(true);
+      }
+
+      reset(randomZ = false) {
+        this.x = (Math.random() - 0.5) * width * 2;
+        this.y = (Math.random() - 0.5) * height * 2;
+        this.z = randomZ ? Math.random() * width : width;
+        this.px = 0;
+        this.py = 0;
+      }
+
+      update() {
+        this.z -= speed * 2; // Move closer
+        
+        if (this.z <= 0) {
+          this.reset();
+        }
+      }
+
+      draw(ctx: CanvasRenderingContext2D) {
+        const cx = width / 2;
+        const cy = height / 2;
+        
+        const x = (this.x / this.z) * 100 + cx;
+        const y = (this.y / this.z) * 100 + cy;
+        
+        const size = (1 - this.z / width) * 3;
+        const alpha = (1 - this.z / width);
+
+        if (alpha > 0) {
+            ctx.beginPath();
+            ctx.fillStyle = `hsla(var(--primary), ${alpha})`;
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+      }
+    }
+
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    };
+    
+    resizeListener = resize;
+    window.addEventListener('resize', resize);
+    resize();
+    
+    stars = [];
+    for(let i=0; i<starCount; i++) {
+        stars.push(new Star());
+    }
+      
+    const animate = () => {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+      
+      // Center Glow
+      const cx = width / 2;
+      const cy = height / 2;
+      const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.5);
+      // We read CSS var outside loop for perf usually, but inside is safer for theme switch.
+      // Optimization: Assuming theme doesn't switch 60fps.
+      gradient.addColorStop(0, "hsla(var(--primary), 0.1)");
+      gradient.addColorStop(1, "transparent");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0,0,width,height);
+
+      stars.forEach(star => {
+        star.update();
+        star.draw(ctx);
+      });
+      
+      animationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+  };
+
+  document.addEventListener('astro:page-load', initWarpTunnel);
+  // Also cleanup on swap
+  document.addEventListener('astro:before-swap', () => {
+      if (animationId) cancelAnimationFrame(animationId);
+      if (resizeListener) window.removeEventListener('resize', resizeListener);
+  });
+</script>

@@ -1,0 +1,93 @@
+---
+---
+
+<canvas id="orbital-field-canvas" class="absolute inset-0 w-full h-full -z-10 pointer-events-none"></canvas>
+
+<script>
+  const canvas = document.getElementById('orbital-field-canvas') as HTMLCanvasElement;
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    let particles: Particle[] = [];
+    const particleCount = 200;
+    
+    class Particle {
+      angle: number;
+      radius: number;
+      speed: number;
+      size: number;
+      color: string;
+      
+      constructor() {
+        this.reset();
+      }
+      
+      reset() {
+         const style = getComputedStyle(document.documentElement);
+         const primary = style.getPropertyValue('--primary').trim();
+         
+         this.angle = Math.random() * Math.PI * 2;
+         // Distribute along radius with more near center but not too close
+         this.radius = 100 + Math.random() * (Math.min(width, height)/2);
+         this.speed = (0.005 + Math.random() * 0.01) * (Math.random() < 0.5 ? 1 : -1);
+         this.size = Math.random() * 2;
+         this.color = `hsla(${primary}, ${Math.random() * 0.5 + 0.2})`;
+      }
+      
+      update() {
+         this.angle += this.speed;
+         // Slowly spiral in or out?
+         // this.radius -= 0.1;
+         // if (this.radius < 50) this.reset();
+      }
+      
+      draw(ctx: CanvasRenderingContext2D) {
+          const cx = width / 2;
+          const cy = height / 2;
+          
+          // Perspective tilt effect (fake 3d ring)
+          const x = cx + Math.cos(this.angle) * this.radius;
+          const y = cy + Math.sin(this.angle) * this.radius * 0.6; // Flatten y for perspective (ring)
+          
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(x, y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+      }
+    }
+    
+    const resize = () => {
+       width = window.innerWidth;
+       height = window.innerHeight;
+       canvas.width = width;
+       canvas.height = height;
+    };
+    
+    const init = () => {
+        resize();
+        window.addEventListener('resize', resize);
+        
+        for(let i=0; i<particleCount; i++) particles.push(new Particle());
+        
+        animate();
+    };
+    
+    const animate = () => {
+        if (!ctx) return;
+        ctx.clearRect(0,0,width,height);
+        
+        // Darken center to highlight button
+        // Optional
+        
+        particles.forEach(p => {
+            p.update();
+            p.draw(ctx);
+        });
+        
+        requestAnimationFrame(animate);
+    };
+    
+    init();
+  }
+</script>

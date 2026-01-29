@@ -1,14 +1,14 @@
 ---
 import { cn } from "@repo/ui/lib/utils";
 import EngineCore from "./EngineCore.astro";
+import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 ---
 
 <section id="momentum-engine" class="relative z-20 w-full h-screen bg-background overflow-hidden">
   <!-- Background Grid (Streaming) -->
   <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
-    <div id="momentum-grid" class="absolute inset-0 opacity-10 dark:opacity-20">
-        <!-- We use a repeated pattern CSS grid or a canvas for the "streaming" effect -->
-        <div class="absolute inset-0 grid-pattern"></div>
+    <div id="momentum-grid" class="absolute inset-0 opacity-40">
+        <WarpTunnel />
     </div>
   </div>
 

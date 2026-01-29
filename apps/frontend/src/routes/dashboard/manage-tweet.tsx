@@ -5,6 +5,7 @@ import { CalendarGrid } from '@/components/manage-tweets/calendar-grid'
 import { TweetQueueSidebar } from '@/components/manage-tweets/tweet-queue-sidebar'
 import { useCalendarContext } from '@/components/manage-tweets/calendar-context'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@repo/ui/components/ui/sheet'
+import { MobileAgendaView } from '@/components/manage-tweets/mobile-agenda-view'
 
 import { ManageTweetSkeleton } from '@/components/dashboard/skeletons'
 import { apiclient } from '@/lib/api.client'
@@ -60,21 +61,29 @@ function ManageTweetContent() {
   const { isQueueDrawerOpen, setQueueDrawerOpen } = useCalendarContext();
 
   return (
-    <div className="h-full bg-background flex flex-col">
+    <div className="h-screen max-h-screen bg-background flex flex-col overflow-hidden">
       <CalendarHeader />
       <div className="flex flex-1 overflow-hidden relative">
         <div className="flex-1 relative min-w-0 h-full overflow-hidden">
-          <CalendarGrid />
+          {/* Desktop View */}
+          <div className="hidden md:block h-full overflow-hidden">
+            <CalendarGrid />
+          </div>
+          
+          {/* Mobile View */}
+          <div className="block md:hidden h-full overflow-hidden">
+            <MobileAgendaView />
+          </div>
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden md:block border-l border-border h-full">
+        <div className="hidden md:block border-l border-border h-full w-80">
           <TweetQueueSidebar />
         </div>
 
         {/* Mobile Drawer */}
         <Sheet open={isQueueDrawerOpen} onOpenChange={setQueueDrawerOpen}>
-          <SheetContent side="right" className="p-0 w-[300px] sm:w-[350px]">
+          <SheetContent side="right" className="p-0 w-[85%] sm:w-[350px]">
             <SheetHeader className="sr-only">
               <SheetTitle>Tweet Queue</SheetTitle>
             </SheetHeader>

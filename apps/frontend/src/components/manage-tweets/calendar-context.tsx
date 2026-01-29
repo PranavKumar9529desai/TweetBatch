@@ -14,6 +14,8 @@ interface CalendarContextType {
   setSelectedPost: (post: ScheduledPost | null) => void;
   isQueueDrawerOpen: boolean;
   setQueueDrawerOpen: (open: boolean) => void;
+  schedulingTargetSlot: { dayIndex: number; hour: number; date: Date } | null;
+  setSchedulingTargetSlot: (slot: { dayIndex: number; hour: number; date: Date } | null) => void;
   // New: Centralized Data Access
   getPostsForSlot: (dayIndex: number, hour: number) => ScheduledPost[];
   isLoading: boolean;
@@ -43,6 +45,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
   const [hoveredCell, setHoveredCell] = useState<{ day: number; hour: number } | null>(null);
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
   const [isQueueDrawerOpen, setQueueDrawerOpen] = useState(false);
+  const [schedulingTargetSlot, setSchedulingTargetSlot] = useState<{ dayIndex: number; hour: number; date: Date } | null>(null);
 
   // FETCH DATA CENTRALLY
   // Calculate end of the week (Start + 7 days)
@@ -106,6 +109,8 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     setSelectedPost,
     isQueueDrawerOpen,
     setQueueDrawerOpen,
+    schedulingTargetSlot,
+    setSchedulingTargetSlot,
     getPostsForSlot,
     isLoading,
     reschedulePost: reschedulePost.mutate,
@@ -117,6 +122,7 @@ export function CalendarProvider({ children }: CalendarProviderProps) {
     hoveredCell,
     selectedPost,
     isQueueDrawerOpen,
+    schedulingTargetSlot,
     getPostsForSlot,
     isLoading,
     reschedulePost.mutate,

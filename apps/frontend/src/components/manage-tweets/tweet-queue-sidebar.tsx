@@ -115,13 +115,37 @@ function DraftItem({ post, index }: DraftItemProps) {
         ? post.content.substring(0, 50) + (post.content.length > 50 ? '...' : '')
         : '(empty)';
 
+    const { schedulingTargetSlot, setSchedulingTargetSlot, reschedulePost, setQueueDrawerOpen } = useCalendarContext();
+
+    const isTargeting = !!schedulingTargetSlot;
+
+    const handleClick = () => {
+        if (schedulingTargetSlot) {
+            const { date, hour } = schedulingTargetSlot;
+            const targetDate = new Date(date);
+            targetDate.setHours(hour, 0, 0, 0);
+
+            reschedulePost({
+                postId: post.id,
+                scheduledAt: targetDate,
+            });
+
+            // Clear state and close drawer
+            setSchedulingTargetSlot(null);
+            setQueueDrawerOpen(false);
+        }
+    };
+
     return (
         <div
             ref={setNodeRef}
             style={style}
+            onClick={handleClick}
             className={cn(
-                'flex items-start gap-2 p-3 rounded-md transition-all',
-                'hover:bg-muted/80 cursor-move group',
+                'flex items-start gap-2 p-3 rounded-md transition-all select-none',
+                isTargeting
+                    ? 'hover:bg-primary/10 cursor-pointer border border-dashed border-transparent hover:border-primary/40 bg-primary/5'
+                    : 'hover:bg-muted/80 cursor-move group',
                 isDragging && 'opacity-50 shadow-lg'
             )}
             {...attributes}
@@ -129,13 +153,19 @@ function DraftItem({ post, index }: DraftItemProps) {
         >
             {/* Item number */}
             <div className="flex-shrink-0 w-6 text-right">
-                <span className="text-xs font-semibold text-muted-foreground">
+                <span className={cn(
+                    "text-xs font-semibold",
+                    isTargeting ? "text-primary" : "text-muted-foreground"
+                )}>
                     {index}
                 </span>
             </div>
 
-            {/* Drag handle */}
-            <div className="flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
+            {/* Drag handle - Hidden on mobile/targeting */}
+            <div className={cn(
+                "flex-shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity",
+                isTargeting && "hidden"
+            )}>
                 <GripVertical className="h-4 w-4" />
             </div>
 
@@ -144,8 +174,11 @@ function DraftItem({ post, index }: DraftItemProps) {
                 <p className="text-sm text-foreground line-clamp-2 break-words">
                     {contentPreview}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                    Drag to schedule
+                <p className={cn(
+                    "text-xs mt-1",
+                    isTargeting ? "text-primary font-medium" : "text-muted-foreground"
+                )}>
+                    {isTargeting ? 'Tap to schedule here' : 'Drag to schedule'}
                 </p>
             </div>
         </div>

@@ -87,34 +87,34 @@ export function CalendarHeader() {
     };
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-background">
-            <div className="flex items-center justify-between w-full sm:w-auto gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+            <div className="flex items-center justify-between w-full sm:w-auto gap-2">
                 {/* Navigation buttons */}
-                <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex items-center gap-1">
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={handlePreviousWeek}
-                        className="h-8 w-8"
+                        className="h-8 w-8 hover:bg-muted"
                         title="Previous week"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
 
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={handleToday}
-                        className="px-2 sm:px-3 h-8"
+                        className="px-3 h-8 text-xs font-medium"
                     >
                         Today
                     </Button>
 
                     <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={handleNextWeek}
-                        className="h-8 w-8"
+                        className="h-8 w-8 hover:bg-muted"
                         title="Next week"
                     >
                         <ChevronRight className="h-4 w-4" />
@@ -123,29 +123,29 @@ export function CalendarHeader() {
 
                 {/* Mobile Queue Toggle */}
                 <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     onClick={() => setQueueDrawerOpen(true)}
-                    className="md:hidden flex items-center gap-2 h-8"
+                    className="md:hidden flex items-center gap-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 border-none shadow-none font-semibold px-3"
                 >
-                    <ListMusic className="h-4 w-4" />
-                    <span>Queue</span>
+                    <ListMusic className="h-3.5 w-3.5" />
+                    <span className="text-xs">Queue</span>
                 </Button>
             </div>
 
             {/* Date range display */}
-            <div className="text-sm font-semibold text-foreground min-w-fit order-first sm:order-none">
+            <div className="text-sm font-bold text-foreground sm:order-none tracking-tight">
                 {dateRangeText}
             </div>
 
             {/* Search input */}
-            <div className="w-full sm:w-auto sm:max-w-xs">
+            <div className="w-full sm:w-auto sm:max-w-[200px] lg:max-w-xs">
                 <Input
                     type="text"
                     placeholder="Search tweets..."
                     value={searchInput}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="h-9"
+                    className="h-8 text-xs bg-muted/40 border-none focus-visible:ring-1 focus-visible:ring-primary/30"
                 />
             </div>
         </div>

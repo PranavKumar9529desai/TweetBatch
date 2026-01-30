@@ -1,59 +1,146 @@
-# Twitter Bulk Scheduler (Serverless)
+# TweetBatch (TB)
 
-**Live Demo:** [https://tweetbatch-frontend.fullstackwebdeveloper123.workers.dev](https://tweetbatch-frontend.fullstackwebdeveloper123.workers.dev)
+> **The State-of-the-Art Twitter Scheduling Platform**
 
-A high-performance, serverless application for scheduling tweets, built on the Cloudflare ecosystem.
+[![Deployed on Cloudflare Workers](https://img.shields.io/badge/Deployed%20on-Cloudflare%20Workers-orange?style=for-the-badge&logo=cloudflare)](https://workers.cloudflare.com/)
+[![Built with Turbolinter](https://img.shields.io/badge/Monorepo-Turborepo-ef4444?style=for-the-badge&logo=turborepo)](https://turbo.build/)
+[![Database: Neon](https://img.shields.io/badge/Database-Neon-00e599?style=for-the-badge&logo=postgresql)](https://neon.tech/)
+[![Framework: Hono](https://img.shields.io/badge/Backend-Hono-E36002?style=for-the-badge&logo=hono)](https://hono.dev/)
+[![Frontend: React 19](https://img.shields.io/badge/Frontend-React%2019-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 
-## ⚡ Tech Stack
+TweetBatch (TB) is a high-performance, serverless application designed to streamline your Twitter presence. Built on the edge with Cloudflare, it combines a futuristic UI with robust scheduling capabilities, ensuring your content reaches your audience at the perfect moment.
 
-| Component | Technology | Description |
-|-----------|------------|-------------|
-| **Runtime** | Cloudflare Workers | Serverless execution environment (Bun/Node compat) |
-| **Language** | TypeScript | Type-safe development |
-| **Framework** | Hono | Lightweight, ultrafast web framework |
-| **Database** | Neon | Serverless Postgres with HTTP pooling |
-| **ORM** | Drizzle | TypeScript ORM for type-safe queries |
-| **Scheduler** | Upstash QStash | Serverless messaging and scheduling |
+## 🚀 Live Demos
 
-## 🏗️ Architecture Highlights
+| Application | URL | Description |
+|-------------|-----|-------------|
+| **Landing Page** | [Click Here](https://landing-page.fullstackwebdeveloper123.workers.dev) | Marketing site featuring Momentum Engine & Kinetic Feed visualizations. |
+| **Web App** | [Click Here](https://tweetbatch-frontend.fullstackwebdeveloper123.workers.dev) | The core application for composing and scheduling tweets. |
 
-### Database Strategy
-We use `@neondatabase/serverless` (HTTP driver) instead of standard TCP connections.
-- **Why?** To support connection pooling and handle concurrency spikes typical in serverless environments.
-- **Transactions:** We prefer `db.batch()` for non-interactive multiple writes.
+---
 
-### Deployment
-- **Target:** Cloudflare Workers
-- **Region:** Optimized for `ap-south-1` (Mumbai) via Smart Placement
-- **Config:** Managed via `wrangler.toml`
+## 🏗️ System Architecture
 
-## 🛠️ Development
+TweetBatch leverages a distributed, serverless architecture to ensure instant scalability and zero-maintenance operations.
 
-This project uses **Bun** as the primary package manager.
+```mermaid
+graph TD
+    subgraph Client ["Client Side"]
+        LP[Landing Page (Astro/GSAP)]
+        WA[Web App (React 19)]
+    end
 
-### Prerequisites
-- [Bun](https://bun.sh/) installed
+    subgraph Edge ["Cloudflare Edge"]
+        W[Worker API (Hono)]
+        Assets[Static Assets]
+    end
 
-### Commands
+    subgraph Infrastructure ["Serverless Infra"]
+        DB[(Neon Serverless Postgres)]
+        Q[Upstash QStash]
+        Twitter[X (Twitter) API]
+    end
 
-```bash
-# Install dependencies
-bun install
-
-# Internal development options
-bun run dev                  # Start local dev server
-bun run drizzle-kit generate # Generate DB migrations
-bun run deploy               # Deploy to Cloudflare Workers
+    Client -- HTTPS --> Edge
+    W -- Drizzle ORM --> DB
+    W -- Scheduling --> Q
+    Q -- Webhook ("At Scheduled Time") --> W
+    W -- OAuth --> Twitter
 ```
 
-## 🎨 UI & Styling
+### Core Components
 
-- **Component Library:** Custom integration of [shadcn/ui](https://ui.shadcn.com/) located in `@repo/ui`.
-- **Styling:** Tailwind CSS using defined color variables in `packages/ui`.
-- **Conventions:** `PascalCase` for components, `kebab-case` for files.
+*   **Momentum Engine (Scheduling)**: Powered by **Upstash QStash**, this engine handles precise message delivery with distinct windows (Morning, Afternoon, Evening) to ensure robust throughput without rate limiting.
+*   **Kinetic Feed (Frontend)**: A drag-and-drop interface built with **React 19**, **TanStack Query**, and **dnd-kit**, allowing users to visually organize their content pipeline.
+*   **Time Weaver (Database)**: Utilizing **Neon Serverless Postgres** with `@neondatabase/serverless` HTTP pooling to manage high-concurrency connections efficiently.
+*   **Quantum Echo (Landing)**: A high-fidelity marketing experience built with **Astro**, **GSAP**, and **Tailwind CSS**, featuring 3D-like animations and scroll-driven storytelling.
 
-## 📝 Coding Standards
+---
 
-- **Variables:** Prefer `const` over `let`.
-- **Async:** Use `async/await` for all DB and network calls.
-- **Networking:** Use `fetch` API; avoid Node.js native `fs` or `child_process`.
+## 📦 Monorepo Structure
+
+This project is organized as a **Turborepo** to manage multiple applications and shared packages efficiently.
+
+| Path | Package | Description |
+|------|---------|-------------|
+| `apps/backend` | `api` | Cloudflare Worker handling API requests and QStash webhooks. |
+| `apps/frontend` | `web` | Main React application (Vite + TanStack Router). |
+| `apps/landing-page` | `landing` | Astro-based static site with advanced animations. |
+| `packages/db` | `@repo/db` | Database schema and Drizzle ORM configuration. |
+| `packages/ui` | `@repo/ui` | Shared Shadcn UI component library. |
+| `packages/auth` | `@repo/auth` | Authentication logic (Lucia/Auth.js). |
+
+---
+
+## ✨ Key Features
+
+*   **Smart Composition**: Rich text editor powered by **TipTap** with character counting and thread support.
+*   **Visual Scheduling**: Drag-and-drop calendar view to reorganize your content strategy instantly.
+*   **Bulk Import**: Upload hundreds of tweets via JSON/CSV and let the Momentum Engine distribute them automatically.
+*   **Fault Tolerance**: Built-in Dead Letter Queues (DLQ) and retry mechanisms to handle Twitter API outages gracefully.
+*   **Edge Performance**: Deployed to Cloudflare's global network for sub-second latency from anywhere in the world.
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+*   **Bun** (v1.0+)
+*   **Node.js** (v20+)
+*   **Cloudflare Account**
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/tweetbatch.git
+
+# Install dependencies via Bun
+bun install
+
+# Set up environment variables
+cp .env.example .env
+```
+
+### Development
+
+```bash
+# Start all applications in development mode
+bun run dev
+
+# Filter for specific app
+bun run dev --filter=frontend
+bun run dev --filter=backend
+```
+
+### Database Management
+
+```bash
+# Generate migrations
+bun run db:generate
+
+# Push changes to Neon
+bun run db:push
+```
+
+---
+
+## 🎨 Design System
+
+TweetBatch utilizes a custom design system based on **Shadcn UI** and **Tailwind CSS**, featuring a futuristic "Dark Glass" aesthetic.
+
+*   **Typography**: Inter (Body), Outfit (Headings).
+*   **Animations**: GSAP for complex timelines, Framer Motion for UI interactions.
+*   **Icons**: Lucide React.
+
+---
+
+## 🔒 Security
+
+*   **OAuth 2.0**: Secure authentication with Twitter/X.
+*   **Signature Verification**: Webhooks from QStash are cryptographically verified.
+*   **Type Safety**: End-to-end type safety with TypeScript and Zod.
+
+---
+
+> Built with ❤️ by [Your Name/Team] using the Cloudflare Stack.

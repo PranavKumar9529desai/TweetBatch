@@ -48,8 +48,10 @@ const tweets = [
 
 <section id="kinetic-feed" class="relative z-20 w-full h-screen bg-background py-10">
   <!-- Dynamic Background Glow -->
-  <div id="feed-background" class="fixed inset-0 pointer-events-none z-0 opacity-0 transition-opacity duration-1000">
-    <FluidMesh />
+    <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
+     <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"></canvas>
+     <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
+     <div class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"></div>
   </div>
 
   <div class="h-full w-full flex flex-col items-center justify-center overflow-hidden pt-20">
@@ -82,14 +84,14 @@ const tweets = [
               "left-12 top-1/2 -translate-y-1/2",
               /* Desktop: Alternate sides */
               "md:top-1/2 md:-translate-y-1/2 md:left-auto md:right-auto",
-              i % 2 === 0 ? "md:right-[55%]" : "md:left-[55%]"
+              i % 2 === 0 ? "md:right-[calc(50%+3rem)]" : "md:left-[calc(50%+3rem)]"
             )}
             data-index={i}
           >
             <!-- Card Connector Dot -->
             <div class={cn(
               "absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-primary bg-background shadow-[0_0_10px_hsl(var(--primary))] z-10 hidden md:block",
-              i % 2 === 0 ? "-right-[calc(11.5%+10px)]" : "-left-[calc(11.5%+10px)]" 
+              i % 2 === 0 ? "-right-[3.5rem]" : "-left-[3.5rem]" 
             )}></div>
 
             <!-- Mobile Connector Dot (Always on left) -->

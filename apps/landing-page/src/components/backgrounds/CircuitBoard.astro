@@ -1,25 +1,30 @@
 ---
+
 ---
 
-<canvas id="circuit-board-canvas" class="absolute inset-0 w-full h-full -z-10 bg-background"></canvas>
+<canvas
+  id="circuit-board-canvas"
+  class="absolute inset-0 w-full h-full -z-10 bg-background"></canvas>
 
 <script>
-  const canvas = document.getElementById('circuit-board-canvas') as HTMLCanvasElement;
+  const canvas = document.getElementById(
+    "circuit-board-canvas",
+  ) as HTMLCanvasElement;
   if (canvas) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     let width = 0;
     let height = 0;
     const gridSize = 40; // Size of grid cells
-    
+
     // Electrons
     interface Electron {
-       x: number;
-       y: number;
-       vx: number;
-       vy: number;
-       life: number;
-       maxLife: number;
-       path: {x: number, y: number}[];
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      maxLife: number;
+      path: { x: number; y: number }[];
     }
     let electrons: Electron[] = [];
     const maxElectrons = 20;
@@ -30,36 +35,41 @@
       canvas.width = width;
       canvas.height = height;
     };
-    
+
     const createElectron = () => {
-        // Start at random grid point
-        const col = Math.floor(Math.random() * (width / gridSize));
-        const row = Math.floor(Math.random() * (height / gridSize));
-        const startX = col * gridSize;
-        const startY = row * gridSize;
-        
-        // Pick direction (up, down, left, right)
-        const dirs = [{x:1,y:0}, {x:-1,y:0}, {x:0,y:1}, {x:0,y:-1}];
-        const dir = dirs[Math.floor(Math.random() * dirs.length)];
-        
-        electrons.push({
-            x: startX, 
-            y: startY, 
-            vx: dir.x * 4, // Speed
-            vy: dir.y * 4,
-            life: 0,
-            maxLife: 100 + Math.random() * 100,
-            path: []
-        });
+      // Start at random grid point
+      const col = Math.floor(Math.random() * (width / gridSize));
+      const row = Math.floor(Math.random() * (height / gridSize));
+      const startX = col * gridSize;
+      const startY = row * gridSize;
+
+      // Pick direction (up, down, left, right)
+      const dirs = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+        { x: 0, y: 1 },
+        { x: 0, y: -1 },
+      ];
+      const dir = dirs[Math.floor(Math.random() * dirs.length)];
+
+      electrons.push({
+        x: startX,
+        y: startY,
+        vx: dir.x * 4, // Speed
+        vy: dir.y * 4,
+        life: 0,
+        maxLife: 100 + Math.random() * 100,
+        path: [],
+      });
     };
 
     const drawGrid = () => {
-       if (!ctx) return;
-       ctx.strokeStyle = "hsla(var(--muted-foreground), 0.1)";
-       ctx.lineWidth = 1;
-       
-       // Draw subtle grid
-       /*
+      if (!ctx) return;
+      ctx.strokeStyle = "hsla(var(--muted-foreground), 0.1)";
+      ctx.lineWidth = 1;
+
+      // Draw subtle grid
+      /*
        ctx.beginPath();
        for (let x = 0; x <= width; x += gridSize) {
          ctx.moveTo(x, 0);
@@ -71,87 +81,93 @@
        }
        ctx.stroke();
        */
-       
-       // Draw random "circuit" connections (static)
-       // actually simpler to just draw the moving electrons, 
-       // maybe some static nodes
+
+      // Draw random "circuit" connections (static)
+      // actually simpler to just draw the moving electrons,
+      // maybe some static nodes
     };
 
     const animate = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
-      
+
       // Background Grid (faint)
       ctx.fillStyle = "hsla(var(--primary), 0.02)";
-      for(let x=0; x<width; x+=gridSize) {
-         for(let y=0; y<height; y+=gridSize) {
-             if (Math.random() > 0.9) {
-                 ctx.fillRect(x-1, y-1, 2, 2);
-             }
-         }
+      for (let x = 0; x < width; x += gridSize) {
+        for (let y = 0; y < height; y += gridSize) {
+          if (Math.random() > 0.9) {
+            ctx.fillRect(x - 1, y - 1, 2, 2);
+          }
+        }
       }
 
       // Manage electrons
       if (electrons.length < maxElectrons && Math.random() < 0.05) {
-          createElectron();
+        createElectron();
       }
 
       for (let i = electrons.length - 1; i >= 0; i--) {
-         const e = electrons[i];
-         e.life++;
-         
-         // Move
-         e.x += e.vx;
-         e.y += e.vy;
-         
-         // Turn randomly at grid intersections
-         if (e.life % (gridSize/Math.abs(e.vx || e.vy)) === 0) {
-             // Chance to turn
-             if (Math.random() < 0.3) {
-                 if (e.vx !== 0) {
-                     e.vx = 0;
-                     e.vy = (Math.random() < 0.5 ? 1 : -1) * 4;
-                 } else {
-                     e.vy = 0;
-                     e.vx = (Math.random() < 0.5 ? 1 : -1) * 4;
-                 }
-             }
-         }
-         
-         // Trail history
-         e.path.push({x: e.x, y: e.y});
-         if (e.path.length > 20) e.path.shift();
-         
-         // Draw Trail
-         ctx.beginPath();
-         ctx.strokeStyle = `hsla(var(--primary), ${(1 - e.life/e.maxLife)})`;
-         ctx.lineWidth = 2;
-         if(e.path.length > 0) ctx.moveTo(e.path[0].x, e.path[0].y);
-         for(let p of e.path) ctx.lineTo(p.x, p.y);
-         ctx.stroke();
-         
-         // Head
-         ctx.fillStyle = "hsl(var(--primary))";
-         ctx.beginPath();
-         ctx.arc(e.x, e.y, 2, 0, Math.PI*2);
-         ctx.fill();
-         
-         // Glow
-         ctx.shadowBlur = 10;
-         ctx.shadowColor = "hsl(var(--primary))";
-         ctx.stroke();
-         ctx.shadowBlur = 0;
-         
-         // Remove dead
-         if (e.life > e.maxLife || e.x < 0 || e.x > width || e.y < 0 || e.y > height) {
-             electrons.splice(i, 1);
-         }
+        const e = electrons[i];
+        e.life++;
+
+        // Move
+        e.x += e.vx;
+        e.y += e.vy;
+
+        // Turn randomly at grid intersections
+        if (e.life % (gridSize / Math.abs(e.vx || e.vy)) === 0) {
+          // Chance to turn
+          if (Math.random() < 0.3) {
+            if (e.vx !== 0) {
+              e.vx = 0;
+              e.vy = (Math.random() < 0.5 ? 1 : -1) * 4;
+            } else {
+              e.vy = 0;
+              e.vx = (Math.random() < 0.5 ? 1 : -1) * 4;
+            }
+          }
+        }
+
+        // Trail history
+        e.path.push({ x: e.x, y: e.y });
+        if (e.path.length > 20) e.path.shift();
+
+        // Draw Trail
+        ctx.beginPath();
+        ctx.strokeStyle = `hsla(var(--primary), ${1 - e.life / e.maxLife})`;
+        ctx.lineWidth = 2;
+        if (e.path.length > 0) ctx.moveTo(e.path[0].x, e.path[0].y);
+        for (let p of e.path) ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+
+        // Head
+        ctx.fillStyle = "hsl(var(--primary))";
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Glow
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "hsl(var(--primary))";
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Remove dead
+        if (
+          e.life > e.maxLife ||
+          e.x < 0 ||
+          e.x > width ||
+          e.y < 0 ||
+          e.y > height
+        ) {
+          electrons.splice(i, 1);
+        }
       }
-      
+
       requestAnimationFrame(animate);
     };
 
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
     resize();
     animate();
   }

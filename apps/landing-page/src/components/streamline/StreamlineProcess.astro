@@ -1,14 +1,17 @@
 ---
 import { cn } from "@repo/ui/lib/utils";
 import CircuitBoard from "../backgrounds/CircuitBoard.astro";
+import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 ---
 
-<section id="streamline-engine" class="relative z-20 w-full py-20 -mt-20 bg-background overflow-hidden">
-  <div class="absolute inset-0 z-0 opacity-30 pointer-events-none">
-     <CircuitBoard />
+<section
+  id="streamline-engine"
+  class="relative z-20 w-full py-20 -mt-20 bg-background overflow-hidden"
+>
+  <div class="absolute inset-0 z-0 pointer-events-none">
+    <WarpTunnel />
   </div>
   <div class="container mx-auto px-4 relative">
-    
     <!-- Title -->
     <div class="text-center mb-20 relative z-10">
       <h2 class="text-4xl md:text-7xl font-black tracking-tighter mb-6">
@@ -20,118 +23,205 @@ import CircuitBoard from "../backgrounds/CircuitBoard.astro";
     </div>
 
     <!-- The Engine Canvas -->
-    <div class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-card/30 rounded-3xl border border-white/10 backdrop-blur-sm overflow-hidden shadow-2xl">
-      
+    <div
+      class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-card/30 rounded-3xl border border-white/10 backdrop-blur-sm overflow-hidden shadow-2xl"
+    >
       <!-- Grid Background -->
-      <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      <div
+        class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+      >
+      </div>
 
-      <svg id="streamline-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet">
+      <svg
+        id="streamline-svg"
+        class="absolute inset-0 w-full h-full"
+        viewBox="0 0 1200 600"
+        preserveAspectRatio="xMidYMid meet"
+      >
         <defs>
           <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"
+            ></feGaussianBlur>
             <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
+              <feMergeNode in="coloredBlur"></feMergeNode>
+              <feMergeNode in="SourceGraphic"></feMergeNode>
             </feMerge>
           </filter>
-          
+
           <linearGradient id="trace-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="hsl(var(--primary))" stop-opacity="0" />
-            <stop offset="50%" stop-color="hsl(var(--primary))" stop-opacity="1" />
-            <stop offset="100%" stop-color="hsl(var(--primary))" stop-opacity="0" />
+            <stop offset="0%" stop-color="hsl(var(--primary))" stop-opacity="0"
+            ></stop>
+            <stop offset="50%" stop-color="hsl(var(--primary))" stop-opacity="1"
+            ></stop>
+            <stop
+              offset="100%"
+              stop-color="hsl(var(--primary))"
+              stop-opacity="0"></stop>
           </linearGradient>
 
-           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))" />
+          <marker
+            id="arrowhead"
+            markerWidth="10"
+            markerHeight="7"
+            refX="9"
+            refY="3.5"
+            orient="auto"
+          >
+            <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))"
+            ></polygon>
           </marker>
         </defs>
 
         <!-- Labels -->
-        <text x="100" y="300" fill="currentColor" class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none">RAW IDEAS</text>
+        <text
+          x="100"
+          y="300"
+          fill="currentColor"
+          class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none"
+          >RAW IDEAS</text
+        >
 
         <!-- 1. Input Traces (Left Side) -->
-        <g id="input-traces" fill="none" stroke="hsl(var(--primary))" stroke-width="2"  stroke-opacity="0.3">
-           <!-- Top Path -->
-           <path d="M150,200 C250,200 350,300 520,300" />
-           <!-- Bottom Path -->
-           <path d="M150,400 C250,400 350,300 520,300" />
-           <!-- Middle Path -->
-           <path d="M150,300 L520,300" />
+        <g
+          id="input-traces"
+          fill="none"
+          stroke="hsl(var(--primary))"
+          stroke-width="2"
+          stroke-opacity="0.3"
+        >
+          <!-- Top Path -->
+          <path d="M150,200 C250,200 350,300 520,300"></path>
+          <!-- Bottom Path -->
+          <path d="M150,400 C250,400 350,300 520,300"></path>
+          <!-- Middle Path -->
+          <path d="M150,300 L520,300"></path>
         </g>
 
         <!-- 2. The Processor (Central Core) -->
         <g id="processor-core" transform="translate(600, 300)">
           <!-- Outer Ring -->
-          <circle r="70" fill="none" stroke="hsl(var(--primary))" stroke-width="1" stroke-dasharray="4 4" class="opacity-30" />
+          <circle
+            r="70"
+            fill="none"
+            stroke="hsl(var(--primary))"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+            class="opacity-30"></circle>
           <!-- Hexagon -->
-          <path d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z" fill="hsl(var(--card))" stroke="hsl(var(--primary))" stroke-width="2" />
+          <path
+            d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z"
+            fill="hsl(var(--card))"
+            stroke="hsl(var(--primary))"
+            stroke-width="2"></path>
           <!-- Inner Core -->
-          <circle id="core-light" r="15" fill="hsl(var(--primary))" class="opacity-50" />
+          <circle
+            id="core-light"
+            r="15"
+            fill="hsl(var(--primary))"
+            class="opacity-50"></circle>
         </g>
 
         <!-- 3. Output Trace (Right Side) -->
-        <g id="output-trace" fill="none" stroke="hsl(var(--primary))" stroke-width="2" stroke-opacity="0.3">
-           <line x1="680" y1="300" x2="950" y2="300" />
+        <g
+          id="output-trace"
+          fill="none"
+          stroke="hsl(var(--primary))"
+          stroke-width="2"
+          stroke-opacity="0.3"
+        >
+          <line x1="680" y1="300" x2="950" y2="300"></line>
         </g>
 
         <!-- 4. Scheduled Box (Target) -->
         <g id="scheduled-box" transform="translate(950, 270)">
-           <rect width="180" height="60" rx="8" fill="hsl(var(--card))" stroke="hsl(var(--primary))" stroke-width="2" class="opacity-50 transition-all duration-300" id="target-rect" />
-           <text x="90" y="35" text-anchor="middle" fill="hsl(var(--primary))" class="font-mono text-xl font-bold tracking-widest select-none">SCHEDULED</text>
+          <rect
+            width="180"
+            height="60"
+            rx="8"
+            fill="hsl(var(--card))"
+            stroke="hsl(var(--primary))"
+            stroke-width="2"
+            class="opacity-50 transition-all duration-300"
+            id="target-rect"></rect>
+          <text
+            x="90"
+            y="35"
+            text-anchor="middle"
+            fill="hsl(var(--primary))"
+            class="font-mono text-xl font-bold tracking-widest select-none"
+            >SCHEDULED</text
+          >
         </g>
 
         <!-- Moving Elements -->
         <g id="anim-elements" filter="url(#glow-filter)">
-           <!-- 3 Input Dots -->
-           <circle id="dot-1" r="6" fill="hsl(var(--primary))" class="opacity-0" />
-           <circle id="dot-2" r="6" fill="hsl(var(--primary))" class="opacity-0" />
-           <circle id="dot-3" r="6" fill="hsl(var(--primary))" class="opacity-0" />
-           
-           <!-- 1 Output Beam -->
-           <rect id="beam-out" width="40" height="6" rx="3" fill="hsl(var(--primary))" class="opacity-0" />
-        </g>
+          <!-- 3 Input Dots -->
+          <circle id="dot-1" r="6" fill="hsl(var(--primary))" class="opacity-0"
+          ></circle>
+          <circle id="dot-2" r="6" fill="hsl(var(--primary))" class="opacity-0"
+          ></circle>
+          <circle id="dot-3" r="6" fill="hsl(var(--primary))" class="opacity-0"
+          ></circle>
 
+          <!-- 1 Output Beam -->
+          <rect
+            id="beam-out"
+            width="40"
+            height="6"
+            rx="3"
+            fill="hsl(var(--primary))"
+            class="opacity-0"></rect>
+        </g>
       </svg>
     </div>
   </div>
 </section>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
-  import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+  import { MotionPathPlugin } from "gsap/MotionPathPlugin";
 
   gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
   const initStreamline = () => {
     console.log("Streamline: Initializing...");
-    const svg = document.getElementById('streamline-svg');
+    const svg = document.getElementById("streamline-svg");
     if (!svg) {
-        console.error("Streamline: SVG not found");
-        return;
+      console.error("Streamline: SVG not found");
+      return;
     }
 
     // Elements
-    const dot1 = document.getElementById('dot-1');
-    const dot2 = document.getElementById('dot-2');
-    const dot3 = document.getElementById('dot-3');
-    const beamOut = document.getElementById('beam-out');
-    const coreLight = document.getElementById('core-light');
-    const targetRect = document.getElementById('target-rect');
+    const dot1 = document.getElementById("dot-1");
+    const dot2 = document.getElementById("dot-2");
+    const dot3 = document.getElementById("dot-3");
+    const beamOut = document.getElementById("beam-out");
+    const coreLight = document.getElementById("core-light");
+    const targetRect = document.getElementById("target-rect");
 
     if (!dot1 || !dot2 || !dot3 || !beamOut) {
-        console.error("Streamline: Missing elements", { dot1, dot2, dot3, beamOut });
-        return;
+      console.error("Streamline: Missing elements", {
+        dot1,
+        dot2,
+        dot3,
+        beamOut,
+      });
+      return;
     }
     console.log("Streamline: Elements found");
 
     // Reset states - ensure they are technically visible but opacity 0 controlled by GSAP
     gsap.set([dot1, dot2, dot3, beamOut], { opacity: 0, scale: 0 });
-    gsap.set(targetRect, { filter: "none", stroke: "hsl(var(--primary))", fill: "hsl(var(--card))" });
+    gsap.set(targetRect, {
+      filter: "none",
+      stroke: "hsl(var(--primary))",
+      fill: "hsl(var(--card))",
+    });
 
     // Paths
     const path1 = "M150,200 C250,200 350,300 520,300"; // Top
-    const path2 = "M150,300 L520,300";               // Mid
+    const path2 = "M150,300 L520,300"; // Mid
     const path3 = "M150,400 C250,400 350,300 520,300"; // Bot
     const pathOut = "M680,300 L950,300";
 
@@ -139,7 +229,7 @@ import CircuitBoard from "../backgrounds/CircuitBoard.astro";
       repeat: -1,
       repeatDelay: 1, // Pause before next cycle
       scrollTrigger: {
-        trigger: '#streamline-engine',
+        trigger: "#streamline-engine",
         start: "top 80%",
         markers: true, // DEBUG: Show markers
         toggleActions: "play pause resume pause",
@@ -147,7 +237,7 @@ import CircuitBoard from "../backgrounds/CircuitBoard.astro";
         onLeave: () => console.log("Streamline: ScrollTrigger Leave"),
         onEnterBack: () => console.log("Streamline: ScrollTrigger EnterBack"),
         onLeaveBack: () => console.log("Streamline: ScrollTrigger LeaveBack"),
-      }
+      },
     });
 
     console.log("Streamline: Timeline created");
@@ -155,99 +245,118 @@ import CircuitBoard from "../backgrounds/CircuitBoard.astro";
     // --- PHASE 1: CONVERGENCE (Chaos) ---
     // Animate 3 dots from left to center
     tl.addLabel("start")
-    
-    // Dot 1 (Top)
-    .to(dot1, {
-      motionPath: {
-        path: path1,
-        alignOrigin: [0.5, 0.5],
-        autoRotate: true
-      },
-      duration: 1.5,
-      ease: "power2.in",
-      opacity: 1,
-      scale: 1,
-      onStart: () => console.log("Streamline: Dot 1 Start")
-    }, "start")
 
-    // Dot 2 (Mid)
-    .to(dot2, {
-      motionPath: {
-        path: path2,
-        alignOrigin: [0.5, 0.5],
-        autoRotate: true
-      },
-      duration: 1.5,
-      ease: "power2.in",
-      opacity: 1,
-      scale: 1,
-      onStart: () => console.log("Streamline: Dot 2 Start")
-    }, "start")
+      // Dot 1 (Top)
+      .to(
+        dot1,
+        {
+          motionPath: {
+            path: path1,
+            alignOrigin: [0.5, 0.5],
+            autoRotate: true,
+          },
+          duration: 1.5,
+          ease: "power2.in",
+          opacity: 1,
+          scale: 1,
+          onStart: () => console.log("Streamline: Dot 1 Start"),
+        },
+        "start",
+      )
 
-    // Dot 3 (Bot)
-    .to(dot3, {
-      motionPath: {
-        path: path3,
-        alignOrigin: [0.5, 0.5],
-        autoRotate: true
-      },
-      duration: 1.5,
-      ease: "power2.in",
-      opacity: 1,
-      scale: 1,
-      onStart: () => console.log("Streamline: Dot 3 Start")
-    }, "start")
+      // Dot 2 (Mid)
+      .to(
+        dot2,
+        {
+          motionPath: {
+            path: path2,
+            alignOrigin: [0.5, 0.5],
+            autoRotate: true,
+          },
+          duration: 1.5,
+          ease: "power2.in",
+          opacity: 1,
+          scale: 1,
+          onStart: () => console.log("Streamline: Dot 2 Start"),
+        },
+        "start",
+      )
 
-    // Hide dots when they hit the core
-    .to([dot1, dot2, dot3], {
-      opacity: 0,
-      scale: 0.5,
-      duration: 0.1
-    })
+      // Dot 3 (Bot)
+      .to(
+        dot3,
+        {
+          motionPath: {
+            path: path3,
+            alignOrigin: [0.5, 0.5],
+            autoRotate: true,
+          },
+          duration: 1.5,
+          ease: "power2.in",
+          opacity: 1,
+          scale: 1,
+          onStart: () => console.log("Streamline: Dot 3 Start"),
+        },
+        "start",
+      )
 
-    // --- PHASE 2: PROCESSING (Core Pulse) ---
-    .to(coreLight, {
-      scale: 2,
-      opacity: 1,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1
-    }, "-=0.1") 
+      // Hide dots when they hit the core
+      .to([dot1, dot2, dot3], {
+        opacity: 0,
+        scale: 0.5,
+        duration: 0.1,
+      })
 
-    // --- PHASE 3: CLARITY (Output) ---
-    // Shoot single beam out
-    .to(beamOut, {
-      motionPath: {
-        path: pathOut,
-        alignOrigin: [0.5, 0.5],
-        autoRotate: false
-      },
-      duration: 0.6, 
-      ease: "power4.out",
-      onStart: () => console.log("Streamline: Beam Out Start")
-    })
-    
-    // Hide beam when it hits target
-    .to(beamOut, {
-      opacity: 0,
-      duration: 0.1
-    })
+      // --- PHASE 2: PROCESSING (Core Pulse) ---
+      .to(
+        coreLight,
+        {
+          scale: 2,
+          opacity: 1,
+          duration: 0.2,
+          yoyo: true,
+          repeat: 1,
+        },
+        "-=0.1",
+      )
 
-    // --- PHASE 4: RESULT (Target Glow) ---
-    .to(targetRect, {
-      strokeWidth: 4,
-      filter: "url(#glow-filter)",
-      fill: "hsl(var(--primary)/0.1)",
-      duration: 0.1
-    }, "-=0.1")
-    .to(targetRect, {
-      strokeWidth: 2,
-      filter: "none",
-      fill: "hsl(var(--card))",
-      duration: 0.5
-    });
+      // --- PHASE 3: CLARITY (Output) ---
+      // Shoot single beam out
+      .to(beamOut, {
+        motionPath: {
+          path: pathOut,
+          alignOrigin: [0.5, 0.5],
+          autoRotate: false,
+        },
+        duration: 0.6,
+        ease: "power4.out",
+        onStart: () => console.log("Streamline: Beam Out Start"),
+      })
 
+      // Hide beam when it hits target
+      .to(beamOut, {
+        opacity: 0,
+        duration: 0.1,
+      })
+
+      // --- PHASE 4: RESULT (Target Glow) ---
+      .to(
+        targetRect,
+        {
+          strokeWidth: 4,
+          filter: "url(#glow-filter)",
+          fill: "hsl(var(--primary)/0.1)",
+          duration: 0.1,
+        },
+        "-=0.1",
+      )
+      .to(targetRect, {
+        strokeWidth: 2,
+        filter: "none",
+        fill: "hsl(var(--card))",
+        duration: 0.5,
+      });
   };
 
-  document.addEventListener('astro:page-load', initStreamline);
+  document.addEventListener("astro:page-load", initStreamline);
 </script>

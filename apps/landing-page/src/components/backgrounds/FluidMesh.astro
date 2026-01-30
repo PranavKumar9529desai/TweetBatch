@@ -1,10 +1,18 @@
 ---
+
 ---
 
-<div id="fluid-mesh-container" class="absolute inset-0 w-full h-full -z-10 overflow-hidden bg-background">
+<div
+  id="fluid-mesh-container"
+  class="absolute inset-0 w-full h-full -z-10 overflow-hidden bg-background"
+>
   <canvas id="fluid-mesh-canvas" class="w-full h-full opacity-60"></canvas>
   <!-- Overlay noise for texture -->
-  <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=');"></div>
+  <div
+    class="absolute inset-0 opacity-[0.03] pointer-events-none"
+    style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=');"
+  >
+  </div>
 </div>
 
 <script>
@@ -12,33 +20,35 @@
   let resizeListener: (() => void) | null = null;
 
   const initFluidMesh = () => {
-    const canvas = document.getElementById('fluid-mesh-canvas') as HTMLCanvasElement;
+    const canvas = document.getElementById(
+      "fluid-mesh-canvas",
+    ) as HTMLCanvasElement;
     if (!canvas) return;
 
     if (animationId) cancelAnimationFrame(animationId);
-    if (resizeListener) window.removeEventListener('resize', resizeListener);
+    if (resizeListener) window.removeEventListener("resize", resizeListener);
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     let width = 0;
     let height = 0;
-    
+
     // Blobs
     const blobs = [
-      { x: 0, y: 0, r: 0, vx: 1, vy: 0.5, color: '' },
-      { x: 0, y: 0, r: 0, vx: -0.5, vy: 1, color: '' },
-      { x: 0, y: 0, r: 0, vx: -1, vy: -0.5, color: '' },
-      { x: 0, y: 0, r: 0, vx: 0.8, vy: -0.8, color: '' },
+      { x: 0, y: 0, r: 0, vx: 1, vy: 0.5, color: "" },
+      { x: 0, y: 0, r: 0, vx: -0.5, vy: 1, color: "" },
+      { x: 0, y: 0, r: 0, vx: -1, vy: -0.5, color: "" },
+      { x: 0, y: 0, r: 0, vx: 0.8, vy: -0.8, color: "" },
     ];
 
     const initBlobs = () => {
-       blobs.forEach((blob, i) => {
-         blob.x = Math.random() * width;
-         blob.y = Math.random() * height;
-         blob.r = Math.min(width, height) * (0.3 + Math.random() * 0.2); 
-         // Random velocities
-         blob.vx = (Math.random() - 0.5) * 1.5;
-         blob.vy = (Math.random() - 0.5) * 1.5;
-       });
+      blobs.forEach((blob, i) => {
+        blob.x = Math.random() * width;
+        blob.y = Math.random() * height;
+        blob.r = Math.min(width, height) * (0.3 + Math.random() * 0.2);
+        // Random velocities
+        blob.vx = (Math.random() - 0.5) * 1.5;
+        blob.vy = (Math.random() - 0.5) * 1.5;
+      });
     };
 
     const resize = () => {
@@ -46,68 +56,78 @@
       height = window.innerHeight;
       canvas.width = width;
       canvas.height = height;
-      
+
       // Re-calc specific sizes if needed
-      blobs.forEach(b => {
-          b.r = Math.min(width, height) * (0.4 + Math.random() * 0.2);
+      blobs.forEach((b) => {
+        b.r = Math.min(width, height) * (0.4 + Math.random() * 0.2);
       });
     };
 
     const animate = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
-      
+
+      // Check theme for blend mode
+      const isDark = document.documentElement.classList.contains("dark");
+      ctx.globalCompositeOperation = isDark ? "screen" : "multiply";
+
+      // Get styles once per frame (dynamic for theme switching)
+      const style = getComputedStyle(document.documentElement);
+      const primary = style.getPropertyValue("--primary").trim();
+      const accent = style.getPropertyValue("--accent").trim();
+
       // Update positions
-      blobs.forEach(blob => {
+      blobs.forEach((blob) => {
         blob.x += blob.vx;
         blob.y += blob.vy;
-        
+
         // Bounce
         if (blob.x < -blob.r) blob.vx = Math.abs(blob.vx);
         if (blob.x > width + blob.r) blob.vx = -Math.abs(blob.vx);
         if (blob.y < -blob.r) blob.vy = Math.abs(blob.vy);
         if (blob.y > height + blob.r) blob.vy = -Math.abs(blob.vy);
       });
-      
-      // Draw with blur
-      ctx.globalCompositeOperation = 'screen'; // Use screen or lighten for blending
 
       blobs.forEach((blob, i) => {
-        const grd = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.r);
-        
-        // Dynamic colors from CSS
-        const style = getComputedStyle(document.documentElement);
-        // Primary
-        const primary = style.getPropertyValue('--primary').trim(); 
-        // Secondary/Accent
-        const accent = style.getPropertyValue('--accent').trim();
-        
+        const grd = ctx.createRadialGradient(
+          blob.x,
+          blob.y,
+          0,
+          blob.x,
+          blob.y,
+          blob.r,
+        );
+
         const baseColor = i % 2 === 0 ? `hsl(${primary})` : `hsl(${accent})`;
-        
-        grd.addColorStop(0, baseColor.replace(')', ' / 0.4)')); // Center opacity
-        grd.addColorStop(1, baseColor.replace(')', ' / 0)'));   // Edge transparent
-        
+
+        // Adjust opacity for blend modes
+        // Screen needs lower opacity to avoid whitewash, Multiply can handle it
+        const opacity = isDark ? 0.4 : 0.15;
+
+        grd.addColorStop(0, baseColor.replace(")", ` / ${opacity})`)); // Center
+        grd.addColorStop(1, baseColor.replace(")", " / 0)")); // Edge
+
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2);
         ctx.fill();
       });
-      
-      ctx.globalCompositeOperation = 'source-over';
+
+      ctx.globalCompositeOperation = "source-over";
 
       animationId = requestAnimationFrame(animate);
     };
-    
+
     resizeListener = resize;
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
     resize();
     initBlobs();
     animate();
   };
 
-  document.addEventListener('astro:page-load', initFluidMesh);
-  document.addEventListener('astro:before-swap', () => {
-      if (animationId) cancelAnimationFrame(animationId);
-      if (resizeListener) window.removeEventListener('resize', resizeListener);
+  document.addEventListener("astro:page-load", initFluidMesh);
+  document.addEventListener("astro:before-swap", () => {
+    if (animationId) cancelAnimationFrame(animationId);
+    if (resizeListener) window.removeEventListener("resize", resizeListener);
   });
 </script>

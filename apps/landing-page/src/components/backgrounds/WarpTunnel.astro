@@ -1,25 +1,30 @@
 ---
+
 ---
 
-<canvas id="warp-tunnel-canvas" class="absolute inset-0 w-full h-full -z-10 opacity-40"></canvas>
+<canvas
+  id="warp-tunnel-canvas"
+  class="absolute inset-0 w-full h-full -z-10 opacity-40"></canvas>
 
 <script>
   let animationId: number | null = null;
   let resizeListener: (() => void) | null = null;
 
   const initWarpTunnel = () => {
-    const canvas = document.getElementById('warp-tunnel-canvas') as HTMLCanvasElement;
+    const canvas = document.getElementById(
+      "warp-tunnel-canvas",
+    ) as HTMLCanvasElement;
     if (!canvas) return;
 
     // Cleanup previous if any (though usually strictly separate, but good safety)
     if (animationId) cancelAnimationFrame(animationId);
-    if (resizeListener) window.removeEventListener('resize', resizeListener);
+    if (resizeListener) window.removeEventListener("resize", resizeListener);
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     let width = 0;
     let height = 0;
     let stars: any[] = []; // Use any or interface
-    
+
     // Config
     const starCount = 400;
     const speed = 2; // Base speed
@@ -45,7 +50,7 @@
 
       update() {
         this.z -= speed * 2; // Move closer
-        
+
         if (this.z <= 0) {
           this.reset();
         }
@@ -54,18 +59,18 @@
       draw(ctx: CanvasRenderingContext2D) {
         const cx = width / 2;
         const cy = height / 2;
-        
+
         const x = (this.x / this.z) * 100 + cx;
         const y = (this.y / this.z) * 100 + cy;
-        
+
         const size = (1 - this.z / width) * 3;
-        const alpha = (1 - this.z / width);
+        const alpha = 1 - this.z / width;
 
         if (alpha > 0) {
-            ctx.beginPath();
-            ctx.fillStyle = `hsla(var(--foreground), ${alpha})`;
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
+          ctx.beginPath();
+          ctx.fillStyle = `hsla(var(--foreground), ${alpha})`;
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fill();
         }
       }
     }
@@ -76,20 +81,20 @@
       canvas.width = width;
       canvas.height = height;
     };
-    
+
     resizeListener = resize;
-    window.addEventListener('resize', resize);
+    window.addEventListener("resize", resize);
     resize();
-    
+
     stars = [];
-    for(let i=0; i<starCount; i++) {
-        stars.push(new Star());
+    for (let i = 0; i < starCount; i++) {
+      stars.push(new Star());
     }
-      
+
     const animate = () => {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
-      
+
       // Center Glow
       const cx = width / 2;
       const cy = height / 2;
@@ -99,23 +104,23 @@
       gradient.addColorStop(0, "hsla(var(--foreground), 0.1)");
       gradient.addColorStop(1, "transparent");
       ctx.fillStyle = gradient;
-      ctx.fillRect(0,0,width,height);
+      ctx.fillRect(0, 0, width, height);
 
-      stars.forEach(star => {
+      stars.forEach((star) => {
         star.update();
         star.draw(ctx);
       });
-      
+
       animationId = requestAnimationFrame(animate);
     };
 
     animate();
   };
 
-  document.addEventListener('astro:page-load', initWarpTunnel);
+  document.addEventListener("astro:page-load", initWarpTunnel);
   // Also cleanup on swap
-  document.addEventListener('astro:before-swap', () => {
-      if (animationId) cancelAnimationFrame(animationId);
-      if (resizeListener) window.removeEventListener('resize', resizeListener);
+  document.addEventListener("astro:before-swap", () => {
+    if (animationId) cancelAnimationFrame(animationId);
+    if (resizeListener) window.removeEventListener("resize", resizeListener);
   });
 </script>

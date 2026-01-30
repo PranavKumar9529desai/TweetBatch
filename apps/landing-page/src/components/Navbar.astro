@@ -6,17 +6,38 @@ import logo from "../assets/favicon.svg";
 
 <header
   id="main-navbar"
-  class="fixed top-0 left-0 right-0 z-50 transition-transform duration-500 ease-in-out will-change-transform"
+  class="fixed top-0 left-0 right-0 z-50 will-change-transform"
 >
   <!-- Glass Background Layer -->
-  <div class="absolute inset-0 bg-background/0 backdrop-blur-[0px] transition-all duration-500" id="navbar-bg"></div>
-  <div class="absolute inset-x-0 bottom-0 h-px bg-border/0 transition-all duration-500" id="navbar-border"></div>
+  <div
+    class="absolute inset-0 bg-background/0 backdrop-blur-[0px] transition-all duration-500"
+    id="navbar-bg"
+  >
+  </div>
+  <div
+    class="absolute inset-x-0 bottom-0 h-px bg-border/0 transition-all duration-500"
+    id="navbar-border"
+  >
+  </div>
 
-  <nav class="container mx-auto px-6 h-20 flex items-center justify-between relative z-10">
+  <nav
+    class="container mx-auto px-6 h-20 flex items-center justify-between relative z-10"
+  >
     <!-- Logo -->
-    <a href="#home" class="flex items-center gap-2 group relative z-20" aria-label="TweetBatch Home">
-      <Image src={logo} alt="TweetBatch" class="size-9 md:size-12 transition-transform duration-500 rotate-12 group-hover:scale-110" />
-      <span class="font-bold text-lg md:text-xl tracking-tight">TweetBatch</span>
+    <a
+      href="#home"
+      class="flex items-center gap-2 group relative z-20"
+      aria-label="TweetBatch Home"
+    >
+      <img
+        src="/favicon/favicon.svg"
+        alt="TweetBatch"
+        width="48"
+        height="48"
+        class="size-9 md:size-12 transition-transform duration-500 rotate-12 group-hover:scale-110"
+      />
+      <span class="font-bold text-lg md:text-xl tracking-tight">TweetBatch</span
+      >
     </a>
 
     <!-- Desktop Menu Removed -->
@@ -30,7 +51,16 @@ import logo from "../assets/favicon.svg";
         class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-secondary/20 hover:bg-secondary/40 text-muted-foreground hover:text-foreground transition-colors border border-transparent hover:border-border"
         aria-label="Toggle theme"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 hidden dark:block"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="4"></circle>
           <path d="M12 2v2"></path>
           <path d="M12 20v2"></path>
@@ -41,7 +71,16 @@ import logo from "../assets/favicon.svg";
           <path d="m6.34 17.66-1.41 1.41"></path>
           <path d="m19.07 4.93-1.41 1.41"></path>
         </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 block dark:hidden"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
         </svg>
       </button>
@@ -53,35 +92,75 @@ import logo from "../assets/favicon.svg";
         Get Started
       </a>
 
-       <!-- Mobile Menu Toggle -->
-       <button id="mobile-menu-toggle" class="md:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 group" aria-label="Menu">
-          <span class="w-6 h-0.5 bg-foreground transition-all duration-300 origin-center group-[.is-active]:rotate-45 group-[.is-active]:translate-y-2"></span>
-          <span class="w-6 h-0.5 bg-foreground transition-all duration-300 group-[.is-active]:opacity-0"></span>
-          <span class="w-6 h-0.5 bg-foreground transition-all duration-300 origin-center group-[.is-active]:-rotate-45 group-[.is-active]:-translate-y-2"></span>
-       </button>
+      <!-- Mobile Menu Toggle -->
+      <button
+        id="mobile-menu-toggle"
+        class="md:hidden relative z-50 w-10 h-10 flex flex-col items-center justify-center gap-1.5 group"
+        aria-label="Menu"
+      >
+        <span
+          class="w-6 h-0.5 bg-foreground transition-all duration-300 origin-center group-[.is-active]:rotate-45 group-[.is-active]:translate-y-2"
+        ></span>
+        <span
+          class="w-6 h-0.5 bg-foreground transition-all duration-300 group-[.is-active]:opacity-0"
+        ></span>
+        <span
+          class="w-6 h-0.5 bg-foreground transition-all duration-300 origin-center group-[.is-active]:-rotate-45 group-[.is-active]:-translate-y-2"
+        ></span>
+      </button>
     </div>
   </nav>
 </header>
 
 <!-- Mobile Menu Overlay (Moved outside Header for robustness) -->
-<div 
-  id="mobile-menu" 
+<div
+  id="mobile-menu"
   class="fixed inset-0 z-40 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 md:hidden"
 >
-    <!-- Background Design Element for Mobile -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-       <div class="absolute top-[10%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-       <div class="absolute bottom-[10%] left-[-10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+  <!-- Background Design Element for Mobile -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+    <div
+      class="absolute top-[10%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl"
+    >
     </div>
+    <div
+      class="absolute bottom-[10%] left-[-10%] w-64 h-64 bg-primary/10 rounded-full blur-3xl"
+    >
+    </div>
+  </div>
 
-    <div class="flex flex-col items-center gap-6 w-full px-8">
-      <a href="#home" class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors">Home</a>
-      <a href="#features-flow" class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors">Features</a>
-      <a href="#momentum-engine" class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors">Momentum</a>
-      <a href="#kinetic-feed" class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors">Kinetic Feed</a>
-      <a href="#streamline-engine" class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors">Streamline</a>
-      <a href="#quantum-cta" class="w-full max-w-xs text-center py-3 bg-primary text-primary-foreground text-base font-medium rounded-full mt-4 mobile-link shadow-lg shadow-primary/20 active:scale-95 transition-transform">Get Started</a>
-    </div>
+  <div class="flex flex-col items-center gap-6 w-full px-8">
+    <a
+      href="#home"
+      class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+      >Home</a
+    >
+    <a
+      href="#features-flow"
+      class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+      >Features</a
+    >
+    <a
+      href="#momentum-engine"
+      class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+      >Momentum</a
+    >
+    <a
+      href="#kinetic-feed"
+      class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+      >Kinetic Feed</a
+    >
+    <a
+      href="#streamline-engine"
+      class="mobile-link text-lg font-medium text-foreground/80 hover:text-primary transition-colors"
+      >Streamline</a
+    >
+    <a
+      href="#quantum-cta"
+      class="w-full max-w-xs text-center py-3 bg-primary text-primary-foreground text-base font-medium rounded-full mt-4 mobile-link shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+      >Get Started</a
+    >
+  </div>
 </div>
 
 <style>
@@ -99,173 +178,198 @@ import logo from "../assets/favicon.svg";
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
   const initNavbar = () => {
-      const navbar = document.getElementById("main-navbar");
-      const bg = document.getElementById("navbar-bg");
-      const border = document.getElementById("navbar-border");
-      const navBubble = document.getElementById("nav-bubble");
-      const navLinks = document.querySelectorAll(".nav-link");
-      const navContainer = document.getElementById("nav-container");
+    const navbar = document.getElementById("main-navbar");
+    const bg = document.getElementById("navbar-bg");
+    const border = document.getElementById("navbar-border");
+    const navBubble = document.getElementById("nav-bubble");
+    const navLinks = document.querySelectorAll(".nav-link");
+    const navContainer = document.getElementById("nav-container");
 
-      const mobileToggle = document.getElementById('mobile-menu-toggle');
-      const mobileMenu = document.getElementById('mobile-menu');
-      let isMenuOpen = false;
+    const mobileToggle = document.getElementById("mobile-menu-toggle");
+    const mobileMenu = document.getElementById("mobile-menu");
+    let isMenuOpen = false;
 
-      // --- 1. Smart Hide/Show on Scroll ---
-      const scrollThreshold = 50;
-      
-      ScrollTrigger.create({
-          start: 'top top',
-          end: 99999,
-          onUpdate: (self) => {
-              // Prevent hiding if menu is open
-              if (isMenuOpen && navbar) {
-                  gsap.set(navbar, { y: '0%' });
-                  return;
-              }
+    // --- 1. Smart Hide/Show on Scroll ---
+    const scrollThreshold = 50;
+    let isNavVisible = true;
 
-              const currentScrollY = self.scroll();
-              const direction = self.direction; // 1 = down, -1 = up
-              
-              // Appearance Logic (Glass Effect)
-              if (currentScrollY > 20) {
-                  bg?.classList.remove("bg-background/0", "backdrop-blur-[0px]");
-                  bg?.classList.add("bg-background/80", "backdrop-blur-md");
-                  border?.classList.remove("bg-border/0");
-                  border?.classList.add("bg-border/50");
-              } else {
-                  bg?.classList.add("bg-background/0", "backdrop-blur-[0px]");
-                  bg?.classList.remove("bg-background/80", "backdrop-blur-md");
-                  border?.classList.add("bg-border/0");
-                  border?.classList.remove("bg-border/50");
-              }
-
-              // Hide/Show Logic
-              // Only hide if we've scrolled past threshold and are scrolling down
-              if (currentScrollY > scrollThreshold && direction === 1) {
-                  gsap.to(navbar, { y: '-100%', duration: 0.3, ease: 'power2.inOut' });
-              } else {
-                  gsap.to(navbar, { y: '0%', duration: 0.3, ease: 'power2.inOut' });
-              }
-          }
-      });
-
-      // --- 2. Liquid Background Bubble & Magnetic Links ---
-      // Removed as per request
-
-      // --- 3. Smooth ScrollTo ---
-      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-          anchor.addEventListener('click', function (e) {
-              const href = this.getAttribute('href');
-              if(!href || href === "#") return;
-              
-              const target = document.querySelector(href);
-              if (target) {
-                  e.preventDefault();
-                  
-                  // Close mobile menu if open
-                  if (isMenuOpen) toggleMenu();
-
-                  gsap.to(window, {
-                      scrollTo: {
-                          y: target,
-                          offsetY: 80 // Navbar height
-                      },
-                      duration: 1.2,
-                      ease: "power3.inOut" // Superior smoothing
-                  });
-              }
-          });
-      });
-
-      // --- 4. Intersection Observer for Active State ---
-      const sections = document.querySelectorAll("section");
-      const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                // Logic removed as desktop nav is removed
-            }
-          });
-      }, { threshold: 0.2, rootMargin: "-20% 0px -50% 0px" });
-      
-      sections.forEach((section) => observer.observe(section));
-
-
-      // --- 5. Mobile Menu & Theme Toggle ---
-      const themeToggleBtn = document.getElementById('theme-toggle');
-      themeToggleBtn?.addEventListener("click", (e) => {
-        // @ts-ignore
-        const isAppearanceTransition = document.startViewTransition && 
-                                       !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-        const switchTheme = () => {
-            const element = document.documentElement;
-            element.classList.toggle("dark");
-            const isDark = element.classList.contains("dark");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-        };
-
-        if (!isAppearanceTransition) {
-            switchTheme();
-            return;
+    ScrollTrigger.create({
+      start: "top top",
+      end: 99999,
+      onUpdate: (self) => {
+        // Prevent hiding if menu is open
+        if (isMenuOpen && navbar) {
+          gsap.set(navbar, { y: "0%" });
+          return;
         }
 
-        const x = (e as MouseEvent).clientX;
-        const y = (e as MouseEvent).clientY;
-        const endRadius = Math.hypot(
-            Math.max(x, window.innerWidth - x),
-            Math.max(y, window.innerHeight - y)
-        );
+        const currentScrollY = self.scroll();
+        const direction = self.direction; // 1 = down, -1 = up
 
-        // @ts-ignore
-        const transition = document.startViewTransition(async () => {
-            switchTheme();
-        });
+        // Appearance Logic (Glass Effect)
+        if (currentScrollY > 20) {
+          bg?.classList.remove("bg-background/0", "backdrop-blur-[0px]");
+          bg?.classList.add("bg-background/80", "backdrop-blur-md");
+          border?.classList.remove("bg-border/0");
+          border?.classList.add("bg-border/50");
+        } else {
+          bg?.classList.add("bg-background/0", "backdrop-blur-[0px]");
+          bg?.classList.remove("bg-background/80", "backdrop-blur-md");
+          border?.classList.add("bg-border/0");
+          border?.classList.remove("bg-border/50");
+        }
 
-        transition.ready.then(() => {
-            const clipPath = [
-                `circle(0px at ${x}px ${y}px)`,
-                `circle(${endRadius}px at ${x}px ${y}px)`
-            ];
-            
-            document.documentElement.animate(
-                {
-                    clipPath: clipPath
-                },
-                {
-                    duration: 400,
-                    easing: "ease-in-out",
-                    pseudoElement: "::view-transition-new(root)"
-                }
-            );
+        // Hide/Show Logic
+        // Only trigger animation if state changes
+        const shouldHide = currentScrollY > scrollThreshold && direction === 1;
+
+        if (shouldHide && isNavVisible) {
+          isNavVisible = false;
+          gsap.to(navbar, {
+            y: "-100%",
+            duration: 0.3,
+            ease: "power3.inOut",
+            overwrite: true,
+          });
+        } else if (!shouldHide && !isNavVisible) {
+          isNavVisible = true;
+          gsap.to(navbar, {
+            y: "0%",
+            duration: 0.4,
+            ease: "power4.out",
+            overwrite: true,
+          });
+        }
+      },
+    });
+
+    // --- 2. Liquid Background Bubble & Magnetic Links ---
+    // Removed as per request
+
+    // --- 3. Smooth ScrollTo ---
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        const href = this.getAttribute("href");
+        if (!href || href === "#") return;
+
+        const target = document.querySelector(href);
+        if (target) {
+          e.preventDefault();
+
+          // Close mobile menu if open
+          if (isMenuOpen) toggleMenu();
+
+          gsap.to(window, {
+            scrollTo: {
+              y: target,
+              offsetY: 80, // Navbar height
+            },
+            duration: 1.2,
+            ease: "power3.inOut", // Superior smoothing
+          });
+        }
+      });
+    });
+
+    // --- 4. Intersection Observer for Active State ---
+    const sections = document.querySelectorAll("section");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Logic removed as desktop nav is removed
+          }
         });
+      },
+      { threshold: 0.2, rootMargin: "-20% 0px -50% 0px" },
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    // --- 5. Mobile Menu & Theme Toggle ---
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    themeToggleBtn?.addEventListener("click", (e) => {
+      // @ts-ignore
+      const isAppearanceTransition =
+        document.startViewTransition &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      const switchTheme = () => {
+        const element = document.documentElement;
+        element.classList.toggle("dark");
+        const isDark = element.classList.contains("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      };
+
+      if (!isAppearanceTransition) {
+        switchTheme();
+        return;
+      }
+
+      const x = (e as MouseEvent).clientX;
+      const y = (e as MouseEvent).clientY;
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+
+      // @ts-ignore
+      const transition = document.startViewTransition(async () => {
+        switchTheme();
       });
 
-      const toggleMenu = () => {
-          isMenuOpen = !isMenuOpen;
-          if (isMenuOpen) {
-              mobileToggle?.classList.add('is-active');
-              mobileMenu?.classList.remove('opacity-0', 'pointer-events-none');
-              document.body.style.overflow = 'hidden';
-              
-              // Ensure navbar is visible
-              if(navbar) gsap.set(navbar, { y: '0%' });
+      transition.ready.then(() => {
+        const clipPath = [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${endRadius}px at ${x}px ${y}px)`,
+        ];
 
-              gsap.fromTo('.mobile-link', 
-                  { y: 50, opacity: 0, rotationX: -45 },
-                  { y: 0, opacity: 1, rotationX: 0, stagger: 0.1, duration: 0.6, ease: "back.out(1.7)" }
-              );
-          } else {
-              mobileToggle?.classList.remove('is-active');
-              mobileMenu?.classList.add('opacity-0', 'pointer-events-none');
-              document.body.style.overflow = '';
-          }
-      };
-      mobileToggle?.addEventListener('click', toggleMenu);
+        document.documentElement.animate(
+          {
+            clipPath: clipPath,
+          },
+          {
+            duration: 400,
+            easing: "ease-in-out",
+            pseudoElement: "::view-transition-new(root)",
+          },
+        );
+      });
+    });
+
+    const toggleMenu = () => {
+      isMenuOpen = !isMenuOpen;
+      if (isMenuOpen) {
+        mobileToggle?.classList.add("is-active");
+        mobileMenu?.classList.remove("opacity-0", "pointer-events-none");
+        document.body.style.overflow = "hidden";
+
+        // Ensure navbar is visible
+        if (navbar) gsap.set(navbar, { y: "0%" });
+
+        gsap.fromTo(
+          ".mobile-link",
+          { y: 50, opacity: 0, rotationX: -45 },
+          {
+            y: 0,
+            opacity: 1,
+            rotationX: 0,
+            stagger: 0.1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+          },
+        );
+      } else {
+        mobileToggle?.classList.remove("is-active");
+        mobileMenu?.classList.add("opacity-0", "pointer-events-none");
+        document.body.style.overflow = "";
+      }
+    };
+    mobileToggle?.addEventListener("click", toggleMenu);
   };
 
   // Run init
   // Handle both initial load and View Transitions if added later
   initNavbar();
   document.addEventListener("astro:page-load", initNavbar);
-
 </script>

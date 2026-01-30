@@ -9,7 +9,10 @@ interface Props {
 	description?: string;
 }
 
-const { title, description = "A high-performance Twitter scheduler built for bulk management." } = Astro.props;
+const {
+	title,
+	description = "A high-performance Twitter scheduler built for bulk management.",
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -17,36 +20,41 @@ const { title, description = "A high-performance Twitter scheduler built for bul
 	<head>
 		<script is:inline>
 			const getTheme = () => {
-				if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-					return localStorage.getItem('theme');
+				if (
+					typeof localStorage !== "undefined" &&
+					localStorage.getItem("theme")
+				) {
+					return localStorage.getItem("theme");
 				}
-				if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-					return 'dark';
+				if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+					return "dark";
 				}
-				return 'light';
+				return "light";
 			};
-			if (getTheme() === 'dark') {
-				document.documentElement.classList.add('dark');
+			if (getTheme() === "dark") {
+				document.documentElement.classList.add("dark");
 			} else {
-				document.documentElement.classList.remove('dark');
+				document.documentElement.classList.remove("dark");
 			}
 		</script>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>
-	<body class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+	<body
+		class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground"
+	>
 		<Navbar />
 		<slot />
 		<Footer />
 
 		<script>
-			import Lenis from 'lenis';
-			import gsap from 'gsap';
-			import { ScrollTrigger } from 'gsap/ScrollTrigger';
+			import Lenis from "lenis";
+			import gsap from "gsap";
+			import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 			// Register GSAP plugins
 			gsap.registerPlugin(ScrollTrigger);
@@ -60,7 +68,7 @@ const { title, description = "A high-performance Twitter scheduler built for bul
 			});
 
 			// Connect Lenis to GSAP ScrollTrigger
-			lenis.on('scroll', ScrollTrigger.update);
+			lenis.on("scroll", ScrollTrigger.update);
 
 			gsap.ticker.add((time) => {
 				lenis.raf(time * 1000);

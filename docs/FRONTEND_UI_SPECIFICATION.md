@@ -1,6 +1,7 @@
 # Frontend UI Specification - Twitter Bulk Scheduler
 
 This document provides detailed technical specifications for implementing the Twitter Bulk Scheduler frontend interface. The UI consists of three primary routes/views.
+using the gsap for frontend animation making it state of art animation for landing page 
 
 ---
 
@@ -439,3 +440,11 @@ interface BulkImportPayload {
   - Single column layouts
   - Calendar switches to day view or list view
   - Bottom sheet for tweet queue
+
+# Landing Page 
+
+> stack : Astro with vanial html + react + GSAP for animation 
+
+- following the theme which we were using for the frontend application.
+- this make out application look consistent and themed.
+- we have state of art animation using ScrollTriger and Svg animation gsap is too good for this.

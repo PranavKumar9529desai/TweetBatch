@@ -4,266 +4,307 @@ import FeatureEditor from "./FeatureEditor.astro";
 import FeatureSchedule from "./FeatureSchedule.astro";
 import FeatureAnalytics from "./FeatureAnalytics.astro";
 ---
-<section id="features-flow" class="relative z-10 w-full h-screen bg-background overflow-hidden">
-  <!-- Background Elements (Magnetic Grid) -->
-  <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
-     <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"></canvas>
-     <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
-     <div class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"></div>
-  </div>
 
-  <!-- Container (GSAP will pin the section) -->
-  <div class="h-full w-full overflow-hidden flex flex-col items-center justify-center">
-    
-    <!-- MAIN STAGE -->
-    <div class="feature-stage relative w-full max-w-7xl px-6 py-12 h-full flex items-center justify-center">
-      
-      <FeatureEditor />
-      <FeatureSchedule />
-      <FeatureAnalytics />
-
-
+<section
+    id="features-flow"
+    class="relative z-10 w-full h-screen bg-background overflow-hidden"
+>
+    <!-- Background Elements (Magnetic Grid) -->
+    <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
+        <canvas
+            id="features-magnetic-grid"
+            class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"
+        ></canvas>
+        <div
+            class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"
+        >
+        </div>
+        <div
+            class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"
+        >
+        </div>
     </div>
-  </div>
+
+    <!-- Container (GSAP will pin the section) -->
+    <div
+        class="h-full w-full overflow-hidden flex flex-col items-center justify-center"
+    >
+        <!-- MAIN STAGE -->
+        <div
+            class="feature-stage relative w-full max-w-7xl px-6 py-12 h-full flex items-center justify-center"
+        >
+            <FeatureEditor />
+            <FeatureSchedule />
+            <FeatureAnalytics />
+        </div>
+    </div>
 </section>
 
 <script>
-    import gsap from 'gsap';
-    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import gsap from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
 
     gsap.registerPlugin(ScrollTrigger);
 
-     // --- Magnetic Grid Logic (Inline for simplicity) ---
-     class MagneticGrid {
-		canvas: HTMLCanvasElement;
-		ctx: CanvasRenderingContext2D;
-		points: { x: number; y: number; angle: number }[] = [];
-		mouseX = -1000;
-		mouseY = -1000;
-		gridSize = 50; 
+    // --- Magnetic Grid Logic (Inline for simplicity) ---
+    class MagneticGrid {
+        canvas: HTMLCanvasElement;
+        ctx: CanvasRenderingContext2D;
+        points: { x: number; y: number; angle: number }[] = [];
+        mouseX = -1000;
+        mouseY = -1000;
+        gridSize = 50;
 
-		isVisible = false;
-		isIdle = false;
-		idleTimer: number | null = null;
-		animationFrameId: number | null = null;
+        isVisible = false;
+        isIdle = false;
+        idleTimer: number | null = null;
+        animationFrameId: number | null = null;
 
-		constructor(canvasId: string) {
-			const el = document.getElementById(canvasId);
-			if (!el) return;
-			this.canvas = el as HTMLCanvasElement;
-			const context = this.canvas.getContext('2d', { alpha: true }); // Optimize for alpha if needed, though standard
-			if (!context) return;
-			this.ctx = context;
-			
-			this.resize();
-			this.initEvents();
-			
-			// Start observation
-			this.initObserver();
-		}
+        constructor(canvasId: string) {
+            const el = document.getElementById(canvasId);
+            if (!el) return;
+            this.canvas = el as HTMLCanvasElement;
+            const context = this.canvas.getContext("2d", { alpha: true }); // Optimize for alpha if needed, though standard
+            if (!context) return;
+            this.ctx = context;
 
-		initObserver() {
-			const observer = new IntersectionObserver((entries) => {
-				entries.forEach(entry => {
-					this.isVisible = entry.isIntersecting;
-					if (this.isVisible) {
-						this.startLoop();
-					} else {
-						this.stopLoop();
-					}
-				});
-			}, { threshold: 0 }); // Trigger as soon as 1px is visible
-			
-			// Observe the section, not just the canvas
-			const section = document.getElementById('features-flow');
-			if (section) observer.observe(section);
-		}
+            this.resize();
+            this.initEvents();
 
-		resize() {
-			// Debounce resize if possible, but for now standard is ok
-			this.canvas.width = window.innerWidth;
-			this.canvas.height = window.innerHeight;
+            // Start observation
+            this.initObserver();
+        }
+
+        initObserver() {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        this.isVisible = entry.isIntersecting;
+                        if (this.isVisible) {
+                            this.startLoop();
+                        } else {
+                            this.stopLoop();
+                        }
+                    });
+                },
+                { threshold: 0 },
+            ); // Trigger as soon as 1px is visible
+
+            // Observe the section, not just the canvas
+            const section = document.getElementById("features-flow");
+            if (section) observer.observe(section);
+        }
+
+        resize() {
+            // Debounce resize if possible, but for now standard is ok
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
             const dpr = window.devicePixelRatio || 1;
             // Cap DPR for performance on high-res screens
-            const effectiveDpr = Math.min(dpr, 2); 
-            
+            const effectiveDpr = Math.min(dpr, 2);
+
             this.canvas.width = window.innerWidth * effectiveDpr;
             this.canvas.height = window.innerHeight * effectiveDpr;
             this.ctx.scale(effectiveDpr, effectiveDpr);
             this.canvas.style.width = `${window.innerWidth}px`;
             this.canvas.style.height = `${window.innerHeight}px`;
-			this.createPoints();
-		}
+            this.createPoints();
+        }
 
-		createPoints() {
-			this.points = [];
-			const cols = Math.ceil(window.innerWidth / this.gridSize) + 1;
-			const rows = Math.ceil(window.innerHeight / this.gridSize) + 1;
-			for (let i = 0; i < cols; i++) {
-				for (let j = 0; j < rows; j++) {
-					this.points.push({ x: i * this.gridSize, y: j * this.gridSize, angle: 0 });
-				}
-			}
-		}
+        createPoints() {
+            this.points = [];
+            const cols = Math.ceil(window.innerWidth / this.gridSize) + 1;
+            const rows = Math.ceil(window.innerHeight / this.gridSize) + 1;
+            for (let i = 0; i < cols; i++) {
+                for (let j = 0; j < rows; j++) {
+                    this.points.push({
+                        x: i * this.gridSize,
+                        y: j * this.gridSize,
+                        angle: 0,
+                    });
+                }
+            }
+        }
 
-		initEvents() {
-			window.addEventListener('resize', () => { 
+        initEvents() {
+            window.addEventListener("resize", () => {
                 // Simple throttle could be added here
-                this.resize(); 
+                this.resize();
             });
-			
-			window.addEventListener('mousemove', (e) => {
-				if (!this.isVisible) return;
+
+            window.addEventListener("mousemove", (e) => {
+                if (!this.isVisible) return;
 
                 const rect = this.canvas.getBoundingClientRect();
-				this.mouseX = e.clientX - rect.left;
-				this.mouseY = e.clientY - rect.top;
-				
-				// User is interacting: wake up
-				this.isIdle = false;
-				this.startLoop();
-				
-				// Reset idle timer
-				if (this.idleTimer) clearTimeout(this.idleTimer);
-				this.idleTimer = setTimeout(() => {
-					// We only mark as checking for idle, the loop naturally stops when everything settles
-					// But we can force "isIdle" to true if we want to stop strictly
-					// For magnetic effect, we just let it settle.
-				}, 2000);
-			});
-		}
-        
-		getGridColor() {
-            return 'rgba(120, 120, 120, 0.15)'; 
+                this.mouseX = e.clientX - rect.left;
+                this.mouseY = e.clientY - rect.top;
+
+                // User is interacting: wake up
+                this.isIdle = false;
+                this.startLoop();
+
+                // Reset idle timer
+                if (this.idleTimer) clearTimeout(this.idleTimer);
+                this.idleTimer = setTimeout(() => {
+                    // We only mark as checking for idle, the loop naturally stops when everything settles
+                    // But we can force "isIdle" to true if we want to stop strictly
+                    // For magnetic effect, we just let it settle.
+                }, 2000);
+            });
+        }
+
+        getGridColor() {
+            return "rgba(120, 120, 120, 0.15)";
         }
 
         getPrimaryColor(opacity = 1) {
-             // ... existing method if needed, but we inline below for speed
-             return 'rgba(255, 255, 255, 1)';
+            // ... existing method if needed, but we inline below for speed
+            return "rgba(255, 255, 255, 1)";
         }
 
-		startLoop() {
-			if (!this.animationFrameId) {
-				this.animate();
-			}
-		}
+        startLoop() {
+            if (!this.animationFrameId) {
+                this.animate();
+            }
+        }
 
-		stopLoop() {
-			if (this.animationFrameId) {
-				cancelAnimationFrame(this.animationFrameId);
-				this.animationFrameId = null;
-			}
-		}
+        stopLoop() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+                this.animationFrameId = null;
+            }
+        }
 
-		animate() {
-			if (!this.isVisible) {
-				this.animationFrameId = null;
-				return;
-			}
+        animate() {
+            if (!this.isVisible) {
+                this.animationFrameId = null;
+                return;
+            }
 
-			// Check if settled (optimization)
-			// If mouse hasn't moved (we can track lastMouse) and all angles are negligible, stop.
-			let needsUpdate = false;
-            
+            // Check if settled (optimization)
+            // If mouse hasn't moved (we can track lastMouse) and all angles are negligible, stop.
+            let needsUpdate = false;
+
             // Optimization: Do minimal work if we know we are animating
-			this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-			this.ctx.strokeStyle = this.getGridColor();
-			this.ctx.lineWidth = 1;
-            
+            this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            this.ctx.strokeStyle = this.getGridColor();
+            this.ctx.lineWidth = 1;
+
             const style = getComputedStyle(document.documentElement);
-            const primaryVar = style.getPropertyValue('--primary').trim();
+            const primaryVar = style.getPropertyValue("--primary").trim();
 
             const maxDist = 200;
             const maxDistSq = maxDist * maxDist; // Use squared distance to avoid sqrt
 
-			this.points.forEach(p => {
-				const dx = this.mouseX - p.x;
-				const dy = this.mouseY - p.y;
-				const distSq = dx * dx + dy * dy;
-				let intensity = 0;
+            this.points.forEach((p) => {
+                const dx = this.mouseX - p.x;
+                const dy = this.mouseY - p.y;
+                const distSq = dx * dx + dy * dy;
+                let intensity = 0;
 
-				if (distSq < maxDistSq) {
-					intensity = 1 - (Math.sqrt(distSq) / maxDist);
-					p.angle = Math.atan2(dy, dx);
+                if (distSq < maxDistSq) {
+                    intensity = 1 - Math.sqrt(distSq) / maxDist;
+                    p.angle = Math.atan2(dy, dx);
                     needsUpdate = true; // Active interaction
-				} else {
-					// Decay
+                } else {
+                    // Decay
                     if (Math.abs(p.angle) > 0.01) {
-					    p.angle *= 0.95;
+                        p.angle *= 0.95;
                         needsUpdate = true; // Still settling
                     } else {
                         p.angle = 0;
                     }
-				}
+                }
 
-                // Culling: Only draw if visible or non-zero angle? 
+                // Culling: Only draw if visible or non-zero angle?
                 // For a grid, we usually draw everything or nothing.
                 // But we can skip "drawCross" transformations if angle is 0 and intensity is 0
-                // HOWEVER, we need to draw the base grid. 
+                // HOWEVER, we need to draw the base grid.
                 // If we want the base grid to be static, we could cache it.
                 // For now, drawing simple lines is cheap.
-				this.drawCross(p.x, p.y, p.angle, intensity, primaryVar);
-			});
-            
+                this.drawCross(p.x, p.y, p.angle, intensity, primaryVar);
+            });
+
             if (needsUpdate || this.isIdle === false) {
-			    this.animationFrameId = requestAnimationFrame(() => this.animate());
+                this.animationFrameId = requestAnimationFrame(() =>
+                    this.animate(),
+                );
                 // If we did a pass and nothing needed update, next time we might stop.
                 // But we need one "clean" pass to ensure everything is at 0.
-                if (!needsUpdate) this.isIdle = true; 
+                if (!needsUpdate) this.isIdle = true;
             } else {
                 this.animationFrameId = null; // Stop the loop
             }
-		}
+        }
 
-		drawCross(x: number, y: number, angle: number, intensity: number, primaryVar: string) {
-			const size = 2; // Smaller crosses
-			this.ctx.save();
-			this.ctx.translate(x, y);
-            
+        drawCross(
+            x: number,
+            y: number,
+            angle: number,
+            intensity: number,
+            primaryVar: string,
+        ) {
+            const size = 2; // Smaller crosses
+            this.ctx.save();
+            this.ctx.translate(x, y);
+
             // Only rotate if necessary
             if (angle !== 0) this.ctx.rotate(angle);
-			
-			if (intensity > 0) {
+
+            if (intensity > 0) {
                 if (primaryVar) {
                     this.ctx.strokeStyle = `hsl(${primaryVar} / ${0.4 + intensity * 0.6})`;
                 } else {
                     this.ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + intensity * 0.5})`;
                 }
-				this.ctx.lineWidth = 1 + intensity;
-			} 
+                this.ctx.lineWidth = 1 + intensity;
+            }
 
-			this.ctx.beginPath();
-			this.ctx.moveTo(-size, 0);
-			this.ctx.lineTo(size, 0);
-			this.ctx.moveTo(0, -size);
-			this.ctx.lineTo(0, size);
-			this.ctx.stroke();
-			this.ctx.restore();
-		}
-	}
+            this.ctx.beginPath();
+            this.ctx.moveTo(-size, 0);
+            this.ctx.lineTo(size, 0);
+            this.ctx.moveTo(0, -size);
+            this.ctx.lineTo(0, size);
+            this.ctx.stroke();
+            this.ctx.restore();
+        }
+    }
 
+    const section = document.querySelector("#features-flow");
 
-    const section = document.querySelector('#features-flow');
-    
     if (section) {
         // Initialize Background
-        new MagneticGrid('features-magnetic-grid');
+        new MagneticGrid("features-magnetic-grid");
 
-        // Set initial state for analytics bars
-        const bars = document.querySelectorAll('.analytics-bar');
-        bars.forEach(bar => {
-            bar.style.height = '0%';
-        });
+        // Counter animation helper
+        const animateCounter = (element: Element, duration: number = 2) => {
+            const target = parseFloat(
+                element.getAttribute("data-target") || "0",
+            );
+            const isDecimal = target % 1 !== 0;
+            const obj = { value: 0 };
+
+            gsap.to(obj, {
+                value: target,
+                duration: duration,
+                ease: "power2.out",
+                onUpdate: () => {
+                    element.textContent = isDecimal
+                        ? obj.value.toFixed(1)
+                        : Math.floor(obj.value).toLocaleString();
+                },
+            });
+        };
 
         const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: section,
                 start: "top top",
                 end: "+=400%", // Pin for 4 viewports worth of scroll
-                scrub: 0.5, 
+                scrub: 0.5,
                 pin: true,
-                anticipatePin: 1
-            }
+                anticipatePin: 1,
+            },
         });
 
         // --- STAGE 1: REST & READ ---
@@ -272,58 +313,137 @@ import FeatureAnalytics from "./FeatureAnalytics.astro";
 
         // --- STAGE 1 -> STAGE 2 ---
         // Fade out Editor
-        tl.to("#stage-editor", { opacity: 0, scale: 0.9, y: -50, duration: 2, ease: "power1.in" })
-          
-          // Show Schedule Container (but cards are invisible initially)
-          .to("#stage-schedule", { opacity: 1, y: 0, duration: 0.1 }, "-=1.5")
-          
-          // Grid fades in smoothly (Clean, no waterfall)
-          .to(".schedule-grid-card", 
-              { 
-                  y: 0, 
-                  opacity: 1, 
-                  duration: 1.5, 
-                  stagger: 0.05, 
-                  ease: "power2.out"
-              },
-              "<" 
-          )
-          
-          // "Flip Up" Card Animation (Face Up -> Face Front)
-          .fromTo("#schedule-card", 
-                { 
+        tl.to("#stage-editor", {
+            opacity: 0,
+            scale: 0.9,
+            y: -50,
+            duration: 2,
+            ease: "power1.in",
+        })
+
+            // Show Schedule Container (but cards are invisible initially)
+            .to("#stage-schedule", { opacity: 1, y: 0, duration: 0.1 }, "-=1.5")
+
+            // Grid fades in smoothly (Clean, no waterfall)
+            .to(
+                ".schedule-grid-card",
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.5,
+                    stagger: 0.05,
+                    ease: "power2.out",
+                },
+                "<",
+            )
+
+            // "Flip Up" Card Animation (Face Up -> Face Front)
+            .fromTo(
+                "#schedule-card",
+                {
                     y: 100, // Start slightly below
                     rotationX: -90, // Lying flat, facing up (negative for natural flip up from bottom)
                     opacity: 0,
                     scale: 0.8,
-                    transformPerspective: 1000
-                }, 
-                { 
-                    y: "-50%", 
+                    transformPerspective: 1000,
+                },
+                {
+                    y: "-50%",
                     rotationX: 0, // Face front
                     opacity: 1,
                     scale: 1,
-                    duration: 2.0, 
-                    ease: "back.out(1.5)" // Overshoot slightly for 'snap' effect
-                }, 
-                "+=0.2" // Start 0.2s AFTER grid finishes (Grid -> Pause -> Card)
+                    duration: 2.0,
+                    ease: "back.out(1.5)", // Overshoot slightly for 'snap' effect
+                },
+                "+=0.2", // Start 0.2s AFTER grid finishes (Grid -> Pause -> Card)
             )
-        
-        // --- STAGE 2 BUFFER ---
-        .to({}, { duration: 4 }) // Extended pause on Schedule (User Request)
 
-        // --- STAGE 2 -> STAGE 3 ---
-        // Fade out Schedule
-         .to("#stage-schedule", { opacity: 0, scale: 1.1, filter: "blur(10px)", duration: 2 })
-         // Fade in Analytics
-         .to("#stage-analytics", { opacity: 1, scale: 1, duration: 2 }, "<")
-         // Grow the bars
-         .to(".analytics-bar", { 
-             height: (i, target) => target.dataset.height, 
-             opacity: 1, 
-             duration: 3, 
-             stagger: 0.1, 
-             ease: "power2.out" 
-         }, "<+=0.5");
+            // --- STAGE 2 BUFFER ---
+            .to({}, { duration: 4 }) // Extended pause on Schedule (User Request)
+
+            // --- STAGE 2 -> STAGE 3 ---
+            // Fade out Schedule
+            .to("#stage-schedule", {
+                opacity: 0,
+                scale: 1.1,
+                filter: "blur(10px)",
+                duration: 2,
+            })
+            // Fade in Analytics
+            .to("#stage-analytics", { opacity: 1, scale: 1, duration: 2 }, "<")
+
+            // Animate hero counter
+            .add(() => {
+                const heroCounter = document.querySelector(
+                    ".analytics-hero-metric .analytics-counter",
+                );
+                if (heroCounter) animateCounter(heroCounter, 2.5);
+            }, "<+=0.3")
+
+            // Stagger in stat cards
+            .to(
+                ".analytics-stat-card",
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    stagger: 0.15,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        // Animate stat counters after cards appear
+                        document
+                            .querySelectorAll(
+                                ".analytics-stat-card .analytics-counter",
+                            )
+                            .forEach((counter, i) => {
+                                setTimeout(
+                                    () => animateCounter(counter, 1.5),
+                                    i * 100,
+                                );
+                            });
+                    },
+                },
+                "<+=0.5",
+            )
+
+            // Draw sparkline
+            .to(
+                ".analytics-sparkline-line",
+                {
+                    strokeDashoffset: 0,
+                    duration: 2,
+                    ease: "power2.inOut",
+                },
+                "<+=0.3",
+            )
+            .to(
+                ".analytics-sparkline-area",
+                {
+                    opacity: 1,
+                    duration: 1,
+                    ease: "power2.out",
+                },
+                "<+=0.5",
+            )
+            .to(
+                ".analytics-sparkline-dot",
+                {
+                    opacity: 1,
+                    duration: 0.5,
+                    ease: "power2.out",
+                },
+                ">-0.3",
+            )
+
+            // Reveal insight badge
+            .to(
+                ".analytics-insight",
+                {
+                    opacity: 1,
+                    duration: 0.8,
+                    ease: "power2.out",
+                },
+                "<",
+            );
     }
 </script>

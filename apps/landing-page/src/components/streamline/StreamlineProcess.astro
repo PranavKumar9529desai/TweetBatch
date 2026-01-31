@@ -21,162 +21,345 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 
     <!-- The Engine Canvas -->
     <div
-      class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-card/30 rounded-3xl border border-white/10 backdrop-blur-sm overflow-hidden shadow-2xl"
+      class="relative w-full aspect-[3/5] md:aspect-[21/9] bg-card/30 rounded-3xl border border-white/10 backdrop-blur-sm overflow-hidden shadow-2xl"
     >
       <!-- Grid Background -->
       <div
-        class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
+        class="hidden md:block absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"
       >
       </div>
 
-      <svg
-        id="streamline-svg"
-        class="absolute inset-0 w-full h-full"
-        viewBox="0 0 1200 600"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        <defs>
-          <filter id="glow-filter" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="4" result="coloredBlur"
-            ></feGaussianBlur>
-            <feMerge>
-              <feMergeNode in="coloredBlur"></feMergeNode>
-              <feMergeNode in="SourceGraphic"></feMergeNode>
-            </feMerge>
-          </filter>
+      <!-- Mobile SVG (Vertical Layout) -->
+      <div class="block md:hidden w-full h-full relative">
+        <svg
+          id="mobile-streamline-svg"
+          class="absolute inset-0 w-full h-full"
+          viewBox="0 0 400 600"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <filter
+              id="mobile-glow-filter"
+              x="-50%"
+              y="-50%"
+              width="200%"
+              height="200%"
+            >
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"
+              ></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="coloredBlur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+            <marker
+              id="mobile-arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="9"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))"
+              ></polygon>
+            </marker>
+          </defs>
 
-          <linearGradient id="trace-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stop-color="hsl(var(--primary))" stop-opacity="0"
-            ></stop>
-            <stop offset="50%" stop-color="hsl(var(--primary))" stop-opacity="1"
-            ></stop>
-            <stop
-              offset="100%"
-              stop-color="hsl(var(--primary))"
-              stop-opacity="0"></stop>
-          </linearGradient>
-
-          <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
+          <!-- Labels -->
+          <text
+            x="200"
+            y="40"
+            text-anchor="middle"
+            fill="currentColor"
+            class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none"
+            >RAW IDEAS</text
           >
-            <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))"
-            ></polygon>
-          </marker>
-        </defs>
 
-        <!-- Labels -->
-        <text
-          x="15"
-          y="300"
-          fill="currentColor"
-          class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none"
-          >RAW IDEAS</text
-        >
-
-        <!-- 1. Input Traces (Left Side) -->
-        <g
-          id="input-traces"
-          fill="none"
-          stroke="hsl(var(--primary))"
-          stroke-width="2"
-          stroke-opacity="0.3"
-        >
-          <!-- Top Path -->
-          <path d="M150,200 C250,200 350,300 520,300"></path>
-          <!-- Bottom Path -->
-          <path d="M150,400 C250,400 350,300 520,300"></path>
-          <!-- Middle Path -->
-          <path d="M150,300 L520,300"></path>
-        </g>
-
-        <!-- 2. The Processor (Central Core) -->
-        <g id="processor-core" transform="translate(600, 300)">
-          <!-- Outer Ring -->
-          <circle
-            r="70"
+          <!-- 1. Input Traces -->
+          <g
+            id="mobile-input-traces"
             fill="none"
             stroke="hsl(var(--primary))"
-            stroke-width="1"
-            stroke-dasharray="4 4"
-            class="opacity-30"></circle>
-          <!-- Hexagon - the main processing element that will glow -->
-          <path
-            id="hexagon-core"
-            d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z"
-            fill="hsl(var(--card))"
-            stroke="hsl(var(--primary))"
-            stroke-width="2"></path>
-          <!-- Inner Core (subtle, doesn't scale) -->
-          <circle
-            id="core-light"
-            r="12"
-            fill="hsl(var(--primary))"
-            class="opacity-40"></circle>
-        </g>
+            stroke-width="2"
+            stroke-opacity="0.3"
+          >
+            <!-- Left Path -->
+            <path d="M100,70 C100,150 150,250 200,250"></path>
+            <!-- Middle Path -->
+            <path d="M200,70 L200,250"></path>
+            <!-- Right Path -->
+            <path d="M300,70 C300,150 250,250 200,250"></path>
+          </g>
 
-        <!-- 3. Output Line (connects hexagon to scheduled box) -->
-        <g id="output-trace" fill="none">
-          <line
-            id="output-line"
-            x1="650"
-            y1="300"
-            x2="950"
-            y2="300"
+          <!-- 2. The Processor (Central Core) -->
+          <g id="mobile-processor-core" transform="translate(200, 250)">
+            <!-- Outer Ring -->
+            <circle
+              r="70"
+              fill="none"
+              stroke="hsl(var(--primary))"
+              stroke-width="1"
+              stroke-dasharray="4 4"
+              class="opacity-30"></circle>
+            <!-- Hexagon -->
+            <path
+              id="mobile-hexagon-core"
+              d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z"
+              fill="hsl(var(--card))"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"></path>
+            <!-- Inner Core -->
+            <circle
+              id="mobile-core-light"
+              r="12"
+              fill="hsl(var(--primary))"
+              class="opacity-40"></circle>
+          </g>
+
+          <!-- 3. Output Line -->
+          <g id="mobile-output-trace" fill="none">
+            <line
+              id="mobile-output-line"
+              x1="200"
+              y1="250"
+              x2="200"
+              y2="450"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"
+              stroke-opacity="0.5"></line>
+          </g>
+
+          <!-- Center Label -->
+          <g id="mobile-center-label" transform="translate(200, 330)">
+            <text
+              text-anchor="middle"
+              fill="hsl(var(--primary))"
+              font-family="var(--font-mono)"
+              font-size="12"
+              letter-spacing="0.15em"
+              class="opacity-0"
+              id="mobile-processing-text">TWEETBATCH</text
+            >
+          </g>
+
+          <!-- 4. Scheduled Box -->
+          <g id="mobile-scheduled-box" transform="translate(110, 450)">
+            <rect
+              id="mobile-target-rect"
+              width="180"
+              height="60"
+              rx="8"
+              fill="hsl(var(--card))"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"
+              class="opacity-50 transition-all duration-300"></rect>
+            <text
+              x="90"
+              y="35"
+              text-anchor="middle"
+              fill="hsl(var(--primary))"
+              class="font-mono text-xl font-bold tracking-widest select-none"
+              >SCHEDULED</text
+            >
+          </g>
+
+          <!-- Moving Elements -->
+          <g id="mobile-anim-elements" filter="url(#mobile-glow-filter)">
+            <circle
+              id="mobile-dot-1"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+            <circle
+              id="mobile-dot-2"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+            <circle
+              id="mobile-dot-3"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Desktop SVG (Horizontal Layout) -->
+      <div class="hidden md:block w-full h-full relative">
+        <svg
+          id="streamline-svg"
+          class="absolute inset-0 w-full h-full"
+          viewBox="0 0 1200 600"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <defs>
+            <filter
+              id="glow-filter"
+              x="-50%"
+              y="-50%"
+              width="200%"
+              height="200%"
+            >
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"
+              ></feGaussianBlur>
+              <feMerge>
+                <feMergeNode in="coloredBlur"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+
+            <linearGradient
+              id="trace-gradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop
+                offset="0%"
+                stop-color="hsl(var(--primary))"
+                stop-opacity="0"></stop>
+              <stop
+                offset="50%"
+                stop-color="hsl(var(--primary))"
+                stop-opacity="1"></stop>
+              <stop
+                offset="100%"
+                stop-color="hsl(var(--primary))"
+                stop-opacity="0"></stop>
+            </linearGradient>
+
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="9"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="hsl(var(--primary))"
+              ></polygon>
+            </marker>
+          </defs>
+
+          <!-- Labels -->
+          <text
+            x="15"
+            y="300"
+            fill="currentColor"
+            class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none"
+            >RAW IDEAS</text
+          >
+
+          <!-- 1. Input Traces (Left Side) -->
+          <g
+            id="input-traces"
+            fill="none"
             stroke="hsl(var(--primary))"
             stroke-width="2"
-            stroke-opacity="0.5"></line>
-        </g>
-
-        <!-- Center Label (appears during processing) -->
-        <g id="center-label" transform="translate(600, 380)">
-          <text
-            text-anchor="middle"
-            fill="hsl(var(--primary))"
-            font-family="var(--font-mono)"
-            font-size="12"
-            letter-spacing="0.15em"
-            class="opacity-0"
-            id="processing-text">TWEETBATCH</text
+            stroke-opacity="0.3"
           >
-        </g>
+            <!-- Top Path -->
+            <path d="M150,200 C250,200 350,300 520,300"></path>
+            <!-- Bottom Path -->
+            <path d="M150,400 C250,400 350,300 520,300"></path>
+            <!-- Middle Path -->
+            <path d="M150,300 L520,300"></path>
+          </g>
 
-        <!-- 4. Scheduled Box (Target) -->
-        <g id="scheduled-box" transform="translate(950, 270)">
-          <rect
-            width="180"
-            height="60"
-            rx="8"
-            fill="hsl(var(--card))"
-            stroke="hsl(var(--primary))"
-            stroke-width="2"
-            class="opacity-50 transition-all duration-300"
-            id="target-rect"></rect>
-          <text
-            x="90"
-            y="35"
-            text-anchor="middle"
-            fill="hsl(var(--primary))"
-            class="font-mono text-xl font-bold tracking-widest select-none"
-            >SCHEDULED</text
-          >
-        </g>
+          <!-- 2. The Processor (Central Core) -->
+          <g id="processor-core" transform="translate(600, 300)">
+            <!-- Outer Ring -->
+            <circle
+              r="70"
+              fill="none"
+              stroke="hsl(var(--primary))"
+              stroke-width="1"
+              stroke-dasharray="4 4"
+              class="opacity-30"></circle>
+            <!-- Hexagon - the main processing element that will glow -->
+            <path
+              id="hexagon-core"
+              d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z"
+              fill="hsl(var(--card))"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"></path>
+            <!-- Inner Core (subtle, doesn't scale) -->
+            <circle
+              id="core-light"
+              r="12"
+              fill="hsl(var(--primary))"
+              class="opacity-40"></circle>
+          </g>
 
-        <!-- Moving Elements -->
-        <g id="anim-elements" filter="url(#glow-filter)">
-          <!-- 3 Input Dots -->
-          <circle id="dot-1" r="6" fill="hsl(var(--primary))" class="opacity-0"
-          ></circle>
-          <circle id="dot-2" r="6" fill="hsl(var(--primary))" class="opacity-0"
-          ></circle>
-          <circle id="dot-3" r="6" fill="hsl(var(--primary))" class="opacity-0"
-          ></circle>
-        </g>
-      </svg>
+          <!-- 3. Output Line (connects hexagon to scheduled box) -->
+          <g id="output-trace" fill="none">
+            <line
+              id="output-line"
+              x1="650"
+              y1="300"
+              x2="950"
+              y2="300"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"
+              stroke-opacity="0.5"></line>
+          </g>
+
+          <!-- Center Label (appears during processing) -->
+          <g id="center-label" transform="translate(600, 380)">
+            <text
+              text-anchor="middle"
+              fill="hsl(var(--primary))"
+              font-family="var(--font-mono)"
+              font-size="12"
+              letter-spacing="0.15em"
+              class="opacity-0"
+              id="processing-text">TWEETBATCH</text
+            >
+          </g>
+
+          <!-- 4. Scheduled Box (Target) -->
+          <g id="scheduled-box" transform="translate(950, 270)">
+            <rect
+              width="180"
+              height="60"
+              rx="8"
+              fill="hsl(var(--card))"
+              stroke="hsl(var(--primary))"
+              stroke-width="2"
+              class="opacity-50 transition-all duration-300"
+              id="target-rect"></rect>
+            <text
+              x="90"
+              y="35"
+              text-anchor="middle"
+              fill="hsl(var(--primary))"
+              class="font-mono text-xl font-bold tracking-widest select-none"
+              >SCHEDULED</text
+            >
+          </g>
+
+          <!-- Moving Elements -->
+          <g id="anim-elements" filter="url(#glow-filter)">
+            <!-- 3 Input Dots -->
+            <circle
+              id="dot-1"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+            <circle
+              id="dot-2"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+            <circle
+              id="dot-3"
+              r="6"
+              fill="hsl(var(--primary))"
+              class="opacity-0"></circle>
+          </g>
+        </svg>
+      </div>
     </div>
   </div>
 </section>
@@ -193,285 +376,310 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
    * Follows the MomentumEngine pattern for reliable initialization
    */
   class StreamlineAnimation {
-    // DOM Elements
-    private svg: SVGSVGElement | null = null;
-    private dot1: SVGCircleElement | null = null;
-    private dot2: SVGCircleElement | null = null;
-    private dot3: SVGCircleElement | null = null;
-    private coreLight: SVGCircleElement | null = null;
-    private hexagonCore: SVGPathElement | null = null;
-    private outputLine: SVGLineElement | null = null;
-    private processingText: SVGTextElement | null = null;
-    private targetRect: SVGRectElement | null = null;
-    private section: HTMLElement | null = null;
+    // DOM Elements - Desktop
+    private desktopSvg: SVGSVGElement | null = null;
+    private desktopElements = {
+      dot1: null as SVGCircleElement | null,
+      dot2: null as SVGCircleElement | null,
+      dot3: null as SVGCircleElement | null,
+      coreLight: null as SVGCircleElement | null,
+      hexagonCore: null as SVGPathElement | null,
+      outputLine: null as SVGLineElement | null,
+      processingText: null as SVGTextElement | null,
+      targetRect: null as SVGRectElement | null,
+    };
 
-    // Paths for motion animation (dots converging)
-    private readonly paths = {
+    // DOM Elements - Mobile
+    private mobileSvg: SVGSVGElement | null = null;
+    private mobileElements = {
+      dot1: null as SVGCircleElement | null,
+      dot2: null as SVGCircleElement | null,
+      dot3: null as SVGCircleElement | null,
+      coreLight: null as SVGCircleElement | null,
+      hexagonCore: null as SVGPathElement | null,
+      outputLine: null as SVGLineElement | null,
+      processingText: null as SVGTextElement | null,
+      targetRect: null as SVGRectElement | null,
+    };
+
+    private section: HTMLElement | null = null;
+    private mm: gsap.MatchMedia;
+
+    // Paths for motion animation
+    private readonly desktopPaths = {
       top: "M150,200 C250,200 350,300 520,300",
       mid: "M150,300 L520,300",
       bot: "M150,400 C250,400 350,300 520,300",
     };
 
-    // GSAP Timeline
-    private timeline: gsap.core.Timeline | null = null;
-    private scrollTrigger: ScrollTrigger | null = null;
+    private readonly mobilePaths = {
+      left: "M100,70 C100,150 150,250 200,250",
+      mid: "M200,70 L200,250",
+      right: "M300,70 C300,150 250,250 200,250",
+    };
 
     constructor() {
+      this.mm = gsap.matchMedia();
       this.init();
     }
 
     private init(): void {
-      // Get section and SVG using querySelector for proper SVG type inference
       this.section = document.getElementById("streamline-engine");
-      this.svg = document.querySelector<SVGSVGElement>("#streamline-svg");
+      this.desktopSvg =
+        document.querySelector<SVGSVGElement>("#streamline-svg");
+      this.mobileSvg = document.querySelector<SVGSVGElement>(
+        "#mobile-streamline-svg",
+      );
 
-      if (!this.section || !this.svg) {
-        console.warn(
-          "StreamlineAnimation: Section or SVG not found, skipping init",
-        );
-        return;
-      }
+      if (!this.section) return;
 
-      // Get all animated elements using querySelector for proper SVG type inference
-      this.dot1 = document.querySelector<SVGCircleElement>("#dot-1");
-      this.dot2 = document.querySelector<SVGCircleElement>("#dot-2");
-      this.dot3 = document.querySelector<SVGCircleElement>("#dot-3");
-      this.coreLight = document.querySelector<SVGCircleElement>("#core-light");
-      this.hexagonCore =
-        document.querySelector<SVGPathElement>("#hexagon-core");
-      this.outputLine = document.querySelector<SVGLineElement>("#output-line");
-      this.processingText =
-        document.querySelector<SVGTextElement>("#processing-text");
-      this.targetRect = document.querySelector<SVGRectElement>("#target-rect");
+      // Select Desktop Elements
+      this.desktopElements.dot1 = document.querySelector("#dot-1");
+      this.desktopElements.dot2 = document.querySelector("#dot-2");
+      this.desktopElements.dot3 = document.querySelector("#dot-3");
+      this.desktopElements.coreLight = document.querySelector("#core-light");
+      this.desktopElements.hexagonCore =
+        document.querySelector("#hexagon-core");
+      this.desktopElements.outputLine = document.querySelector("#output-line");
+      this.desktopElements.processingText =
+        document.querySelector("#processing-text");
+      this.desktopElements.targetRect = document.querySelector("#target-rect");
 
-      if (
-        !this.dot1 ||
-        !this.dot2 ||
-        !this.dot3 ||
-        !this.hexagonCore ||
-        !this.outputLine
-      ) {
-        console.warn("StreamlineAnimation: Missing animation elements");
-        return;
-      }
+      // Select Mobile Elements
+      this.mobileElements.dot1 = document.querySelector("#mobile-dot-1");
+      this.mobileElements.dot2 = document.querySelector("#mobile-dot-2");
+      this.mobileElements.dot3 = document.querySelector("#mobile-dot-3");
+      this.mobileElements.coreLight =
+        document.querySelector("#mobile-core-light");
+      this.mobileElements.hexagonCore = document.querySelector(
+        "#mobile-hexagon-core",
+      );
+      this.mobileElements.outputLine = document.querySelector(
+        "#mobile-output-line",
+      );
+      this.mobileElements.processingText = document.querySelector(
+        "#mobile-processing-text",
+      );
+      this.mobileElements.targetRect = document.querySelector(
+        "#mobile-target-rect",
+      );
 
-      this.resetElements();
-      this.createTimeline();
+      this.createAnimations();
     }
 
     /**
-     * Reset all animated elements to their initial state
+     * Set initial states for elements
      */
-    private resetElements(): void {
-      // Position dots at starting points (leftmost, visible from start)
-      // Path starts: top at (150,200), mid at (150,300), bot at (150,400)
-      gsap.set(this.dot1, { x: 150, y: 200, opacity: 1, scale: 1 });
-      gsap.set(this.dot2, { x: 150, y: 300, opacity: 1, scale: 1 });
-      gsap.set(this.dot3, { x: 150, y: 400, opacity: 1, scale: 1 });
+    private setInitialStates(isMobile: boolean): void {
+      const els = isMobile ? this.mobileElements : this.desktopElements;
 
-      // Reset target box
-      if (this.targetRect) {
-        gsap.set(this.targetRect, {
-          opacity: 0.5,
-          filter: "none",
-        });
+      // Reset dots
+      if (isMobile) {
+        gsap.set(els.dot1, { x: 100, y: 70, opacity: 1, scale: 1 });
+        gsap.set(els.dot2, { x: 200, y: 70, opacity: 1, scale: 1 });
+        gsap.set(els.dot3, { x: 300, y: 70, opacity: 1, scale: 1 });
+      } else {
+        gsap.set(els.dot1, { x: 150, y: 200, opacity: 1, scale: 1 });
+        gsap.set(els.dot2, { x: 150, y: 300, opacity: 1, scale: 1 });
+        gsap.set(els.dot3, { x: 150, y: 400, opacity: 1, scale: 1 });
       }
 
-      // Reset hexagon (no glow initially)
-      if (this.hexagonCore) {
-        gsap.set(this.hexagonCore, {
+      // Reset common elements
+      if (els.targetRect)
+        gsap.set(els.targetRect, { opacity: 0.5, filter: "none" });
+      if (els.hexagonCore)
+        gsap.set(els.hexagonCore, {
           filter: "none",
           attr: { "stroke-width": 2 },
         });
-      }
-
-      // Reset output line (visible by default)
-      if (this.outputLine) {
-        gsap.set(this.outputLine, {
+      if (els.outputLine)
+        gsap.set(els.outputLine, {
           attr: { "stroke-opacity": 0.5, "stroke-width": 2 },
           filter: "none",
         });
-      }
-
-      // Reset processing text (hidden initially)
-      if (this.processingText) {
-        gsap.set(this.processingText, {
-          opacity: 0,
-        });
-      }
-
-      // Reset core light (subtle, no animation)
-      if (this.coreLight) {
-        gsap.set(this.coreLight, {
-          opacity: 0.4,
-        });
-      }
+      if (els.processingText) gsap.set(els.processingText, { opacity: 0 });
+      if (els.coreLight) gsap.set(els.coreLight, { opacity: 0.4 });
     }
 
-    /**
-     * Create the scroll-triggered animation timeline
-     * Uses pinning to pause viewport so users can see the full animation
-     */
-    private createTimeline(): void {
-      // Create timeline with scroll-linked animation WITH pinning
-      // This section is placed AFTER the other pinned sections (MomentumEngine, KineticFeed)
-      // so the pin order should be correct
-      this.timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: this.section,
-          start: "top top", // Pin when section top reaches viewport top
-          end: "+=1200", // Extended scroll distance - gives extra time to see completed animation
-          scrub: 1, // Smooth scroll-linked animation
-          pin: true, // Pin the section while animating
-          anticipatePin: 1, // Smooth pin transition
-          onEnter: () => this.resetElements(), // Reset on each entry
-        },
+    private createAnimations(): void {
+      // Desktop Animation (min-width: 768px)
+      this.mm.add("(min-width: 768px)", () => {
+        if (!this.desktopSvg) return;
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: this.section,
+            start: "top top",
+            end: "+=1200",
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            onEnter: () => this.setInitialStates(false),
+          },
+        });
+
+        this.buildSequence(tl, false);
+        return () => {
+          tl.kill();
+        };
       });
 
-      this.buildAnimationSequence();
+      // Mobile Animation (max-width: 767px)
+      this.mm.add("(max-width: 767px)", () => {
+        if (!this.mobileSvg) return;
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: this.section,
+            start: "top top", // Pin earlier on mobile?
+            end: "+=1200",
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+            onEnter: () => this.setInitialStates(true),
+          },
+        });
+
+        this.buildSequence(tl, true);
+        return () => {
+          tl.kill();
+        };
+      });
     }
 
-    /**
-     * Build the 4-phase animation sequence
-     */
-    private buildAnimationSequence(): void {
-      if (!this.timeline) return;
+    private buildSequence(tl: gsap.core.Timeline, isMobile: boolean): void {
+      const els = isMobile ? this.mobileElements : this.desktopElements;
 
-      const tl = this.timeline;
+      // Check if essential elements exist
+      if (
+        !els.dot1 ||
+        !els.dot2 ||
+        !els.dot3 ||
+        !els.hexagonCore ||
+        !els.outputLine
+      )
+        return;
 
-      // ═══════════════════════════════════════════════════════════════
-      // PHASE 1: CONVERGENCE - 3 dots animate from left to center
-      // ═══════════════════════════════════════════════════════════════
-      tl.addLabel("convergence")
+      // Phase 1: Convergence
+      tl.addLabel("convergence");
 
-        // Dot 1 (Top path) - already visible, just moves along path
-        .to(
-          this.dot1,
+      if (isMobile) {
+        const paths = this.mobilePaths;
+        tl.to(
+          els.dot1,
           {
-            motionPath: {
-              path: this.paths.top,
-              alignOrigin: [0.5, 0.5],
-            },
+            motionPath: { path: paths.left, alignOrigin: [0.5, 0.5] },
             duration: 2,
             ease: "power2.inOut",
           },
           "convergence",
         )
-
-        // Dot 2 (Middle path)
-        .to(
-          this.dot2,
-          {
-            motionPath: {
-              path: this.paths.mid,
-              alignOrigin: [0.5, 0.5],
+          .to(
+            els.dot2,
+            {
+              motionPath: { path: paths.mid, alignOrigin: [0.5, 0.5] },
+              duration: 2,
+              ease: "power2.inOut",
             },
+            "convergence",
+          )
+          .to(
+            els.dot3,
+            {
+              motionPath: { path: paths.right, alignOrigin: [0.5, 0.5] },
+              duration: 2,
+              ease: "power2.inOut",
+            },
+            "convergence",
+          );
+      } else {
+        const paths = this.desktopPaths;
+        tl.to(
+          els.dot1,
+          {
+            motionPath: { path: paths.top, alignOrigin: [0.5, 0.5] },
             duration: 2,
             ease: "power2.inOut",
           },
           "convergence",
         )
-
-        // Dot 3 (Bottom path)
-        .to(
-          this.dot3,
-          {
-            motionPath: {
-              path: this.paths.bot,
-              alignOrigin: [0.5, 0.5],
+          .to(
+            els.dot2,
+            {
+              motionPath: { path: paths.mid, alignOrigin: [0.5, 0.5] },
+              duration: 2,
+              ease: "power2.inOut",
             },
-            duration: 2,
-            ease: "power2.inOut",
-          },
-          "convergence",
-        );
+            "convergence",
+          )
+          .to(
+            els.dot3,
+            {
+              motionPath: { path: paths.bot, alignOrigin: [0.5, 0.5] },
+              duration: 2,
+              ease: "power2.inOut",
+            },
+            "convergence",
+          );
+      }
 
-      // ═══════════════════════════════════════════════════════════════
-      // PHASE 2: PROCESSING - Dots disappear, EVERYTHING glows together!
-      // ═══════════════════════════════════════════════════════════════
+      // Phase 2: Processing & Glow
       tl.addLabel("processing")
-
-        // Hide dots as they reach the core
-        .to([this.dot1, this.dot2, this.dot3], {
+        .to([els.dot1, els.dot2, els.dot3], {
           opacity: 0,
           scale: 0.3,
           duration: 0.4,
         })
 
-        // === ALL GLOW TOGETHER ===
+        // Note: For mobile, we might want to use the mobile glow filter ID if they are distinct,
+        // but here we used 'glow-filter' in the script for both.
+        // However, I defined 'mobile-glow-filter' in the mobile SVG.
+        // I need to make sure the script uses the correct filter ID.
+        // Actually, the filter ID is 'url(#glow-filter)' in previous code.
+        // In mobile SVG I named it 'mobile-glow-filter'.
+        // I should update the script to use the correct filter ID based on isMobile.
 
-        // Hexagon glow
         .to(
-          this.hexagonCore,
+          els.hexagonCore,
           {
-            filter: "url(#glow-filter)",
+            filter: isMobile ? "url(#mobile-glow-filter)" : "url(#glow-filter)",
             attr: { "stroke-width": 4 },
             duration: 0.5,
           },
           "-=0.2",
         )
 
-        // Output line brightens (at same time as hexagon) - NO filter, just brighter stroke
         .to(
-          this.outputLine,
+          els.outputLine,
           {
             attr: { "stroke-opacity": 1, "stroke-width": 3 },
             duration: 0.5,
           },
-          "<", // Same time as hexagon
+          "<",
         )
 
-        // Target box glows (at same time)
         .to(
-          this.targetRect,
+          els.targetRect,
           {
             attr: { "stroke-width": 4 },
-            filter: "url(#glow-filter)",
+            filter: isMobile ? "url(#mobile-glow-filter)" : "url(#glow-filter)",
             opacity: 1,
             duration: 0.5,
-          },
-          "<", // Same time as hexagon & line
-        )
-
-        // Core light brightens (at same time)
-        .to(
-          this.coreLight,
-          {
-            opacity: 0.9,
-            duration: 0.4,
           },
           "<",
         )
 
-        // Processing label fades in (slightly after)
-        .to(
-          this.processingText,
-          {
-            opacity: 1,
-            duration: 0.4,
-          },
-          "<0.1",
-        );
+        .to(els.coreLight, { opacity: 0.9, duration: 0.4 }, "<")
+        .to(els.processingText, { opacity: 1, duration: 0.4 }, "<0.1");
 
-      // ═══════════════════════════════════════════════════════════════
-      // PHASE 3: HOLD - Let users appreciate the completed animation
-      // ═══════════════════════════════════════════════════════════════
-      tl.addLabel("hold").to({}, { duration: 1.5 }); // Empty tween - just holds for 1.5s of scroll
+      // Phase 3: Hold
+      tl.addLabel("hold").to({}, { duration: 1.5 });
     }
 
-    /**
-     * Cleanup method for proper disposal
-     */
     public destroy(): void {
-      if (this.scrollTrigger) {
-        this.scrollTrigger.kill();
-      }
-      if (this.timeline) {
-        this.timeline.kill();
-      }
+      if (this.mm) this.mm.revert();
     }
   }
 
-  // Immediate instantiation - no event listener dependency
   new StreamlineAnimation();
 </script>

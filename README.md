@@ -14,7 +14,7 @@ TweetBatch (TB) is a high-performance, serverless application designed to stream
 
 | Application | URL | Description |
 |-------------|-----|-------------|
-| **Landing Page** | [Click Here](https://landing-page.fullstackwebdeveloper123.workers.dev) | Marketing site featuring Momentum Engine & Kinetic Feed visualizations. |
+| **Landing Page** | [Click Here](https://landing-page.fullstackwebdeveloper123.workers.dev) | Marketing site featuring advanced scheduling & interactive feed visualizations. |
 | **Web App** | [Click Here](https://tweetbatch-frontend.fullstackwebdeveloper123.workers.dev) | The core application for composing and scheduling tweets. |
 
 ---
@@ -26,34 +26,34 @@ TweetBatch leverages a distributed, serverless architecture to ensure instant sc
 ```mermaid
 graph TD
     subgraph Client ["Client Side"]
-        LP[Landing Page (Astro/GSAP)]
-        WA[Web App (React 19)]
+        LP["Landing Page (Astro/GSAP)"]
+        WA["Web App (React 19)"]
     end
 
     subgraph Edge ["Cloudflare Edge"]
-        W[Worker API (Hono)]
-        Assets[Static Assets]
+        W["Worker API (Hono)"]
+        Assets["Static Assets"]
     end
 
     subgraph Infrastructure ["Serverless Infra"]
-        DB[(Neon Serverless Postgres)]
-        Q[Upstash QStash]
-        Twitter[X (Twitter) API]
+        DB[("Neon Serverless Postgres")]
+        Q["Upstash QStash"]
+        Twitter["X (Twitter) API"]
     end
 
     Client -- HTTPS --> Edge
     W -- Drizzle ORM --> DB
     W -- Scheduling --> Q
-    Q -- Webhook ("At Scheduled Time") --> W
+    Q -- "Webhook (At Scheduled Time)" --> W
     W -- OAuth --> Twitter
 ```
 
 ### Core Components
 
-*   **Momentum Engine (Scheduling)**: Powered by **Upstash QStash**, this engine handles precise message delivery with distinct windows (Morning, Afternoon, Evening) to ensure robust throughput without rate limiting.
-*   **Kinetic Feed (Frontend)**: A drag-and-drop interface built with **React 19**, **TanStack Query**, and **dnd-kit**, allowing users to visually organize their content pipeline.
-*   **Time Weaver (Database)**: Utilizing **Neon Serverless Postgres** with `@neondatabase/serverless` HTTP pooling to manage high-concurrency connections efficiently.
-*   **Quantum Echo (Landing)**: A high-fidelity marketing experience built with **Astro**, **GSAP**, and **Tailwind CSS**, featuring 3D-like animations and scroll-driven storytelling.
+*   **Scheduling Engine**: Powered by **Upstash QStash**, this system handles precise message delivery with distinct windows (Morning, Afternoon, Evening) to ensure robust throughput without rate limiting.
+*   **Interactive Feed (Frontend)**: A drag-and-drop interface built with **React 19**, **TanStack Query**, and **dnd-kit**, allowing users to visually organize their content pipeline.
+*   **Database Layer**: Utilizing **Neon Serverless Postgres** with `@neondatabase/serverless` HTTP pooling to manage high-concurrency connections efficiently.
+*   **Landing Page Experience**: A high-fidelity site built with **Astro**, **GSAP**, and **Tailwind CSS**, featuring 3D-like animations and scroll-driven storytelling.
 
 ---
 
@@ -76,7 +76,7 @@ This project is organized as a **Turborepo** to manage multiple applications and
 
 *   **Smart Composition**: Rich text editor powered by **TipTap** with character counting and thread support.
 *   **Visual Scheduling**: Drag-and-drop calendar view to reorganize your content strategy instantly.
-*   **Bulk Import**: Upload hundreds of tweets via JSON/CSV and let the Momentum Engine distribute them automatically.
+*   **Bulk Import**: Upload hundreds of tweets via JSON/CSV and let the scheduling engine distribute them automatically.
 *   **Fault Tolerance**: Built-in Dead Letter Queues (DLQ) and retry mechanisms to handle Twitter API outages gracefully.
 *   **Edge Performance**: Deployed to Cloudflare's global network for sub-second latency from anywhere in the world.
 

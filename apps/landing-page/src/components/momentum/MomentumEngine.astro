@@ -4,282 +4,333 @@ import EngineCore from "./EngineCore.astro";
 import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 ---
 
-<section id="momentum-engine" class="relative z-20 w-full h-screen bg-background overflow-hidden">
-  <!-- Background Grid (Streaming) -->
-  <div class="absolute inset-0 -z-10 pointer-events-none">
-    <div id="momentum-grid" class="absolute inset-0 opacity-40 grid-pattern">
-        <WarpTunnel />
-    </div>
-  </div>
-
-  <!-- Main Canvas for Particles -->
-  <canvas id="engine-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
-
-  <!-- Container (GSAP will pin the section) -->
-  <div class="h-full w-full flex flex-col items-center justify-center">
-    
-    <!-- Stage Title -->
-    <div class="absolute top-[15%] text-center z-30 pointer-events-none">
-        <h2 id="momentum-title" class="text-4xl md:text-6xl font-black tracking-tighter opacity-0 translate-y-10">
-            TURNING CHAOS <br/> <span class="text-primary">INTO MOMENTUM</span>
-        </h2>
+<section
+    id="momentum-engine"
+    class="relative z-20 w-full h-screen bg-background overflow-hidden"
+>
+    <!-- Background Grid (Streaming) -->
+    <div class="absolute inset-0 -z-10 pointer-events-none">
+        <div
+            id="momentum-grid"
+            class="absolute inset-0 opacity-40 grid-pattern"
+        >
+            <WarpTunnel />
+        </div>
     </div>
 
-    <!-- The Core -->
-    <div id="momentum-core-wrapper" class="relative z-40 opacity-0 scale-50">
-        <EngineCore />
-    </div>
+    <!-- Main Canvas for Particles -->
+    <canvas
+        id="engine-canvas"
+        class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
 
-    <!-- Growth Message -->
-    <div class="absolute bottom-[20%] text-center z-30 w-full max-w-2xl px-6 pointer-events-none">
-        <p id="momentum-subtitle" class="text-xl md:text-2xl text-muted-foreground font-medium opacity-0">
-            Consistency is the only algorithm that actually works.
-        </p>
-    </div>
+    <!-- Container (GSAP will pin the section) -->
+    <div class="h-full w-full flex flex-col items-center justify-center">
+        <!-- Stage Title -->
+        <div class="absolute top-[15%] text-center z-30 pointer-events-none">
+            <h2
+                id="momentum-title"
+                class="text-4xl md:text-6xl font-black tracking-tighter opacity-0 translate-y-10"
+            >
+                TURNING CHAOS <br />
+                <span class="text-primary">INTO MOMENTUM</span>
+            </h2>
+        </div>
 
-  </div>
+        <!-- The Core -->
+        <div
+            id="momentum-core-wrapper"
+            class="relative z-40 opacity-0 scale-50"
+        >
+            <EngineCore />
+        </div>
+
+        <!-- Growth Message -->
+        <div
+            class="absolute bottom-[20%] text-center z-30 w-full max-w-2xl px-6 pointer-events-none"
+        >
+            <p
+                id="momentum-subtitle"
+                class="text-xl md:text-2xl text-muted-foreground font-medium opacity-0"
+            >
+                Consistency is the only algorithm that actually works.
+            </p>
+        </div>
+    </div>
 </section>
 
 <style>
-  .grid-pattern {
-    background-image: 
-        radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0);
-    background-size: 40px 40px;
-    color: hsl(var(--foreground) / 0.15);
-  }
+    .grid-pattern {
+        background-image: radial-gradient(
+            circle at 1px 1px,
+            currentColor 1px,
+            transparent 0
+        );
+        background-size: 40px 40px;
+        color: hsl(var(--foreground) / 0.15);
+    }
 
-  #momentum-engine {
-    background: radial-gradient(circle at center, hsl(var(--primary) / 0.05) 0%, transparent 70%);
-  }
+    #momentum-engine {
+        background-image: radial-gradient(
+            circle at center,
+            hsl(var(--primary) / 0.05) 0%,
+            transparent 70%
+        );
+    }
 </style>
 
 <script>
-  import gsap from 'gsap';
-  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import gsap from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-  gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger);
 
-  class MomentumEngine {
-    canvas: HTMLCanvasElement;
-    ctx: CanvasRenderingContext2D;
-    particles: Particle[] = [];
-    particleCount = 120;
-    
-    // Engine State (Controlled by GSAP)
-    state = {
-        chaos: 0,       // 0 to 1
-        turbine: 0,     // 0 to 1
-        velocity: 0.2,   // Rotation speed
-        coreGlow: 0,    // 0 to 1
-        streaming: 0    // Background motion blur
-    };
+    class MomentumEngine {
+        canvas: HTMLCanvasElement;
+        ctx: CanvasRenderingContext2D;
+        particles: Particle[] = [];
+        particleCount = 120;
 
-    isPlaying = false;
-    animationId: number | null = null;
-
-    constructor(canvasId: string) {
-        const el = document.getElementById(canvasId);
-        if (!el) return;
-        this.canvas = el as HTMLCanvasElement;
-        this.ctx = this.canvas.getContext('2d')!;
-        
-        this.resize();
-        this.initParticles();
-        this.initTimeline();
-        this.initObserver();
-        
-        window.addEventListener('resize', () => this.resize());
-    }
-
-    initObserver() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                this.isPlaying = entry.isIntersecting;
-                if (this.isPlaying) this.render();
-                else if (this.animationId) cancelAnimationFrame(this.animationId);
-            });
-        }, { threshold: 0 });
-        
-        observer.observe(document.getElementById('momentum-engine')!);
-    }
-
-    resize() {
-        const dpr = window.devicePixelRatio || 1;
-        this.canvas.width = window.innerWidth * dpr;
-        this.canvas.height = window.innerHeight * dpr;
-        this.ctx.scale(dpr, dpr);
-        this.canvas.style.width = `${window.innerWidth}px`;
-        this.canvas.style.height = `${window.innerHeight}px`;
-    }
-
-    initParticles() {
-        for (let i = 0; i < this.particleCount; i++) {
-            this.particles.push(new Particle(window.innerWidth, window.innerHeight));
-        }
-    }
-
-    initTimeline() {
-        const style = getComputedStyle(document.documentElement);
-        const primaryHSL = style.getPropertyValue('--primary').trim();
-        // Convert HSL string "0 55% 39%" to "hsl(0 55% 39%)"
-        const primaryColor = `hsl(${primaryHSL})`;
-
-        const section = document.getElementById('momentum-engine')!;
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: section,
-                start: "top top",
-                end: "+=300%", // Pin for 3 viewports worth of scroll
-                scrub: 1,
-                pin: true,
-                anticipatePin: 1
-            }
-        });
-
-        // STAGE 1: Reveal & Title
-        tl.to("#momentum-title", { opacity: 1, y: 0, duration: 2, ease: "power2.out" })
-          .to("#momentum-core-wrapper", { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" }, "-=1.5");
-
-        // STAGE 2: Chaos (Explosion)
-        tl.to(this.state, { chaos: 1, duration: 4, ease: "power1.inOut" })
-          .to("#momentum-title", { opacity: 0, y: -20, duration: 1 }, "-=4");
-
-        // STAGE 3: Turbine Alignment
-        tl.to(this.state, { 
-            chaos: 0.1, 
-            turbine: 1, 
-            velocity: 3, 
-            duration: 5, 
-            ease: "power2.inOut" 
-        })
-          .to("#momentum-subtitle", { opacity: 1, duration: 2 }, "-=2");
-
-        // STAGE 4: Max Velocity
-        tl.to(this.state, { 
-            velocity: 15, 
-            streaming: 1, 
-            duration: 3, 
-            ease: "power1.in" 
-        })
-          .to("#momentum-grid", { 
-            skewX: -20, 
-            scale: 1.5, 
-            opacity: 0.4, 
-            duration: 3 
-          }, "<");
-    }
-
-    render() {
-        if (!this.isPlaying) return;
-
-        this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-
-        // Get dynamic colors
-        const style = getComputedStyle(document.documentElement);
-        const primaryHSL = style.getPropertyValue('--primary').trim();
-        const primaryColor = `hsl(${primaryHSL})`;
-
-        this.particles.forEach(p => {
-            p.update(this.state, centerX, centerY);
-            p.draw(this.ctx, this.state, primaryColor);
-        });
-
-        this.animationId = requestAnimationFrame(() => this.render());
-    }
-  }
-
-  class Particle {
-    x: number;
-    y: number;
-    baseX: number;
-    baseY: number;
-    vx: number;
-    vy: number;
-    size: number;
-    angle: number;
-    orbitRadius: number;
-    chaosOffset: { x: number; y: number };
-    color: string;
-
-    constructor(w: number, h: number) {
-        this.reset(w, h);
-    }
-
-    reset(w: number, h: number) {
-        this.baseX = w / 2;
-        this.baseY = h / 2;
-        this.x = this.baseX;
-        this.y = this.baseY;
-        this.vx = (Math.random() - 0.5) * 10;
-        this.vy = (Math.random() - 0.5) * 10;
-        this.size = Math.random() * 3 + 1;
-        this.angle = Math.random() * Math.PI * 2;
-        this.orbitRadius = Math.random() * 300 + 100;
-        this.chaosOffset = { 
-            x: (Math.random() - 0.5) * 1000, 
-            y: (Math.random() - 0.5) * 1000 
+        // Engine State (Controlled by GSAP)
+        state = {
+            chaos: 0, // 0 to 1
+            turbine: 0, // 0 to 1
+            velocity: 0.2, // Rotation speed
+            coreGlow: 0, // 0 to 1
+            streaming: 0, // Background motion blur
         };
-        const primaryColors = ['#60a5fa', '#3b82f6', '#2563eb', '#ffffff'];
-        this.color = primaryColors[Math.floor(Math.random() * primaryColors.length)];
-    }
 
-    update(state: any, cx: number, cy: number) {
-        // Chaos logic: Expand outward
-        const chaosX = cx + this.chaosOffset.x * state.chaos;
-        const chaosY = cy + this.chaosOffset.y * state.chaos;
+        isPlaying = false;
+        animationId: number | null = null;
 
-        // Turbine logic: Rotate around core
-        this.angle += (state.velocity * 0.01) * (200 / this.orbitRadius);
-        const turbineX = cx + Math.cos(this.angle) * this.orbitRadius;
-        const turbineY = cy + Math.sin(this.angle) * this.orbitRadius;
+        constructor(canvasId: string) {
+            const el = document.getElementById(canvasId);
+            if (!el) return;
+            this.canvas = el as HTMLCanvasElement;
+            this.ctx = this.canvas.getContext("2d")!;
 
-        // Blending
-        const targetX = chaosX * (1 - state.turbine) + turbineX * state.turbine;
-        const targetY = chaosY * (1 - state.turbine) + turbineY * state.turbine;
+            this.resize();
+            this.initParticles();
+            this.initTimeline();
+            this.initObserver();
 
-        // Smooth follower
-        this.x += (targetX - this.x) * 0.1;
-        this.y += (targetY - this.y) * 0.1;
-    }
-
-    draw(ctx: CanvasRenderingContext2D, state: any, primaryColor: string) {
-        ctx.save();
-        ctx.globalAlpha = 0.5 + state.turbine * 0.5;
-        
-        const color = state.turbine > 0.5 ? primaryColor : this.color;
-
-        // Motion Blur effect for turbine
-        if (state.velocity > 5) {
-            ctx.shadowBlur = state.velocity * 2;
-            ctx.shadowColor = color;
+            window.addEventListener("resize", () => this.resize());
         }
 
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        
-        // Change shape based on state?
-        if (state.turbine > 0.8 && state.velocity > 10) {
-            // Stretch it into a line
-            const stretch = state.velocity;
-            const dx = -Math.sin(this.angle) * stretch;
-            const dy = Math.cos(this.angle) * stretch;
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.x + dx, this.y + dy);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = this.size;
-            ctx.stroke();
-        } else {
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        
-        ctx.restore();
-    }
-  }
+        initObserver() {
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        this.isPlaying = entry.isIntersecting;
+                        if (this.isPlaying) this.render();
+                        else if (this.animationId)
+                            cancelAnimationFrame(this.animationId);
+                    });
+                },
+                { threshold: 0 },
+            );
 
-  // Initialize
-  new MomentumEngine('engine-canvas');
+            observer.observe(document.getElementById("momentum-engine")!);
+        }
+
+        resize() {
+            const dpr = window.devicePixelRatio || 1;
+            this.canvas.width = window.innerWidth * dpr;
+            this.canvas.height = window.innerHeight * dpr;
+            this.ctx.scale(dpr, dpr);
+            this.canvas.style.width = `${window.innerWidth}px`;
+            this.canvas.style.height = `${window.innerHeight}px`;
+        }
+
+        initParticles() {
+            for (let i = 0; i < this.particleCount; i++) {
+                this.particles.push(
+                    new Particle(window.innerWidth, window.innerHeight),
+                );
+            }
+        }
+
+        initTimeline() {
+            const style = getComputedStyle(document.documentElement);
+            const primaryHSL = style.getPropertyValue("--primary").trim();
+            // Convert HSL string "0 55% 39%" to "hsl(0 55% 39%)"
+            const primaryColor = `hsl(${primaryHSL})`;
+
+            const section = document.getElementById("momentum-engine")!;
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top top",
+                    end: "+=300%", // Pin for 3 viewports worth of scroll
+                    scrub: 1,
+                    pin: true,
+                    anticipatePin: 1,
+                },
+            });
+
+            // STAGE 1: Reveal & Title
+            tl.to("#momentum-title", {
+                opacity: 1,
+                y: 0,
+                duration: 2,
+                ease: "power2.out",
+            }).to(
+                "#momentum-core-wrapper",
+                { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" },
+                "-=1.5",
+            );
+
+            // STAGE 2: Chaos (Explosion)
+            tl.to(this.state, {
+                chaos: 1,
+                duration: 4,
+                ease: "power1.inOut",
+            }).to(
+                "#momentum-title",
+                { opacity: 0, y: -20, duration: 1 },
+                "-=4",
+            );
+
+            // STAGE 3: Turbine Alignment
+            tl.to(this.state, {
+                chaos: 0.1,
+                turbine: 1,
+                velocity: 3,
+                duration: 5,
+                ease: "power2.inOut",
+            }).to("#momentum-subtitle", { opacity: 1, duration: 2 }, "-=2");
+
+            // STAGE 4: Max Velocity
+            tl.to(this.state, {
+                velocity: 15,
+                streaming: 1,
+                duration: 3,
+                ease: "power1.in",
+            }).to(
+                "#momentum-grid",
+                {
+                    skewX: -20,
+                    scale: 1.5,
+                    opacity: 0.4,
+                    duration: 3,
+                },
+                "<",
+            );
+        }
+
+        render() {
+            if (!this.isPlaying) return;
+
+            this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+
+            // Get dynamic colors
+            const style = getComputedStyle(document.documentElement);
+            const primaryHSL = style.getPropertyValue("--primary").trim();
+            const primaryColor = `hsl(${primaryHSL})`;
+
+            this.particles.forEach((p) => {
+                p.update(this.state, centerX, centerY);
+                p.draw(this.ctx, this.state, primaryColor);
+            });
+
+            this.animationId = requestAnimationFrame(() => this.render());
+        }
+    }
+
+    class Particle {
+        x: number;
+        y: number;
+        baseX: number;
+        baseY: number;
+        vx: number;
+        vy: number;
+        size: number;
+        angle: number;
+        orbitRadius: number;
+        chaosOffset: { x: number; y: number };
+        color: string;
+
+        constructor(w: number, h: number) {
+            this.reset(w, h);
+        }
+
+        reset(w: number, h: number) {
+            this.baseX = w / 2;
+            this.baseY = h / 2;
+            this.x = this.baseX;
+            this.y = this.baseY;
+            this.vx = (Math.random() - 0.5) * 10;
+            this.vy = (Math.random() - 0.5) * 10;
+            this.size = Math.random() * 3 + 1;
+            this.angle = Math.random() * Math.PI * 2;
+            this.orbitRadius = Math.random() * 300 + 100;
+            this.chaosOffset = {
+                x: (Math.random() - 0.5) * 1000,
+                y: (Math.random() - 0.5) * 1000,
+            };
+            const primaryColors = ["#60a5fa", "#3b82f6", "#2563eb", "#ffffff"];
+            this.color =
+                primaryColors[Math.floor(Math.random() * primaryColors.length)];
+        }
+
+        update(state: any, cx: number, cy: number) {
+            // Chaos logic: Expand outward
+            const chaosX = cx + this.chaosOffset.x * state.chaos;
+            const chaosY = cy + this.chaosOffset.y * state.chaos;
+
+            // Turbine logic: Rotate around core
+            this.angle += state.velocity * 0.01 * (200 / this.orbitRadius);
+            const turbineX = cx + Math.cos(this.angle) * this.orbitRadius;
+            const turbineY = cy + Math.sin(this.angle) * this.orbitRadius;
+
+            // Blending
+            const targetX =
+                chaosX * (1 - state.turbine) + turbineX * state.turbine;
+            const targetY =
+                chaosY * (1 - state.turbine) + turbineY * state.turbine;
+
+            // Smooth follower
+            this.x += (targetX - this.x) * 0.1;
+            this.y += (targetY - this.y) * 0.1;
+        }
+
+        draw(ctx: CanvasRenderingContext2D, state: any, primaryColor: string) {
+            ctx.save();
+            ctx.globalAlpha = 0.5 + state.turbine * 0.5;
+
+            const color = state.turbine > 0.5 ? primaryColor : this.color;
+
+            // Motion Blur effect for turbine
+            if (state.velocity > 5) {
+                ctx.shadowBlur = state.velocity * 2;
+                ctx.shadowColor = color;
+            }
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+
+            // Change shape based on state?
+            if (state.turbine > 0.8 && state.velocity > 10) {
+                // Stretch it into a line
+                const stretch = state.velocity;
+                const dx = -Math.sin(this.angle) * stretch;
+                const dy = Math.cos(this.angle) * stretch;
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + dx, this.y + dy);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = this.size;
+                ctx.stroke();
+            } else {
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+    }
+
+    // Initialize
+    new MomentumEngine("engine-canvas");
 </script>

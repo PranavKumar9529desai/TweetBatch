@@ -8,9 +8,6 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
   id="streamline-engine"
   class="relative z-20 w-full py-20 -mt-20 bg-background overflow-hidden"
 >
-  <div class="absolute inset-0 z-0 pointer-events-none">
-    <WarpTunnel />
-  </div>
   <div class="container mx-auto px-4 relative">
     <!-- Title -->
     <div class="text-center mb-20 relative z-10">
@@ -74,7 +71,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 
         <!-- Labels -->
         <text
-          x="100"
+          x="15"
           y="300"
           fill="currentColor"
           class="text-muted-foreground font-mono text-xl tracking-widest opacity-50 select-none"
@@ -107,29 +104,45 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
             stroke-width="1"
             stroke-dasharray="4 4"
             class="opacity-30"></circle>
-          <!-- Hexagon -->
+          <!-- Hexagon - the main processing element that will glow -->
           <path
+            id="hexagon-core"
             d="M0,-50 L43,-25 L43,25 L0,50 L-43,25 L-43,-25 Z"
             fill="hsl(var(--card))"
             stroke="hsl(var(--primary))"
             stroke-width="2"></path>
-          <!-- Inner Core -->
+          <!-- Inner Core (subtle, doesn't scale) -->
           <circle
             id="core-light"
-            r="15"
+            r="12"
             fill="hsl(var(--primary))"
-            class="opacity-50"></circle>
+            class="opacity-40"></circle>
         </g>
 
-        <!-- 3. Output Trace (Right Side) -->
-        <g
-          id="output-trace"
-          fill="none"
-          stroke="hsl(var(--primary))"
-          stroke-width="2"
-          stroke-opacity="0.3"
-        >
-          <line x1="680" y1="300" x2="950" y2="300"></line>
+        <!-- 3. Output Line (connects hexagon to scheduled box) -->
+        <g id="output-trace" fill="none">
+          <line
+            id="output-line"
+            x1="650"
+            y1="300"
+            x2="950"
+            y2="300"
+            stroke="hsl(var(--primary))"
+            stroke-width="2"
+            stroke-opacity="0.5"></line>
+        </g>
+
+        <!-- Center Label (appears during processing) -->
+        <g id="center-label" transform="translate(600, 380)">
+          <text
+            text-anchor="middle"
+            fill="hsl(var(--primary))"
+            font-family="var(--font-mono)"
+            font-size="12"
+            letter-spacing="0.15em"
+            class="opacity-0"
+            id="processing-text">TWEETBATCH</text
+          >
         </g>
 
         <!-- 4. Scheduled Box (Target) -->
@@ -162,15 +175,6 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
           ></circle>
           <circle id="dot-3" r="6" fill="hsl(var(--primary))" class="opacity-0"
           ></circle>
-
-          <!-- 1 Output Beam -->
-          <rect
-            id="beam-out"
-            width="40"
-            height="6"
-            rx="3"
-            fill="hsl(var(--primary))"
-            class="opacity-0"></rect>
         </g>
       </svg>
     </div>
@@ -184,179 +188,290 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 
   gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
-  const initStreamline = () => {
-    console.log("Streamline: Initializing...");
-    const svg = document.getElementById("streamline-svg");
-    if (!svg) {
-      console.error("Streamline: SVG not found");
-      return;
+  /**
+   * StreamlineAnimation - Class-based animation for the "Chaos to Clarity" section
+   * Follows the MomentumEngine pattern for reliable initialization
+   */
+  class StreamlineAnimation {
+    // DOM Elements
+    private svg: SVGSVGElement | null = null;
+    private dot1: SVGCircleElement | null = null;
+    private dot2: SVGCircleElement | null = null;
+    private dot3: SVGCircleElement | null = null;
+    private coreLight: SVGCircleElement | null = null;
+    private hexagonCore: SVGPathElement | null = null;
+    private outputLine: SVGLineElement | null = null;
+    private processingText: SVGTextElement | null = null;
+    private targetRect: SVGRectElement | null = null;
+    private section: HTMLElement | null = null;
+
+    // Paths for motion animation (dots converging)
+    private readonly paths = {
+      top: "M150,200 C250,200 350,300 520,300",
+      mid: "M150,300 L520,300",
+      bot: "M150,400 C250,400 350,300 520,300",
+    };
+
+    // GSAP Timeline
+    private timeline: gsap.core.Timeline | null = null;
+    private scrollTrigger: ScrollTrigger | null = null;
+
+    constructor() {
+      this.init();
     }
 
-    // Elements
-    const dot1 = document.getElementById("dot-1");
-    const dot2 = document.getElementById("dot-2");
-    const dot3 = document.getElementById("dot-3");
-    const beamOut = document.getElementById("beam-out");
-    const coreLight = document.getElementById("core-light");
-    const targetRect = document.getElementById("target-rect");
+    private init(): void {
+      // Get section and SVG using querySelector for proper SVG type inference
+      this.section = document.getElementById("streamline-engine");
+      this.svg = document.querySelector<SVGSVGElement>("#streamline-svg");
 
-    if (!dot1 || !dot2 || !dot3 || !beamOut) {
-      console.error("Streamline: Missing elements", {
-        dot1,
-        dot2,
-        dot3,
-        beamOut,
-      });
-      return;
+      if (!this.section || !this.svg) {
+        console.warn(
+          "StreamlineAnimation: Section or SVG not found, skipping init",
+        );
+        return;
+      }
+
+      // Get all animated elements using querySelector for proper SVG type inference
+      this.dot1 = document.querySelector<SVGCircleElement>("#dot-1");
+      this.dot2 = document.querySelector<SVGCircleElement>("#dot-2");
+      this.dot3 = document.querySelector<SVGCircleElement>("#dot-3");
+      this.coreLight = document.querySelector<SVGCircleElement>("#core-light");
+      this.hexagonCore =
+        document.querySelector<SVGPathElement>("#hexagon-core");
+      this.outputLine = document.querySelector<SVGLineElement>("#output-line");
+      this.processingText =
+        document.querySelector<SVGTextElement>("#processing-text");
+      this.targetRect = document.querySelector<SVGRectElement>("#target-rect");
+
+      if (
+        !this.dot1 ||
+        !this.dot2 ||
+        !this.dot3 ||
+        !this.hexagonCore ||
+        !this.outputLine
+      ) {
+        console.warn("StreamlineAnimation: Missing animation elements");
+        return;
+      }
+
+      this.resetElements();
+      this.createTimeline();
     }
-    console.log("Streamline: Elements found");
 
-    // Reset states - ensure they are technically visible but opacity 0 controlled by GSAP
-    gsap.set([dot1, dot2, dot3, beamOut], { opacity: 0, scale: 0 });
-    gsap.set(targetRect, {
-      filter: "none",
-      stroke: "hsl(var(--primary))",
-      fill: "hsl(var(--card))",
-    });
+    /**
+     * Reset all animated elements to their initial state
+     */
+    private resetElements(): void {
+      // Position dots at starting points (leftmost, visible from start)
+      // Path starts: top at (150,200), mid at (150,300), bot at (150,400)
+      gsap.set(this.dot1, { x: 150, y: 200, opacity: 1, scale: 1 });
+      gsap.set(this.dot2, { x: 150, y: 300, opacity: 1, scale: 1 });
+      gsap.set(this.dot3, { x: 150, y: 400, opacity: 1, scale: 1 });
 
-    // Paths
-    const path1 = "M150,200 C250,200 350,300 520,300"; // Top
-    const path2 = "M150,300 L520,300"; // Mid
-    const path3 = "M150,400 C250,400 350,300 520,300"; // Bot
-    const pathOut = "M680,300 L950,300";
+      // Reset target box
+      if (this.targetRect) {
+        gsap.set(this.targetRect, {
+          opacity: 0.5,
+          filter: "none",
+        });
+      }
 
-    const tl = gsap.timeline({
-      repeat: -1,
-      repeatDelay: 1, // Pause before next cycle
-      scrollTrigger: {
-        trigger: "#streamline-engine",
-        start: "top 80%",
-        markers: true, // DEBUG: Show markers
-        toggleActions: "play pause resume pause",
-        onEnter: () => console.log("Streamline: ScrollTrigger Enter"),
-        onLeave: () => console.log("Streamline: ScrollTrigger Leave"),
-        onEnterBack: () => console.log("Streamline: ScrollTrigger EnterBack"),
-        onLeaveBack: () => console.log("Streamline: ScrollTrigger LeaveBack"),
-      },
-    });
+      // Reset hexagon (no glow initially)
+      if (this.hexagonCore) {
+        gsap.set(this.hexagonCore, {
+          filter: "none",
+          attr: { "stroke-width": 2 },
+        });
+      }
 
-    console.log("Streamline: Timeline created");
+      // Reset output line (visible by default)
+      if (this.outputLine) {
+        gsap.set(this.outputLine, {
+          attr: { "stroke-opacity": 0.5, "stroke-width": 2 },
+          filter: "none",
+        });
+      }
 
-    // --- PHASE 1: CONVERGENCE (Chaos) ---
-    // Animate 3 dots from left to center
-    tl.addLabel("start")
+      // Reset processing text (hidden initially)
+      if (this.processingText) {
+        gsap.set(this.processingText, {
+          opacity: 0,
+        });
+      }
 
-      // Dot 1 (Top)
-      .to(
-        dot1,
-        {
-          motionPath: {
-            path: path1,
-            alignOrigin: [0.5, 0.5],
-            autoRotate: true,
-          },
-          duration: 1.5,
-          ease: "power2.in",
-          opacity: 1,
-          scale: 1,
-          onStart: () => console.log("Streamline: Dot 1 Start"),
+      // Reset core light (subtle, no animation)
+      if (this.coreLight) {
+        gsap.set(this.coreLight, {
+          opacity: 0.4,
+        });
+      }
+    }
+
+    /**
+     * Create the scroll-triggered animation timeline
+     * Uses pinning to pause viewport so users can see the full animation
+     */
+    private createTimeline(): void {
+      // Create timeline with scroll-linked animation WITH pinning
+      // This section is placed AFTER the other pinned sections (MomentumEngine, KineticFeed)
+      // so the pin order should be correct
+      this.timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: this.section,
+          start: "top top", // Pin when section top reaches viewport top
+          end: "+=1200", // Extended scroll distance - gives extra time to see completed animation
+          scrub: 1, // Smooth scroll-linked animation
+          pin: true, // Pin the section while animating
+          anticipatePin: 1, // Smooth pin transition
+          onEnter: () => this.resetElements(), // Reset on each entry
         },
-        "start",
-      )
-
-      // Dot 2 (Mid)
-      .to(
-        dot2,
-        {
-          motionPath: {
-            path: path2,
-            alignOrigin: [0.5, 0.5],
-            autoRotate: true,
-          },
-          duration: 1.5,
-          ease: "power2.in",
-          opacity: 1,
-          scale: 1,
-          onStart: () => console.log("Streamline: Dot 2 Start"),
-        },
-        "start",
-      )
-
-      // Dot 3 (Bot)
-      .to(
-        dot3,
-        {
-          motionPath: {
-            path: path3,
-            alignOrigin: [0.5, 0.5],
-            autoRotate: true,
-          },
-          duration: 1.5,
-          ease: "power2.in",
-          opacity: 1,
-          scale: 1,
-          onStart: () => console.log("Streamline: Dot 3 Start"),
-        },
-        "start",
-      )
-
-      // Hide dots when they hit the core
-      .to([dot1, dot2, dot3], {
-        opacity: 0,
-        scale: 0.5,
-        duration: 0.1,
-      })
-
-      // --- PHASE 2: PROCESSING (Core Pulse) ---
-      .to(
-        coreLight,
-        {
-          scale: 2,
-          opacity: 1,
-          duration: 0.2,
-          yoyo: true,
-          repeat: 1,
-        },
-        "-=0.1",
-      )
-
-      // --- PHASE 3: CLARITY (Output) ---
-      // Shoot single beam out
-      .to(beamOut, {
-        motionPath: {
-          path: pathOut,
-          alignOrigin: [0.5, 0.5],
-          autoRotate: false,
-        },
-        duration: 0.6,
-        ease: "power4.out",
-        onStart: () => console.log("Streamline: Beam Out Start"),
-      })
-
-      // Hide beam when it hits target
-      .to(beamOut, {
-        opacity: 0,
-        duration: 0.1,
-      })
-
-      // --- PHASE 4: RESULT (Target Glow) ---
-      .to(
-        targetRect,
-        {
-          strokeWidth: 4,
-          filter: "url(#glow-filter)",
-          fill: "hsl(var(--primary)/0.1)",
-          duration: 0.1,
-        },
-        "-=0.1",
-      )
-      .to(targetRect, {
-        strokeWidth: 2,
-        filter: "none",
-        fill: "hsl(var(--card))",
-        duration: 0.5,
       });
-  };
 
-  document.addEventListener("astro:page-load", initStreamline);
+      this.buildAnimationSequence();
+    }
+
+    /**
+     * Build the 4-phase animation sequence
+     */
+    private buildAnimationSequence(): void {
+      if (!this.timeline) return;
+
+      const tl = this.timeline;
+
+      // ═══════════════════════════════════════════════════════════════
+      // PHASE 1: CONVERGENCE - 3 dots animate from left to center
+      // ═══════════════════════════════════════════════════════════════
+      tl.addLabel("convergence")
+
+        // Dot 1 (Top path) - already visible, just moves along path
+        .to(
+          this.dot1,
+          {
+            motionPath: {
+              path: this.paths.top,
+              alignOrigin: [0.5, 0.5],
+            },
+            duration: 2,
+            ease: "power2.inOut",
+          },
+          "convergence",
+        )
+
+        // Dot 2 (Middle path)
+        .to(
+          this.dot2,
+          {
+            motionPath: {
+              path: this.paths.mid,
+              alignOrigin: [0.5, 0.5],
+            },
+            duration: 2,
+            ease: "power2.inOut",
+          },
+          "convergence",
+        )
+
+        // Dot 3 (Bottom path)
+        .to(
+          this.dot3,
+          {
+            motionPath: {
+              path: this.paths.bot,
+              alignOrigin: [0.5, 0.5],
+            },
+            duration: 2,
+            ease: "power2.inOut",
+          },
+          "convergence",
+        );
+
+      // ═══════════════════════════════════════════════════════════════
+      // PHASE 2: PROCESSING - Dots disappear, EVERYTHING glows together!
+      // ═══════════════════════════════════════════════════════════════
+      tl.addLabel("processing")
+
+        // Hide dots as they reach the core
+        .to([this.dot1, this.dot2, this.dot3], {
+          opacity: 0,
+          scale: 0.3,
+          duration: 0.4,
+        })
+
+        // === ALL GLOW TOGETHER ===
+
+        // Hexagon glow
+        .to(
+          this.hexagonCore,
+          {
+            filter: "url(#glow-filter)",
+            attr: { "stroke-width": 4 },
+            duration: 0.5,
+          },
+          "-=0.2",
+        )
+
+        // Output line brightens (at same time as hexagon) - NO filter, just brighter stroke
+        .to(
+          this.outputLine,
+          {
+            attr: { "stroke-opacity": 1, "stroke-width": 3 },
+            duration: 0.5,
+          },
+          "<", // Same time as hexagon
+        )
+
+        // Target box glows (at same time)
+        .to(
+          this.targetRect,
+          {
+            attr: { "stroke-width": 4 },
+            filter: "url(#glow-filter)",
+            opacity: 1,
+            duration: 0.5,
+          },
+          "<", // Same time as hexagon & line
+        )
+
+        // Core light brightens (at same time)
+        .to(
+          this.coreLight,
+          {
+            opacity: 0.9,
+            duration: 0.4,
+          },
+          "<",
+        )
+
+        // Processing label fades in (slightly after)
+        .to(
+          this.processingText,
+          {
+            opacity: 1,
+            duration: 0.4,
+          },
+          "<0.1",
+        );
+
+      // ═══════════════════════════════════════════════════════════════
+      // PHASE 3: HOLD - Let users appreciate the completed animation
+      // ═══════════════════════════════════════════════════════════════
+      tl.addLabel("hold").to({}, { duration: 1.5 }); // Empty tween - just holds for 1.5s of scroll
+    }
+
+    /**
+     * Cleanup method for proper disposal
+     */
+    public destroy(): void {
+      if (this.scrollTrigger) {
+        this.scrollTrigger.kill();
+      }
+      if (this.timeline) {
+        this.timeline.kill();
+      }
+    }
+  }
+
+  // Immediate instantiation - no event listener dependency
+  new StreamlineAnimation();
 </script>

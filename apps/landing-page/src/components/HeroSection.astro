@@ -210,7 +210,7 @@
 
 			this.ctx.lineWidth = 1;
 
-			this.points.forEach((p) => {
+			this.points.forEach((p, i) => {
 				const dx = this.mouseX - p.x;
 				const dy = this.mouseY - p.y;
 				const dist = Math.sqrt(dx * dx + dy * dy);
@@ -238,6 +238,9 @@
 					opacity = 0.4 + (distCenter / maxDistFromCenter) * 0.5;
 				}
 
+				// Draw connections (Constellation effect)
+				this.drawConnections(p, i, isMobile);
+
 				this.drawCross(
 					p.x,
 					p.y,
@@ -250,6 +253,69 @@
 			});
 
 			requestAnimationFrame(() => this.animate());
+		}
+
+		drawConnections(p: any, index: number, isMobile: boolean) {
+			// Connect to mouse
+			const dxMouse = this.mouseX - p.x;
+			const dyMouse = this.mouseY - p.y;
+			const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+			const mouseConnectRange = 150;
+
+			if (distMouse < mouseConnectRange) {
+				const opacity = (1 - distMouse / mouseConnectRange) * 0.2;
+				this.ctx.beginPath();
+				this.ctx.moveTo(p.x, p.y);
+				this.ctx.lineTo(this.mouseX, this.mouseY);
+				this.ctx.strokeStyle = `rgba(var(--primary), ${opacity})`;
+				this.ctx.lineWidth = 0.5;
+				this.ctx.stroke();
+			}
+
+			// On mobile, skip the expensive neighbor connections to save battery/performance
+			if (isMobile) return;
+
+			// Connect to nearby points (limit checks for performance)
+			// Only check points that are "next" in the array to avoid double drawing and reduce N^2
+			// This is a simple optimization: check next few points
+			for (let j = index + 1; j < this.points.length; j++) {
+				const p2 = this.points[j];
+				const dx = p.x - p2.x;
+				const dy = p.y - p2.y;
+				// Quick distance check (square)
+				if (
+					Math.abs(dx) > this.gridSize * 1.5 ||
+					Math.abs(dy) > this.gridSize * 1.5
+				)
+					continue;
+
+				const dist = Math.sqrt(dx * dx + dy * dy);
+
+				if (dist < this.gridSize * 1.5) {
+					// We only want to draw if we are somewhat close to the mouse "energy"
+					// Or maybe just always subtle connections?
+					// Let's make it dynamic: only connect if one of the points has high intensity (near mouse)
+					// OR if they are just neighbors.
+					// Let's go with: always subtle connections, but brighter near mouse.
+
+					// Calculate average intensity of the two points (we need to store intensity on point)
+					// For now, let's recalculate or just use a base.
+
+					const nearMouse = distMouse < 200; // If p is near mouse
+					if (!nearMouse) continue; // Optimization: Only constellation near mouse
+
+					const opacity =
+						(1 - dist / (this.gridSize * 1.5)) *
+						0.15 *
+						(1 - distMouse / 200);
+
+					this.ctx.beginPath();
+					this.ctx.moveTo(p.x, p.y);
+					this.ctx.lineTo(p2.x, p2.y);
+					this.ctx.strokeStyle = `rgba(150, 150, 150, ${opacity})`;
+					this.ctx.stroke();
+				}
+			}
 		}
 
 		drawCross(
@@ -406,4 +472,25 @@
 			});
 		});
 	});
+
+	// --- 6. 3D Perspective Tilt on Container ---
+	const heroSection = document.getElementById("home");
+	const contentContainer = heroSection?.querySelector(".flex"); // The content wrapper
+
+	if (heroSection && contentContainer) {
+		// Set perspective on parent
+		gsap.set(heroSection, { perspective: 1000 });
+
+		heroSection.addEventListener("mousemove", (e) => {
+			const x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
+			const y = (e.clientY / window.innerHeight - 0.5) * 2; // -1 to 1
+
+			gsap.to(contentContainer, {
+				rotationY: x * 2, // Very subtle tilt
+				rotationX: -y * 2,
+				duration: 0.5,
+				ease: "power1.out",
+			});
+		});
+	}
 </script>

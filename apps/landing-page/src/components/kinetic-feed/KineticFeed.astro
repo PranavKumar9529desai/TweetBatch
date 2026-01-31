@@ -1,133 +1,315 @@
 ---
+/**
+ * KineticFeed - 3D Orbital Carousel Animation
+ * Tweet cards orbit around a central hub with perspective depth
+ * Scroll-controlled carousel with auto-rotation
+ */
 import { cn } from "@repo/ui/lib/utils";
-import FluidMesh from "../backgrounds/FluidMesh.astro";
 
+// Tweet status configuration
+const statusConfig = {
+  scheduled: {
+    label: "Scheduled",
+    bgColor: "bg-blue-500/10",
+    textColor: "text-blue-600 dark:text-blue-400",
+    icon: "clock" // Clock icon
+  },
+  queued: {
+    label: "Queued",
+    bgColor: "bg-amber-500/10",
+    textColor: "text-amber-600 dark:text-amber-400",
+    icon: "queue" // List icon
+  },
+  posted: {
+    label: "Posted",
+    bgColor: "bg-green-500/10",
+    textColor: "text-green-600 dark:text-green-400",
+    icon: "check" // Checkmark
+  },
+  failed: {
+    label: "Failed",
+    bgColor: "bg-red-500/10",
+    textColor: "text-red-600 dark:text-red-400",
+    icon: "x" // X icon
+  }
+} as const;
+
+type TweetStatus = keyof typeof statusConfig;
+
+// Tweets showing the lifecycle stages
 const tweets = [
   { 
     id: 1, 
-    user: "@alex_creatives", 
-    avatar: "A",
-    time: "09:00 AM",
-    text: "Consistency isn't rocket science. It's just doing the boring work when you don't feel like it. #BuildInPublic", 
-    stats: { likes: 124, retweets: 18 }
+    user: "@growth_sarah", 
+    avatar: "S",
+    time: "Tomorrow, 9:00 AM",
+    text: "Consistency beats intensity. 30 min/day > 5 hours once a week. 📈", 
+    likes: null, 
+    retweets: null,
+    day: "Monday",
+    status: "scheduled" as TweetStatus
   },
   { 
     id: 2, 
-    user: "@marketing_guru", 
+    user: "@dev_marcus", 
     avatar: "M",
-    time: "11:30 AM",
-    text: "If you aren't scheduling your content, you are letting the algorithm dictate your life. Take back control.", 
-    stats: { likes: 892, retweets: 145 }
+    time: "Today, 12:30 PM",
+    text: "Shipped the new feature! Auto-scheduling saved me 4 hours this week. 🚀", 
+    likes: null, 
+    retweets: null,
+    day: "Tuesday",
+    status: "queued" as TweetStatus
   },
   { 
     id: 3, 
-    user: "@indie_dev", 
-    avatar: "I",
-    time: "02:15 PM",
-    text: "Just shipped v2.0! 🚀 The feeling of seeing your users happy is unmatched. #SaaS #IndieHacker", 
-    stats: { likes: 56, retweets: 12 }
+    user: "@creator_luna", 
+    avatar: "L",
+    time: "Posted 2h ago",
+    text: "Thread: How I grew from 100 → 10K followers using optimal posting times ⏰", 
+    likes: 2456, 
+    retweets: 512,
+    day: "Wednesday",
+    status: "posted" as TweetStatus
   },
   { 
     id: 4, 
-    user: "@design_thinking", 
-    avatar: "D",
-    time: "04:45 PM",
-    text: "White space is not empty space. It's an active design element. Use it wisely.", 
-    stats: { likes: 340, retweets: 89 }
+    user: "@founder_alex", 
+    avatar: "A",
+    time: "Yesterday, 6:00 PM",
+    text: "Queue is full, weekend is mine. That's the power of batch scheduling. 🎯", 
+    likes: 634, 
+    retweets: 98,
+    day: "Thursday",
+    status: "posted" as TweetStatus
   },
   { 
     id: 5, 
-    user: "@growth_hacker", 
-    avatar: "G",
-    time: "08:00 PM",
-    text: "The best growth hack? Building a product people actually want to talk about. Everything else is noise.", 
-    stats: { likes: 1205, retweets: 310 }
+    user: "@indie_hacker", 
+    avatar: "I",
+    time: "Retry available",
+    text: "Best advice: Schedule your posts when YOUR audience is online, not generic peak times.", 
+    likes: null, 
+    retweets: null,
+    day: "Friday",
+    status: "failed" as TweetStatus
   }
 ];
 ---
 
-<section id="kinetic-feed" class="relative z-20 w-full h-screen bg-background py-10">
-  <!-- Dynamic Background Glow -->
-    <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
-     <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"></canvas>
-     <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
-     <div class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"></div>
+<section id="kinetic-feed" class="relative z-20 w-full min-h-screen bg-background overflow-hidden">
+  
+  <!-- Background effects -->
+  <div class="absolute inset-0 -z-10 pointer-events-none">
+    <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-15"></canvas>
+    <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+    <div class="absolute bottom-[30%] left-[10%] w-72 h-72 bg-accent/15 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1.5s;"></div>
   </div>
 
-  <div class="h-full w-full flex flex-col items-center justify-center overflow-hidden pt-20">
+  <div class="h-screen flex flex-col items-center justify-center py-16 md:py-20">
     
-    <!-- Title Section -->
-    <div class="absolute top-10 md:top-20 text-center z-10 px-4 w-full">
-      <h2 class="text-3xl md:text-5xl font-black tracking-tighter mb-2">
-        YOUR <span class="text-primary">SCHEDULE</span>
+    <!-- Header -->
+    <div id="carousel-header" class="text-center mb-8 md:mb-12 px-4 opacity-0">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 mb-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+        <span>Tweet Lifecycle</span>
+      </div>
+      <h2 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight mb-3">
+        From Draft to <span class="text-primary">Published</span>
       </h2>
-      <p class="text-muted-foreground text-sm md:text-base">
-        A timeline of impact, automated for you.
+      <p class="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto mb-4">
+        Track every tweet through its journey
+      </p>
+      <!-- Status Flow Visualization -->
+      <div class="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+        <span class="status-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-semibold border border-blue-500/20 transition-all hover:scale-105 hover:bg-blue-500/20 cursor-default">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Scheduled
+        </span>
+        <svg class="h-4 w-4 text-muted-foreground/50 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+        <span class="status-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm font-semibold border border-amber-500/20 transition-all hover:scale-105 hover:bg-amber-500/20 cursor-default" style="animation-delay: 0.2s;">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <circle cx="4" cy="6" r="1" fill="currentColor"></circle>
+            <circle cx="4" cy="12" r="1" fill="currentColor"></circle>
+            <circle cx="4" cy="18" r="1" fill="currentColor"></circle>
+          </svg>
+          Queued
+        </span>
+        <svg class="h-4 w-4 text-muted-foreground/50 animate-pulse" style="animation-delay: 0.3s;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"></path>
+        </svg>
+        <span class="status-pill inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 text-sm font-semibold border border-green-500/20 transition-all hover:scale-105 hover:bg-green-500/20 cursor-default" style="animation-delay: 0.4s;">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Posted
+        </span>
+      </div>
+      <p class="text-muted-foreground/70 text-sm mt-3">
+        With automatic retries if anything fails
       </p>
     </div>
 
-    <!-- Feed Container -->
-    <div class="relative w-full max-w-4xl px-4 md:px-6 h-[60vh] md:h-[70vh] flex flex-col items-center justify-center">
+    <!-- 3D Carousel Container -->
+    <div id="carousel-wrapper" class="relative w-full max-w-5xl md:max-w-6xl mx-auto" style="perspective: 1200px;">
       
-      <!-- Central Line (Draws on scroll) -->
-      <div class="absolute left-6 md:left-1/2 top-0 bottom-0 w-[2px] bg-border md:-translate-x-1/2 h-full overflow-hidden">
-        <div id="timeline-progress" class="w-full h-full bg-primary origin-top scale-y-0"></div>
-      </div>
-
-      <!-- Feed Cards Wrapper -->
-      <div id="feed-cards" class="relative w-full h-full">
+    
+      
+      <!-- Carousel Track -->
+      <div id="carousel-track" class="relative h-[400px] md:h-[450px] w-full" style="transform-style: preserve-3d;">
         {tweets.map((tweet, i) => (
           <div 
-            class={cn(
-              "feed-card absolute w-[calc(100%-3rem)] md:w-[28rem] p-6 rounded-2xl border border-border bg-card/60 backdrop-blur-md shadow-lg opacity-0 translate-y-20 origin-center will-change-transform will-change-opacity",
-              /* Mobile: Always offset from left line */
-              "left-12 top-1/2 -translate-y-1/2",
-              /* Desktop: Alternate sides */
-              "md:top-1/2 md:-translate-y-1/2 md:left-auto md:right-auto",
-              i % 2 === 0 ? "md:right-[calc(50%+3rem)]" : "md:left-[calc(50%+3rem)]"
-            )}
+            class="carousel-card absolute left-1/2 top-1/2 w-[300px] md:w-[360px] -translate-x-1/2 -translate-y-1/2 opacity-0"
             data-index={i}
+            style={`transform-style: preserve-3d;`}
           >
-            <!-- Card Connector Dot -->
-            <div class={cn(
-              "absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-primary bg-background shadow-[0_0_10px_hsl(var(--primary))] z-10 hidden md:block",
-              i % 2 === 0 ? "-right-[3.5rem]" : "-left-[3.5rem]" 
-            )}></div>
-
-            <!-- Mobile Connector Dot (Always on left) -->
-            <div class="md:hidden absolute top-1/2 -translate-y-1/2 -left-[1.6rem] w-3 h-3 rounded-full border-2 border-primary bg-background shadow-[0_0_10px_hsl(var(--primary))] z-10"></div>
-
-            <!-- Content -->
-            <div class="flex flex-col gap-3">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
-                    {tweet.avatar}
-                  </div>
-                  <div class="flex flex-col">
-                    <span class="text-xs font-bold leading-none">{tweet.user}</span>
-                    <span class="text-[10px] text-muted-foreground">{tweet.time}</span>
-                  </div>
+            <!-- Tweet Card -->
+            <div class="card-inner p-5 md:p-6 rounded-2xl border border-border bg-card/90 backdrop-blur-xl shadow-xl transition-all duration-300 hover:shadow-2xl hover:border-primary/40">
+              
+              <!-- Day Badge -->
+              <div class="absolute -top-3 left-4 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20">
+                {tweet.day}
+              </div>
+              
+              <!-- Header -->
+              <div class="flex items-center gap-3 mb-4 pt-2">
+                <div class="h-11 w-11 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 ring-2 ring-primary/30 flex items-center justify-center">
+                  <span class="text-lg font-bold text-primary">{tweet.avatar}</span>
                 </div>
-                <div class="h-6 w-6 rounded-full bg-green-500/10 flex items-center justify-center">
-                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <div class="flex-1">
+                  <span class="text-sm font-semibold text-foreground block">{tweet.user}</span>
+                  <span class="text-xs text-muted-foreground flex items-center gap-1">
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    {tweet.time}
+                  </span>
+                </div>
+                <div class={`flex items-center gap-1 px-2 py-1 rounded-full ${statusConfig[tweet.status].bgColor} ${statusConfig[tweet.status].textColor} text-[10px] font-semibold uppercase`}>
+                  {tweet.status === "scheduled" && (
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                  )}
+                  {tweet.status === "queued" && (
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <line x1="8" y1="6" x2="21" y2="6"></line>
+                      <line x1="8" y1="12" x2="21" y2="12"></line>
+                      <line x1="8" y1="18" x2="21" y2="18"></line>
+                      <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                      <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                      <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                  )}
+                  {tweet.status === "posted" && (
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  )}
+                  {tweet.status === "failed" && (
+                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                      <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                  )}
+                  {statusConfig[tweet.status].label}
                 </div>
               </div>
               
-              <p class="text-sm font-medium leading-relaxed">
+              <!-- Content -->
+              <p class="text-sm md:text-base leading-relaxed text-foreground mb-4">
                 {tweet.text}
               </p>
-
-              <div class="flex items-center gap-4 text-xs text-muted-foreground pt-2 border-t border-border/50">
-                <span class="flex items-center gap-1">❤️ {tweet.stats.likes}</span>
-                <span class="flex items-center gap-1">🔁 {tweet.stats.retweets}</span>
-              </div>
+              
+              <!-- Stats (only show for posted tweets) -->
+              {tweet.status === "posted" && tweet.likes !== null && tweet.retweets !== null ? (
+                <div class="flex items-center gap-5 pt-3 border-t border-border/50 text-muted-foreground">
+                  <span class="flex items-center gap-1.5 text-xs hover:text-primary transition-colors">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                    {tweet.likes.toLocaleString()}
+                  </span>
+                  <span class="flex items-center gap-1.5 text-xs hover:text-primary transition-colors">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17 1l4 4-4 4"></path>
+                      <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                      <path d="M7 23l-4-4 4-4"></path>
+                      <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                    </svg>
+                    {tweet.retweets.toLocaleString()}
+                  </span>
+                </div>
+              ) : (
+                <div class="flex items-center gap-3 pt-3 border-t border-border/50 text-muted-foreground text-xs">
+                  {tweet.status === "scheduled" && (
+                    <span class="flex items-center gap-1.5">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      Will post at scheduled time
+                    </span>
+                  )}
+                  {tweet.status === "queued" && (
+                    <span class="flex items-center gap-1.5">
+                      <svg class="h-4 w-4 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      Waiting to post...
+                    </span>
+                  )}
+                  {tweet.status === "failed" && (
+                    <span class="flex items-center gap-1.5 text-red-500">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 4v6h6"></path>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                      </svg>
+                      Click to retry
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
       </div>
-
     </div>
+
+    <!-- Navigation Dots -->
+    <div id="carousel-nav" class="flex items-center justify-center gap-2 mt-8 opacity-0">
+      {tweets.map((_, i) => (
+        <button 
+          class="nav-dot w-2.5 h-2.5 rounded-full bg-border transition-all duration-300 hover:bg-primary/50"
+          data-index={i}
+        ></button>
+      ))}
+    </div>
+
+    <!-- Scroll hint -->
+    <div id="scroll-hint" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground opacity-0">
+      <svg class="h-5 w-5 animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M19 12l-7 7-7-7"></path>
+      </svg>
+    </div>
+    
   </div>
 </section>
 
@@ -137,95 +319,235 @@ const tweets = [
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const initKineticFeed = () => {
-    const section = document.getElementById('kinetic-feed');
-    const progressLine = document.getElementById('timeline-progress');
-    const cards = gsap.utils.toArray('.feed-card');
-    const bg = document.getElementById('feed-background');
+  /**
+   * OrbitalCarousel - Class-based animation for the Kinetic Feed section
+   * Follows the StreamlineAnimation pattern for reliable initialization
+   */
+  class OrbitalCarousel {
+    // DOM Elements
+    private section: HTMLElement | null = null;
+    private header: HTMLElement | null = null;
+    private hub: HTMLElement | null = null;
+    private track: HTMLElement | null = null;
+    private cards: HTMLElement[] = [];
+    private nav: HTMLElement | null = null;
+    private navDots: HTMLElement[] = [];
+    private scrollHint: HTMLElement | null = null;
 
-    if (!section) return;
+    // Configuration
+    private numCards: number = 0;
+    private angleStep: number = 0;
+    private radius: number = 300;
 
-    // Master Timeline
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: "+=2500", // Virtual height
-        scrub: 1, // Smooth interaction
-        pin: true, // Auto-pinning
+    // GSAP instances (for cleanup)
+    private entranceTl: gsap.core.Timeline | null = null;
+    private scrollTl: gsap.core.Timeline | null = null;
+
+    constructor() {
+      this.init();
+    }
+
+    private init(): void {
+      // Get all DOM elements
+      this.section = document.getElementById('kinetic-feed');
+      this.header = document.getElementById('carousel-header');
+      this.hub = document.getElementById('central-hub');
+      this.track = document.getElementById('carousel-track');
+      this.nav = document.getElementById('carousel-nav');
+      this.scrollHint = document.getElementById('scroll-hint');
+
+      // Use querySelectorAll scoped to section to avoid grabbing elements from other components
+      if (this.section) {
+        this.cards = Array.from(this.section.querySelectorAll('.carousel-card')) as HTMLElement[];
+        this.navDots = Array.from(this.section.querySelectorAll('.nav-dot')) as HTMLElement[];
       }
-    });
 
-    // 1. Line Progress - draws continuously
-    tl.to(progressLine, { scaleY: 1, ease: "none", duration: 10 }, 0);
+      // Early exit if critical elements missing
+      if (!this.section || !this.track || this.cards.length === 0) {
+        console.warn('OrbitalCarousel: Missing required elements, skipping init');
+        return;
+      }
 
-    // 2. Card Animation Stagger
-    // We want each card to enter, stay for a bit, then exit.
-    // Total duration for cards track needs to match roughly the line drawing.
-    
-    cards.forEach((card, i) => {
-      const element = card as HTMLElement;
-      
-      // Adjusted Timing for cleaner overlap
-      // Increased step slightly to separate dots during transition
-      const step = 2.5; 
-      const startTime = i * step; 
-      
-      const entryDuration = 1.5;
-      const stayDuration = 1.5;
-      const exitDuration = 1.5;
-      
-      // Entry
-      tl.fromTo(element, 
-        { 
-          yPercent: 120, // Start lower down (relative to card height)
-          opacity: 0, 
-          scale: 0.8,
-          filter: "blur(10px)",
-          display: 'block',
-          force3D: true // Hardware acceleration hint
-        },
-        { 
-          yPercent: -10, // Slight upward move to center
-          opacity: 1, 
-          scale: 1,
-          filter: "blur(0px)",
-          duration: entryDuration,
-          ease: "power2.out"
-        },
-        startTime
-      );
+      // Calculate configuration
+      this.numCards = this.cards.length;
+      this.angleStep = 360 / this.numCards;
+      this.radius = window.innerWidth < 768 ? 200 : 300;
 
-      // Exit (Fly up and fade out)
-      tl.to(element, 
-        {
-          yPercent: -120, // Exit upwards
-          opacity: 0,
-          scale: 0.8,
-          filter: "blur(10px)",
-          duration: exitDuration,
-          ease: "power2.in"
-        },
-        startTime + entryDuration + stayDuration
-      );
-    });
+      // Initialize
+      this.positionCards(0);
+      this.createEntranceAnimation();
+      this.createScrollAnimation();
+      this.setupInteractions();
+    }
 
-    // 3. Ambient Background Fade In
-    // We just want it to be visible when we are in the section.
-    // The CSS transition handles the smoothness, we just toggle opacity via class or inline style
+    /**
+     * Position cards in a 3D circle based on progress (0-1)
+     */
+    private positionCards(progress: number = 0): void {
+      this.cards.forEach((card, i) => {
+        const angle = (i * this.angleStep + progress * 360) * (Math.PI / 180);
+        const x = Math.sin(angle) * this.radius;
+        const z = Math.cos(angle) * this.radius;
+        const rotateY = -(i * this.angleStep + progress * 360);
 
+        // Calculate opacity and scale based on z-position (depth)
+        const normalizedZ = (z + this.radius) / (2 * this.radius);
+        const opacity = 0.3 + normalizedZ * 0.7;
+        const scale = 0.7 + normalizedZ * 0.3;
 
-    ScrollTrigger.create({
-        trigger: section,
-        start: "top center",
-        end: "bottom center",
-        onToggle: self => {
-            if (bg) bg.style.opacity = self.isActive ? "1" : "0";
+        gsap.set(card, {
+          x: x,
+          z: z,
+          rotateY: rotateY,
+          opacity: opacity,
+          scale: scale,
+          zIndex: Math.round(normalizedZ * 10)
+        });
+      });
+
+      // Update nav dots using CSS classes only (GSAP cannot parse CSS custom properties)
+      const activeIndex = Math.round(progress * this.numCards) % this.numCards;
+      this.navDots.forEach((dot, i) => {
+        const isActive = i === activeIndex;
+        dot.classList.toggle('active', isActive);
+        gsap.set(dot, { scale: isActive ? 1.4 : 1 });
+      });
+    }
+
+    /**
+     * Create entrance animation triggered when section enters viewport
+     */
+    private createEntranceAnimation(): void {
+      this.entranceTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: this.section,
+          start: "top 70%",
+          toggleActions: "play none none reverse"
         }
-    });
-  };
+      });
 
-  document.addEventListener('astro:page-load', initKineticFeed);
-  // Also run on initial load if view transitions aren't fully intercepting yet or for dev HMR
-  initKineticFeed();
+      // Only animate elements that exist
+      if (this.header) {
+        this.entranceTl.to(this.header, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+      }
+      if (this.hub) {
+        this.entranceTl.to(this.hub, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.5)" }, "-=0.4");
+      }
+      if (this.cards.length > 0) {
+        this.entranceTl.to(this.cards, {
+          opacity: (i: number, el: HTMLElement) => {
+            const z = gsap.getProperty(el, "z") as number;
+            return 0.3 + ((z + this.radius) / (2 * this.radius)) * 0.7;
+          },
+          duration: 0.8,
+          stagger: { each: 0.1, from: "random" },
+          ease: "power2.out"
+        }, "-=0.3");
+      }
+      if (this.nav) {
+        this.entranceTl.to(this.nav, { opacity: 1, duration: 0.5 }, "-=0.3");
+      }
+      if (this.scrollHint) {
+        this.entranceTl.to(this.scrollHint, { opacity: 1, duration: 0.5 }, "-=0.3");
+      }
+    }
+
+    /**
+     * Create scroll-driven rotation animation
+     */
+    private createScrollAnimation(): void {
+      gsap.to({}, {
+        scrollTrigger: {
+          trigger: this.section,
+          start: "top top",
+          end: "+=2000",
+          scrub: 1,
+          pin: true,
+          onUpdate: (self) => {
+            this.positionCards(self.progress);
+          }
+        }
+      });
+    }
+
+    /**
+     * Setup click handlers and hover effects
+     */
+    private setupInteractions(): void {
+      // Nav dot click handlers
+      this.navDots.forEach((dot, i) => {
+        dot.addEventListener('click', () => {
+          const targetProgress = i / this.numCards;
+          gsap.to({}, {
+            duration: 0.8,
+            ease: "power2.inOut",
+            onUpdate: () => {
+              this.positionCards(targetProgress);
+            }
+          });
+        });
+      });
+
+      // Card hover effects - with null check for inner element
+      this.cards.forEach(card => {
+        const inner = card.querySelector('.card-inner');
+        if (!inner) return; // Skip if no inner element found
+
+        card.addEventListener('mouseenter', () => {
+          gsap.to(inner, {
+            scale: 1.05,
+            // Use standard RGBA - GSAP cannot parse CSS custom properties
+            boxShadow: "0 25px 50px -12px rgba(139, 92, 246, 0.25)",
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+
+        card.addEventListener('mouseleave', () => {
+          gsap.to(inner, {
+            scale: 1,
+            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+            duration: 0.3,
+            ease: "power2.out"
+          });
+        });
+      });
+    }
+
+    /**
+     * Cleanup method for proper disposal
+     */
+    public destroy(): void {
+      if (this.entranceTl) {
+        this.entranceTl.kill();
+      }
+      if (this.scrollTl) {
+        this.scrollTl.kill();
+      }
+    }
+  }
+
+  // Single instantiation - no double init
+  new OrbitalCarousel();
 </script>
+
+<style>
+  .carousel-card {
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+  }
+  
+  .card-inner {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  
+  .nav-dot {
+    cursor: pointer;
+  }
+  
+  .nav-dot.active {
+    background-color: hsl(var(--primary));
+    transform: scale(1.4);
+  }
+</style>

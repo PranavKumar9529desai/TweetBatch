@@ -1,57 +1,278 @@
 <section
-  id="quantum-cta"
+  id="orbital-hub"
   class="relative z-30 min-h-[80vh] w-full flex items-center justify-center bg-background border-t border-border/40 overflow-hidden"
 >
-  <!-- Cinematic Ambient Glow Background -->
-  <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+  <!-- 1. Deep Background Layer -->
+  <div class="absolute inset-0 z-0 pointer-events-none">
+    <!-- Subtle Grid -->
     <div
-      class="quantum-orb absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-40 mix-blend-screen"
+      class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"
     >
     </div>
+    <!-- Ambient Glow center -->
     <div
-      class="quantum-orb absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-[100px] opacity-30 mix-blend-screen"
+      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/10 blur-[120px] rounded-full opacity-50"
     >
     </div>
+    <!-- Connecting Lines (Decorative) -->
+    <svg class="absolute inset-0 w-full h-full opacity-20" aria-hidden="true">
+      <defs>
+        <pattern
+          id="orbit-grid"
+          width="100"
+          height="100"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M 100 0 L 0 0 0 100"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="0.5"></path>
+        </pattern>
+      </defs>
+      <!-- Circular Orbit Paths -->
+      <circle
+        cx="50%"
+        cy="50%"
+        r="150"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-dasharray="4 4"
+        class="text-muted-foreground/30 animate-spin-slow"></circle>
+      <circle
+        cx="50%"
+        cy="50%"
+        r="350"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-dasharray="8 8"
+        class="text-muted-foreground/20 animate-reverse-spin-slow"></circle>
+    </svg>
+  </div>
+
+  <!-- 2. Satellite Layer (Floating Cards) -->
+  <div
+    class="absolute inset-0 z-10 w-full h-full max-w-7xl mx-auto pointer-events-none"
+    id="orbital-field"
+  >
+    <!-- Satellite 1: Growth/Analytics (Top Left) -->
     <div
-      class="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background/80"
+      class="satellite absolute top-[10%] left-[2%] md:left-[5%] p-4 bg-background/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
+      data-speed="0.5"
     >
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-green-500/20 text-green-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="m22 7-8.5 8.5-6-6-7.5 7.5"></path><path d="M16 7h6v6"
+            ></path></svg
+          >
+        </div>
+        <div>
+          <p
+            class="text-xs text-muted-foreground uppercase tracking-wider font-semibold"
+          >
+            Engagement
+          </p>
+          <p class="text-lg font-bold text-foreground">+127%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Satellite 2: Queue/Productivity (Bottom Right) -->
+    <div
+      class="satellite absolute bottom-[15%] right-[2%] md:right-[5%] p-4 bg-background/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl"
+      data-speed="0.8"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-500/20 text-blue-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-layers"
+            ><path
+              d="m12.83 2.44 9.8 5.55a.96.96 0 0 1 0 1.7L12.96 15a1 1 0 0 1-.95 0L2.3 9.69a.96.96 0 0 1 0-1.7l9.6-5.55a1 1 0 0 1 .93 0Z"
+            ></path><path d="M12 17.5v-7"></path><path d="m22 10-10 6-10-6"
+            ></path></svg
+          >
+        </div>
+        <div>
+          <p
+            class="text-xs text-muted-foreground uppercase tracking-wider font-semibold"
+          >
+            Queue Status
+          </p>
+          <p class="text-lg font-bold text-foreground flex items-center gap-2">
+            30 Posts <span
+              class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Satellite 3: Success/Badge (Top Right - Far) -->
+    <div
+      class="satellite absolute top-[20%] right-[5%] md:right-[5%] p-3 bg-background/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl hidden md:flex items-center gap-3"
+      data-speed="0.3"
+    >
+      <div
+        class="w-8 h-8 rounded-full bg-yellow-500/20 text-yellow-500 flex items-center justify-center"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><circle cx="12" cy="8" r="7"></circle><polyline
+            points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg
+        >
+      </div>
+      <span class="text-sm font-medium pr-2">Top 1% Creator</span>
+    </div>
+
+    <!-- Satellite 4: System (Bottom Left - Far) -->
+    <div
+      class="satellite absolute bottom-[25%] left-[5%] md:left-[10%] px-4 py-2 bg-primary/10 backdrop-blur-md border border-primary/20 rounded-full hidden md:flex items-center justify-center"
+      data-speed="0.4"
+    >
+      <span class="text-xs font-mono text-primary animate-pulse"
+        >● SYSTEM OPTIMAL</span
+      >
     </div>
   </div>
 
-  <div class="container relative z-10 mx-auto px-6 text-center">
-    <div class="flex flex-col items-center justify-center space-y-10">
-      <!-- Headline -->
-      <div class="space-y-6 max-w-4xl mx-auto">
-        <h2
-          class="quantum-title text-5xl md:text-7xl font-bold tracking-tight text-foreground"
+  <!-- 3. Central Content Hub -->
+  <div class="container relative z-20 mx-auto px-6 text-center">
+    <div class="flex flex-col items-center justify-center space-y-8">
+      <!-- Label -->
+      <div
+        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border/50 backdrop-blur-sm mb-4"
+      >
+        <span class="relative flex h-2 w-2">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+          ></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"
+          ></span>
+        </span>
+        <span class="text-xs font-medium text-muted-foreground tracking-wide"
+          >COMMAND CENTER READY</span
         >
-          Ready to Accelerate Your Growth?
+      </div>
+
+      <!-- Headlines -->
+      <div class="space-y-4 max-w-3xl mx-auto">
+        <h2
+          class="orbital-title text-5xl md:text-7xl font-bold tracking-tight text-foreground"
+        >
+          <!-- Scale your voice. <br /> -->
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-primary"
+            >Schedule and Sleep</span
+          >
         </h2>
 
         <p
-          class="quantum-text text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto font-light leading-relaxed"
+          class="orbital-text text-xl text-muted-foreground/80 max-w-2xl mx-auto font-light leading-relaxed"
         >
-          Join thousands of creators who are scaling their Twitter presence with
-          intelligent automation.
+          Join the 1% of creators who rely on data, not luck. Your personal
+          growth engine is primed for launch.
         </p>
       </div>
 
-      <!-- Action Button -->
-      <div class="pt-8">
+      <!-- Main Action -->
+      <div class="pt-6 relative group">
+        <!-- Connecting lines to button (visual only) -->
+        <div
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700 opacity-50"
+        >
+        </div>
+
         <a
           href="https://tweetbatch-frontend.fullstackwebdeveloper123.workers.dev/auth/sign-in"
-          class="quantum-btn relative inline-flex items-center justify-center px-12 py-6 text-xl font-medium text-primary-foreground bg-primary rounded-full hover:bg-primary/90 transition-colors duration-300 shadow-xl shadow-primary/20"
+          class="orbital-btn relative inline-flex items-center justify-center px-10 py-5 text-lg font-bold text-primary-foreground bg-primary rounded-full overflow-hidden hover:scale-105 transition-all duration-300 shadow-[0_0_40px_-10px_rgba(var(--primary),0.4)] hover:shadow-[0_0_60px_-15px_rgba(var(--primary),0.6)]"
         >
-          <span class="relative z-10">Start For Free</span>
-          <div
-            class="absolute inset-0 rounded-full bg-white/20 blur-md opacity-0 hover:opacity-100 transition-opacity duration-300"
-          >
+          <span
+            class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          ></span>
+
+          <div class="relative z-10 flex items-center gap-2">
+            <span>Start Scheduling Free</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="transition-transform group-hover:translate-x-1"
+              ><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg
+            >
           </div>
         </a>
+        <p class="mt-4 text-sm text-muted-foreground/50">
+          No credit card required
+        </p>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes reverse-spin-slow {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 60s linear infinite;
+    transform-origin: center;
+  }
+  .animate-reverse-spin-slow {
+    animation: reverse-spin-slow 80s linear infinite;
+    transform-origin: center;
+  }
+</style>
 
 <script>
   import { gsap } from "gsap";
@@ -59,96 +280,107 @@
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const section = document.getElementById("quantum-cta");
-  const orbs = section?.querySelectorAll(".quantum-orb");
-  const title = section?.querySelector(".quantum-title");
-  const text = section?.querySelector(".quantum-text");
-  const btn = section?.querySelector(".quantum-btn") as HTMLElement;
+  const section = document.getElementById("orbital-hub");
+  const satellites = section?.querySelectorAll(".satellite");
+  const title = section?.querySelector(".orbital-title");
+  const text = section?.querySelector(".orbital-text");
+  const btn = section?.querySelector(".orbital-btn");
+  const field = document.getElementById("orbital-field");
 
-  if (section) {
+  if (section && satellites) {
+    // 1. Entrance Animation
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: "top 75%",
-        toggleActions: "play none none reverse",
       },
     });
 
-    // 1. Cinematic Entrance
-    if (title && text && btn) {
-      tl.fromTo(
-        [title, text, btn],
-        {
-          y: 40,
-          opacity: 0,
-          filter: "blur(10px)",
-        },
-        {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1.2,
-          stagger: 0.2,
-          ease: "power3.out",
-        },
-      );
-    }
+    tl.fromTo(
+      [title, text, btn],
+      { y: 50, opacity: 0, filter: "blur(10px)" },
+      {
+        y: 0,
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1,
+        stagger: 0.1,
+        ease: "power3.out",
+      },
+    ).fromTo(
+      satellites,
+      { scale: 0, opacity: 0 },
+      {
+        scale: 1,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+      },
+      "-=0.5",
+    );
 
-    // 2. Ambient Orb Movement (Breathing Effect)
-    if (orbs && orbs.length > 0) {
-      orbs.forEach((orb, i) => {
-        gsap.to(orb, {
-          x: "random(-50, 50)",
-          y: "random(-30, 30)",
-          scale: "random(0.9, 1.1)",
-          duration: "random(4, 7)",
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: i * 0.5,
+    // 2. Idle Floating (Unique for each)
+    satellites.forEach((sat, i) => {
+      gsap.to(sat, {
+        y: "random(-15, 15)",
+        x: "random(-10, 10)",
+        rotation: "random(-5, 5)",
+        duration: "random(3, 6)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: i * 0.2,
+      });
+    });
+
+    // 3. Mouse Parallax (3D Depth)
+    section.addEventListener("mousemove", (e) => {
+      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2;
+      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
+
+      // Move Satellites (Fastest)
+      satellites.forEach((sat) => {
+        const speed = parseFloat(sat.getAttribute("data-speed") || "0.5");
+        gsap.to(sat, {
+          x: xPercent * 40 * speed,
+          y: yPercent * 40 * speed,
+          duration: 1,
+          ease: "power2.out",
         });
       });
-    }
+    });
 
-    // 3. Magnetic Button Effect
+    // 4. Hover Convergence (Magnet Effect)
     if (btn) {
-      btn.addEventListener("mousemove", (e: MouseEvent) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
+      btn.addEventListener("mouseenter", () => {
+        // Get dynamic primary color
+        const style = getComputedStyle(document.documentElement);
+        const primaryVal = style.getPropertyValue("--primary").trim();
+        const glowColor = `hsl(${primaryVal} / 0.5)`; // Modern CSS HSL syntax
 
-        gsap.to(btn, {
-          x: x * 0.3, // Magnetic strength
-          y: y * 0.3,
-          duration: 0.3,
-          ease: "power2.out",
+        // Pull satellites toward center
+        satellites.forEach((sat) => {
+          gsap.to(sat, {
+            scale: 1.1,
+            duration: 0.5,
+            ease: "back.out(2)",
+            boxShadow: `0 0 30px ${glowColor}`,
+          });
         });
       });
 
       btn.addEventListener("mouseleave", () => {
-        gsap.to(btn, {
-          x: 0,
-          y: 0,
-          duration: 0.5,
-          ease: "elastic.out(1, 0.3)",
+        satellites.forEach((sat) => {
+          gsap.to(sat, {
+            scale: 1,
+            duration: 0.5,
+            ease: "power2.out",
+            boxShadow: "none",
+            clearProps: "boxShadow",
+          });
         });
       });
     }
-
-    // 4. Subtle Parallax on Mouse Move (Section)
-    section.addEventListener("mousemove", (e) => {
-      const xPercent = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
-      const yPercent = (e.clientY / window.innerHeight - 0.5) * 2;
-
-      if (orbs) {
-        gsap.to(orbs, {
-          x: xPercent * 30, // Slight shift opposite to cursor
-          y: yPercent * 30,
-          duration: 1.5,
-          ease: "power2.out",
-          overwrite: "auto", // Don't conflict with breathing too much (actually we need to be careful here)
-        });
-      }
-    });
   }
 </script>

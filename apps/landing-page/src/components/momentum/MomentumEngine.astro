@@ -2,6 +2,7 @@
 import { cn } from "@repo/ui/lib/utils";
 import EngineCore from "./EngineCore.astro";
 import WarpTunnel from "../backgrounds/WarpTunnel.astro";
+import FluidMesh from "../backgrounds/FluidMesh.astro";
 ---
 
 <section
@@ -9,14 +10,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
     class="relative z-20 w-full h-screen bg-background overflow-hidden"
 >
     <!-- Background Grid (Streaming) -->
-    <div class="absolute inset-0 -z-10 pointer-events-none">
-        <div
-            id="momentum-grid"
-            class="absolute inset-0 opacity-40 grid-pattern"
-        >
-            <WarpTunnel />
-        </div>
-    </div>
+    <FluidMesh />
 
     <!-- Main Canvas for Particles -->
     <canvas
@@ -29,7 +23,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
         <div class="absolute top-[15%] text-center z-30 pointer-events-none">
             <h2
                 id="momentum-title"
-                class="text-4xl md:text-6xl font-black tracking-tighter opacity-0 translate-y-10"
+                class="text-4xl md:text-6xl font-black tracking-tighter opacity-100 translate-y-0"
             >
                 TURNING CHAOS <br />
                 <span class="text-primary">INTO MOMENTUM</span>
@@ -39,7 +33,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
         <!-- The Core -->
         <div
             id="momentum-core-wrapper"
-            class="relative z-40 opacity-0 scale-50"
+            class="relative z-40 opacity-100 scale-100"
         >
             <EngineCore />
         </div>
@@ -92,7 +86,7 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
 
         // Engine State (Controlled by GSAP)
         state = {
-            chaos: 0, // 0 to 1
+            chaos: 1, // Start at full chaos
             turbine: 0, // 0 to 1
             velocity: 0.2, // Rotation speed
             coreGlow: 0, // 0 to 1
@@ -167,39 +161,38 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
                 },
             });
 
-            // STAGE 1: Reveal & Title
-            tl.to("#momentum-title", {
-                opacity: 1,
-                y: 0,
-                duration: 2,
-                ease: "power2.out",
-            }).to(
-                "#momentum-core-wrapper",
-                { opacity: 1, scale: 1, duration: 2, ease: "back.out(1.7)" },
-                "-=1.5",
-            );
+            // STAGE 1: Turning Chaos into Momentum (The Transition)
+            // We start with Chaos = 1 (set in state).
+            // As user scrolls, we reduce chaos and form the turbine.
 
-            // STAGE 2: Chaos (Explosion)
             tl.to(this.state, {
-                chaos: 1,
-                duration: 4,
-                ease: "power1.inOut",
-            }).to(
-                "#momentum-title",
-                { opacity: 0, y: -20, duration: 1 },
-                "-=4",
-            );
-
-            // STAGE 3: Turbine Alignment
-            tl.to(this.state, {
-                chaos: 0.1,
+                chaos: 0,
                 turbine: 1,
                 velocity: 3,
                 duration: 5,
                 ease: "power2.inOut",
-            }).to("#momentum-subtitle", { opacity: 1, duration: 2 }, "-=2");
+            })
+                .to(
+                    "#momentum-title",
+                    {
+                        opacity: 0,
+                        scale: 0.9,
+                        y: -50,
+                        duration: 2,
+                        ease: "power2.in",
+                    },
+                    "<",
+                ) // Fade title out as we start organizing
+                .to(
+                    "#momentum-subtitle",
+                    {
+                        opacity: 1,
+                        duration: 2,
+                    },
+                    "-=2",
+                );
 
-            // STAGE 4: Max Velocity
+            // STAGE 2: Max Velocity
             tl.to(this.state, {
                 velocity: 15,
                 streaming: 1,
@@ -267,8 +260,8 @@ import WarpTunnel from "../backgrounds/WarpTunnel.astro";
             this.angle = Math.random() * Math.PI * 2;
             this.orbitRadius = Math.random() * 300 + 100;
             this.chaosOffset = {
-                x: (Math.random() - 0.5) * 1000,
-                y: (Math.random() - 0.5) * 1000,
+                x: (Math.random() - 0.5) * w * 1.5,
+                y: (Math.random() - 0.5) * h * 1.5,
             };
             const primaryColors = ["#60a5fa", "#3b82f6", "#2563eb", "#ffffff"];
             this.color =

@@ -2,8 +2,10 @@
 /**
  * FlightLoader.astro
  *
- * A state-of-the-art preloader component featuring the TweetBatch bird animation.
+ * A state-of-the-art preloader component featuring a "Firebird" animation.
  * The bird flies from bottom-left to center, hovers/flaps wings, then flies off to top-right.
+ *
+ * Usage: Import and place in your main Layout or index page.
  */
 ---
 
@@ -19,74 +21,61 @@
 
     <!-- Animation Container -->
     <div class="relative w-full h-full max-w-[1920px] max-h-[1080px] mx-auto">
+        <!-- The Firebird SVG -->
         <!-- 
-             TweetBatch Bird SVG 
-             ViewBox matches the original logo file: 0 0 423 310
+             NOTE: This SVG is a placeholder structure. 
+             Replace the paths inside #firebird-body, #wing-left, #wing-right with your actual logo paths.
+             Ensure the viewBox aligns with your vector graphics.
         -->
         <svg
-            id="bird-svg"
-            class="absolute top-1/2 left-1/2 w-[200px] h-[150px] -ml-[100px] -mt-[75px] drop-shadow-2xl opacity-0"
-            viewBox="0 0 423 310"
+            id="firebird-svg"
+            class="absolute top-1/2 left-1/2 w-[120px] h-[120px] text-primary drop-shadow-[0_0_15px_rgba(255,100,0,0.5)] opacity-0"
+            viewBox="0 0 100 100"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
         >
-            <g id="bird-group">
-                <!-- Left Wing (Back) -->
-                <g id="wing-left" style="transform-origin: 140px 90px;">
-                    <path
-                        style="fill:#b83336;stroke:none"
-                        d="m 114,63 -6,-2 -1,3 c -4.21678,-1.704559 -9.249298,0.389313 -12,4 l 3,-1 c 2.11208,8.291565 14.0453,13.516876 20.40972,18.611115 12.66012,10.133483 25.66387,19.862515 38.59028,29.640425 7.98416,6.03945 17.1226,11.47388 23,19.74846 l -18,-9 -38,-22 -17,-9 -6,-2 c -3.147331,19.85709 8.9636,27.97331 23,37.86343 18.34535,12.92624 40.00267,23.27344 56,39.13657 -21.30663,-3.79803 -42.07883,-19.70612 -62,-28 -0.55144,4.69998 2.04081,8.68842 3.80016,13 8.05242,19.7339 28.08702,25.12723 46.19984,34.24768 6.21538,3.12967 14.07985,10.19025 21,11.04013 5.95114,0.73087 14.62337,-5.12887 20,-7.43828 5.1554,-2.21437 25.72633,-7.6754 27.18672,-13.07408 1.03055,-3.80964 -2.87308,-10.26262 -4.24844,-13.77545 -4.67929,-11.95146 -9.47637,-24.17404 -14.55864,-36 C 211.93819,117.33827 199.37395,111.69197 188,104.41357 180.73466,99.764359 172.53516,96.3582 165.61497,91.235352 160.66214,87.568878 155.49591,81.606369 149,82 l -6,-4 1,3 -7,-2 -11,3 v -3 l -5,-1 3,-2 v -1 l -6,2 -1,-5 h 1 v 3 c 3.58564,-3.287567 0.35731,-7.807312 -2,-11 h 4 v -3 h -2 l 1,-2 z"
-                    ></path>
-                    <path
-                        style="fill:#c65e52;stroke:none"
-                        d="m 87,37 c 0.07082,8.554108 0.935974,22.338242 5.023918,29.960648 C 94.577843,71.722702 100.70885,74.858521 105,77.861115 112.95787,83.429382 120.34393,90.582169 129,95 V 94 L 92,64 v -1 c 3.832886,-1.561554 0.337837,-3.381744 0,-6 l 4,-1 v 3 h 1 l 4,-5 -1,2 6,-1 -2,-3 c 10.92828,3.939148 21.55334,9.793777 29,19 L 156,83 140,71.258484 105,48.091827 Z"
-                    ></path>
-                </g>
+            <g id="firebird-group">
+                <!-- Left Wing -->
+                <path
+                    id="wing-left"
+                    d="M30 50 C 20 40, 10 30, 5 45 C 15 55, 30 60, 45 55 Z"
+                    fill="currentColor"
+                    style="transform-origin: 45px 55px;"></path>
 
-                <!-- Body (Center) - Includes head and main body parts -->
-                <g id="bird-body">
-                    <path
-                        style="fill:#b83336;stroke:none"
-                        d="m 166,225 c -20.97278,22.94781 -52.79611,38.34726 -71,64 20.9504,-3.73453 44.31369,-18.02737 64,-26.42746 9.19452,-3.92328 16.84677,-8.57143 27,-8.57254 v -1 l -3,-9 -10,-9 -3,-2 h 1 v 2 h 1 l -1,-6 h 1 l 1,2 1,-5 -8,-1 m 9,0 v 2 l 2,-2 z"
-                    ></path>
-                    <path
-                        style="fill:#bb5731;stroke:none"
-                        d="m 170,190 1,1 -1,-1 m 18,11 c -4.6183,15.26569 -28.36252,23.82202 -37,37 l 15,-13 8,1 -1,5 -1,-2 h -1 l 1,6 h -1 v -2 h -1 l 3,2 10,9 2,11 16,-5 v -1 h -4 -1 l -2,-12 -3,1 -4,-7 v 3 c -1.18781,-2.44159 -2.03784,-3.60803 1,-4 -4.80659,-9.94492 9.86021,-12.93813 8,-23 3.61345,-1.02576 5.34497,-2.26904 6,-6 l 14,-11 z"
-                    ></path>
-                    <path
-                        style="fill:#c65e52;stroke:none"
-                        d="m 202,201 -6,6 c 0.37277,9.54094 -14.28838,13.88748 -8,23 l -3,1 2,3 v -3 l 7,6 2,12 h 1 4 v 1 l -13,4 v 1 c 8.51912,-0.006 16.12798,-0.66856 23,-6 v -4 c 2.86295,-0.61728 3.9731,-2.46048 5.56018,-5.0054 3.62228,-5.80843 3.84987,-12.3504 -1.07716,-17.63117 -3.12223,-3.34639 -9.99536,-5.72982 -7.61034,-11.64892 C 213.05965,197.84164 228.92659,192.03168 237,182 c -13.58638,4.52129 -23.47049,10.81912 -35,19 z"
-                    ></path>
-                    <path
-                        style="fill:#d88956;stroke:none"
-                        d="m 229,157 c 3.26776,5.50294 10.6084,17.32016 8.50464,23.99922 -1.64308,5.21649 -8.56195,8.20003 -12.33489,11.73381 C 217.73932,199.69247 215.09267,205.28506 214,215 l 5,3 c -0.73026,4.41077 1.63139,6.81577 2.1929,11 0.94797,7.06409 -4.20239,12.85036 -9.1929,17 l 4,2 v 1 l -10,4 v 1 c 13.29794,-1.79068 25.53395,-7.09653 36.96065,-13.93442 C 247.86182,237.13266 252.21877,230.76785 258,230 v -1 -1 l -3,1 4,-5 -6,3 2,-4 h -5 l 2,-3 -5,-7 c -12.27921,-6.58789 -5.41673,-30.79471 -5.96143,-42 -0.18037,-3.71045 0.25809,-12.66652 -3.60261,-14.84027 C 235.33124,154.97467 231.3224,156.84055 229,157 Z"
-                    ></path>
-                    <path
-                        style="fill:#ecb77a;stroke:none"
-                        d="m 256,140 -18,12 c 3.08519,12.06262 5.03763,24.45644 4.28241,37 -0.21223,3.52509 -2.69281,10.43681 1.71759,11 l 1,3 3,-1 c -0.0235,4.06287 8.4968,8.44279 12,5 v 5 l -5,1 7,1 v 1 h -3 l 5,7 -1,-2 h 1 l -2,6 v 1 c 14.8222,-6.93124 21.09042,-27.23038 27.00928,-41 2.73864,-6.37119 6.37243,-12.1868 7.99072,-19 l -2,1 3,-6 h -3 v -4 l -5,-1 c 0.0271,-2.6161 -0.43204,-2.55365 -3,-2 l 3,-3 v -1 h -6 l -9,-10 -3,3 -6,-1 3,-4 z"
-                    ></path>
-                    <path
-                        style="fill:#eccaa2;stroke:none"
-                        d="m 234,155 22,-15 13,-1 -3,4 6,1 3,-3 9,10 h 6 v 1 h -3 v 3 l 3,-1 v 3 l 5,1 v 4 h 3 l -3,6 2,-1 v 1 l -11,28 h 1 c 3.34622,-8.62502 9.72946,-32.80209 19,-36 2.35342,-10.09091 16.49551,-11.41998 22,-19 -14.54858,0.64337 -22.96146,-8.63266 -36,-11.48148 -20.9711,-4.58201 -45.15071,9.05639 -58,25.48148 m -116,-26 1,1 z"
-                    ></path>
-                </g>
+                <!-- Right Wing -->
+                <path
+                    id="wing-right"
+                    d="M70 50 C 80 40, 90 30, 95 45 C 85 55, 70 60, 55 55 Z"
+                    fill="currentColor"
+                    style="transform-origin: 55px 55px;"></path>
 
-                <!-- Right Wing (Front) -->
-                <g id="wing-right" style="transform-origin: 200px 90px;">
-                    <path
-                        style="fill:#bb5731;stroke:none"
-                        d="m 217,78 2,3 -2,-3 m 4,0 2,4 -4,1 -3,-1 v 4 l -4,-2 v 4 h -4 l 12,15 -22,-9 -3,-2 -1,-3 h -1 l 1,3 -6,-2 v 1 l 17,14 c 18.84851,3.39009 21.86491,25.58888 28,40 6.30963,-3.51277 17.53238,-9.62263 20.93286,-16.18442 1.77341,-3.42209 -0.061,-9.22925 -0.73688,-12.81558 C 251.17586,105.28113 247.59743,88.48851 234,87 c -1.85313,-3.45752 -4.13168,-4.51033 -8,-4 z"
-                    ></path>
-                    <path
-                        style="fill:#bf805f;stroke:none"
-                        d="m 186,52 -6,4 -3,-2 c -0.004,8.531448 8.83298,14.198059 14.67516,19.205246 C 200.3082,80.604416 205.66916,91.31424 215,98 L 199,76 h 2 l -1,-3 3,-6 4,4 h 1 l 1,-3 4,4 c 10.86511,-1.141678 29.87006,18.984573 36,27 h 1 C 247.76497,93.078156 240.75153,88.43338 235.99924,84.409729 226.924,76.725937 218.10762,68.729141 208.97531,61.115738 204.52205,57.403152 199.00081,50.635254 193,55 h -1 z"
-                    ></path>
-                    <path
-                        style="fill:#d88956;stroke:none"
-                        d="M 161,19 162.5602,45.829468 175,59.000763 204,87 C 197.54419,76.67894 177.79158,66.400131 177,54 l 3,2 6,-4 6,3 h 1 l 7,-1 C 190.50499,41.585907 173.8654,27.956024 161,19 Z"
-                    ></path>
-                </g>
+                <!-- Body/Head -->
+                <path
+                    id="firebird-body"
+                    d="M45 55 Q 50 80, 55 55 Q 60 30, 50 15 Q 40 30, 45 55 Z"
+                    fill="currentColor"></path>
+
+                <!-- Tail Particles (Simulated) -->
+                <circle
+                    cx="50"
+                    cy="80"
+                    r="2"
+                    class="animate-pulse opacity-50"
+                    fill="currentColor"></circle>
             </g>
+        </svg>
+
+        <!-- Motion Path Visualizer (Optional: Hidden by default, useful for debugging) -->
+        <svg
+            class="absolute inset-0 w-full h-full pointer-events-none opacity-0"
+            preserveAspectRatio="none"
+        >
+            <path
+                id="flight-path"
+                d=""
+                fill="none"
+                stroke="red"
+                stroke-width="2"></path>
         </svg>
     </div>
 
@@ -94,7 +83,7 @@
     <div
         class="absolute bottom-10 left-1/2 -translate-x-1/2 text-muted-foreground text-sm tracking-widest uppercase animate-pulse"
     >
-        TweetBatch
+        Initializing System...
     </div>
 </div>
 
@@ -104,15 +93,16 @@
 
     gsap.registerPlugin(MotionPathPlugin);
 
+    // Main Animation Logic
     const initLoader = () => {
         const loader = document.getElementById("flight-loader");
-        const bird = document.getElementById("bird-svg");
+        const bird = document.getElementById("firebird-svg");
         const wingLeft = document.getElementById("wing-left");
         const wingRight = document.getElementById("wing-right");
 
         if (!loader || !bird) return;
 
-        // 1. Initial State
+        // 1. Initial State (Start at Bottom-Left relative to center)
         const startX = -window.innerWidth * 0.45;
         const startY = window.innerHeight * 0.45;
 
@@ -125,17 +115,16 @@
             y: startY,
         });
 
+        // 2. Define the Flight Path
         const masterTl = gsap.timeline({
             onComplete: () => {
+                // Remove loader from DOM or hide it
                 gsap.to(loader, {
                     opacity: 0,
                     duration: 0.8,
                     onComplete: () => {
                         loader.style.display = "none";
                         // Dispatch event that loading is done
-                        document.dispatchEvent(new Event("loader-complete"));
-
-                        // Fallback: Also dispatch on window just in case
                         window.dispatchEvent(
                             new CustomEvent("loader-complete"),
                         );
@@ -149,61 +138,40 @@
         masterTl.to(bird, {
             motionPath: {
                 path: [
-                    { x: startX * 0.5, y: startY * 0.5 },
-                    { x: 0, y: 0 },
+                    { x: startX * 0.5, y: startY * 0.5 }, // Control point for curve
+                    { x: 0, y: 0 }, // Center
                 ],
                 curviness: 1.5,
-                autoRotate: false, // SVG is already oriented? Let's assume standard orientation
+                autoRotate: true,
                 alignOrigin: [0.5, 0.5],
             },
-            rotation: 15, // Tilt down slightly when arriving
             opacity: 1,
             duration: 2,
             ease: "power2.out",
-            scale: 1.2,
+            scale: 1.5, // Grow as it approaches
         });
 
-        // === FLAPPING LOOP ===
+        // === PHASE 2: HOVER & FLAP ===
+        // We want the bird to stay in center and flap wings.
+        // The wing flapping is a separate loop running concurrently or triggered here.
+
+        // Flapping Animation (Loop)
         const flapTl = gsap.timeline({ repeat: -1, yoyo: true });
-
-        // Flap DOWN (Wings move down)
-        // Transform origins are approximate based on SVG coordinates
-        flapTl
-            .to(
-                wingLeft,
-                {
-                    rotation: 30,
-                    duration: 0.15,
-                    ease: "sine.inOut",
-                },
-                0,
-            )
-            .to(
-                wingRight,
-                {
-                    rotation: -30,
-                    duration: 0.15,
-                    ease: "sine.inOut",
-                },
-                0,
-            )
-            .to(
-                bird,
-                {
-                    y: "+=5", // Bobbing motion
-                    duration: 0.15,
-                    ease: "sine.inOut",
-                },
-                0,
-            );
-
-        // === PHASE 2: HOVER ===
-        masterTl.to(bird, {
-            y: "-=20",
-            duration: 1.5,
+        flapTl.to([wingLeft, wingRight], {
+            rotation: (i) => (i === 0 ? -30 : 30), // Left wing rotates neg, Right wing pos
+            scaleY: 0.8,
+            duration: 0.15,
             ease: "sine.inOut",
+        });
+
+        // Add a "Hover" moment in the master timeline
+        // We do this by adding a dummy tween or just a delay
+        masterTl.to(bird, {
+            y: "+=20", // Slight hover up/down
             yoyo: true,
-            repeat: 1,
+            repeat: 3,
+            duration: 0.5,
+            ease: "sine.inOut",
         });
 
         // === PHASE 3: FLY AWAY ===
@@ -213,26 +181,28 @@
                     {
                         x: window.innerWidth * 0.5,
                         y: -window.innerHeight * 0.5,
-                    },
+                    }, // Top Right
                 ],
                 curviness: 1,
-                autoRotate: false,
+                autoRotate: true,
             },
-            rotation: -25, // Tilt up for takeoff
-            duration: 1.2,
-            scale: 0.8,
+            duration: 1.5,
+            scale: 0.5, // Shrink away
             ease: "power2.in",
         });
 
-        // Fade out at the end
-        masterTl.to(bird, { opacity: 0, duration: 0.3 }, "-=0.3");
+        // Fade trail
+        masterTl.to(bird, { opacity: 0, duration: 0.5 }, "-=0.5");
     };
 
     // Run on load
-    // Using a more robust loading strategy for Astro
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initLoader);
-    } else {
+    window.addEventListener("load", () => {
+        // Small delay to ensure everything is ready
+        setTimeout(initLoader, 100);
+    });
+
+    // Fallback if load already fired
+    if (document.readyState === "complete") {
         initLoader();
     }
 </script>

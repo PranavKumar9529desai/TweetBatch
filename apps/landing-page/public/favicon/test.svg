@@ -1,0 +1,36 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bodyGradient" x1="280" y1="230" x2="280" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFB74D" />
+      <stop offset="1" stop-color="#FF9800" />
+    </linearGradient>
+    <linearGradient id="wingGradient" x1="100" y1="100" x2="300" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F57C00" />
+      <stop offset="1" stop-color="#E65100" />
+    </linearGradient>
+    <linearGradient id="topWingGradient" x1="200" y1="100" x2="300" y2="250" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9800" />
+      <stop offset="1" stop-color="#F57C00" />
+    </linearGradient>
+  </defs>
+
+  <g id="right-wing">
+    <path d="M245 140 L300 180 L290 220 L235 180 Z" fill="url(#topWingGradient)"/>
+    <path d="M235 185 L285 225 L275 255 L225 215 Z" fill="url(#topWingGradient)"/>
+  </g>
+
+  <g id="left-wing">
+    <path d="M200 150 L260 210 L260 240 L160 190 Z" fill="url(#wingGradient)"/>
+    <path d="M205 200 L265 245 L265 275 L170 240 Z" fill="url(#wingGradient)"/>
+    <path d="M210 250 L270 280 L250 310 L200 360 L200 300 Z" fill="url(#wingGradient)"/>
+  </g>
+
+  <g id="body">
+    <path d="M270 240 C270 240 330 230 360 240 C360 240 340 280 300 320 C260 360 200 365 200 365 L245 315 C260 300 270 280 270 240 Z" fill="url(#bodyGradient)"/>
+    
+    <rect x="200" y="290" width="30" height="10" transform="skewX(-20)" fill="#E65100"/>
+    <rect x="205" y="310" width="25" height="10" transform="skewX(-20)" fill="#E65100"/>
+    <rect x="210" y="330" width="20" height="10" transform="skewX(-20)" fill="#E65100"/>
+  </g>
+
+</svg>

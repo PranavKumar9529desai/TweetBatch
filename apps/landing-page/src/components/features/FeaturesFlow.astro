@@ -3,28 +3,20 @@ import { cn } from "@repo/ui/lib/utils";
 import FeatureEditor from "./FeatureEditor.astro";
 import FeatureSchedule from "./FeatureSchedule.astro";
 import FeatureAnalytics from "./FeatureAnalytics.astro";
+import WarpTunnel from "../backgrounds/WarpTunnel.astro";
+import CircuitBoard from "../backgrounds/CircuitBoard.astro";
+import OrbitalField from "../backgrounds/OrbitalField.astro";
+import FluidMesh from "../backgrounds/FluidMesh.astro";
+import AmbienceGlow from "../backgrounds/AmbienceGlow.astro";
 ---
 
 <section
     id="features-flow"
-    class="relative z-10 w-full h-screen bg-background overflow-hidden"
+    class="relative z-10 w-full h-screen overflow-hidden"
 >
     <!-- Background Elements (Magnetic Grid) -->
-    <div class="absolute inset-0 -z-10 bg-background pointer-events-none">
-        <canvas
-            id="features-magnetic-grid"
-            class="absolute inset-0 h-full w-full opacity-20 dark:opacity-20 opacity-40"
-        ></canvas>
-        <div
-            class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[100px] animate-pulse"
-        >
-        </div>
-        <div
-            class="absolute bottom-[20%] left-[10%] w-64 h-64 bg-purple-500/10 rounded-full blur-[80px] animate-pulse delay-1000"
-        >
-        </div>
-    </div>
-
+    <!-- <FluidMesh /> -->
+    <AmbienceGlow />
     <!-- Container (GSAP will pin the section) -->
     <div
         class="h-full w-full overflow-hidden flex flex-col items-center justify-center"

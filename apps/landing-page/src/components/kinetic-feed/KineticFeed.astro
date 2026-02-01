@@ -5,6 +5,7 @@
  * Scroll-controlled carousel with auto-rotation
  */
 import { cn } from "@repo/ui/lib/utils";
+import AmbienceGlow from "../backgrounds/AmbienceGlow.astro";
 
 // Tweet status configuration
 const statusConfig = {
@@ -99,11 +100,8 @@ const tweets = [
 <section id="kinetic-feed" class="relative z-20 w-full min-h-screen bg-background overflow-hidden">
   
   <!-- Background effects -->
-  <div class="absolute inset-0 -z-10 pointer-events-none">
-    <canvas id="features-magnetic-grid" class="absolute inset-0 h-full w-full opacity-15"></canvas>
-    <div class="absolute top-[20%] right-[10%] w-96 h-96 bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-    <div class="absolute bottom-[30%] left-[10%] w-72 h-72 bg-accent/15 rounded-full blur-[100px] animate-pulse" style="animation-delay: 1.5s;"></div>
-  </div>
+
+   <AmbienceGlow />
 
   <div class="h-screen flex flex-col items-center justify-center py-16 md:py-20">
     

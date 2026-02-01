@@ -1,133 +1,278 @@
 ---
-
+import {
+  MessageSquare,
+  BarChart3,
+  Clock,
+  Image as ImageIcon,
+} from "lucide-astro";
 ---
 
 <div
   id="fluid-mesh-container"
-  class="absolute inset-0 w-full h-full -z-10 overflow-hidden bg-background"
+  class="absolute inset-0 w-full h-full -z-10 overflow-hidden bg-background/5"
 >
-  <canvas id="fluid-mesh-canvas" class="w-full h-full opacity-60"></canvas>
-  <!-- Overlay noise for texture -->
+  <!-- Layer 1: Canvas for 'Data Particles' -->
+  <canvas
+    id="particle-stream-canvas"
+    class="absolute inset-0 w-full h-full opacity-60"></canvas>
+
+  <!-- Layer 2: Floating Product Assets -->
   <div
-    class="absolute inset-0 opacity-[0.03] pointer-events-none"
+    class="absolute inset-0 pointer-events-none overflow-hidden"
+    id="floating-assets"
+  >
+    <!-- Asset 1: Abstract Tweet Card -->
+    <div
+      class="float-asset absolute top-[15%] left-[10%] opacity-0"
+      data-speed="20"
+    >
+      <div
+        class="w-32 h-20 rounded-xl bg-card/60 border border-border/40 backdrop-blur-md flex flex-col gap-2 p-3 transform -rotate-12"
+      >
+        <div class="flex gap-2 items-center">
+          <div class="w-6 h-6 rounded-full bg-primary/20"></div>
+          <div class="w-16 h-2 rounded bg-muted-foreground/20"></div>
+        </div>
+        <div class="space-y-1 mt-1">
+          <div class="w-full h-1.5 rounded bg-muted-foreground/15"></div>
+          <div class="w-2/3 h-1.5 rounded bg-muted-foreground/15"></div>
+        </div>
+        <MessageSquare
+          class="absolute -bottom-4 -right-4 w-12 h-12 text-primary/10 -z-10"
+        />
+      </div>
+    </div>
+
+    <!-- Asset 2: Analytics Sparkline -->
+    <div
+      class="float-asset absolute top-[40%] right-[15%] opacity-0"
+      data-speed="-15"
+    >
+      <div
+        class="w-24 h-24 rounded-2xl bg-gradient-to-tr from-accent/20 to-transparent border border-border/40 backdrop-blur-sm flex items-center justify-center transform rotate-6"
+      >
+        <BarChart3 class="w-10 h-10 text-primary" />
+        <div
+          class="absolute -bottom-2 -left-2 w-8 h-8 rounded-full bg-primary/20 blur-xl"
+        >
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset 3: Scheduling Clock -->
+    <div
+      class="float-asset absolute bottom-[20%] left-[20%] opacity-0"
+      data-speed="25"
+    >
+      <div
+        class="relative w-16 h-16 rounded-full border border-primary/20 bg-background/40 backdrop-blur-md flex items-center justify-center"
+      >
+        <Clock class="w-8 h-8 text-primary/80" />
+        <div
+          class="absolute w-full h-full border border-dashed border-primary/20 rounded-full animate-spin-slow"
+        >
+        </div>
+      </div>
+    </div>
+
+    <!-- Asset 4: Media Placeholder -->
+    <div
+      class="float-asset absolute bottom-[30%] right-[25%] opacity-0 hidden md:block"
+      data-speed="-10"
+    >
+      <div
+        class="w-20 h-24 rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm flex items-center justify-center transform -rotate-3 skew-y-3"
+      >
+        <ImageIcon class="w-8 h-8 text-muted-foreground/40" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay noise -->
+  <div
+    class="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay"
     style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIj48ZmlsdGVyIGlkPSJnoiPjxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSIzIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsdGVyPSJ1cmwoI2cpIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=');"
   >
   </div>
 </div>
 
 <script>
-  let animationId: number | null = null;
-  let resizeListener: (() => void) | null = null;
+  import gsap from "gsap";
 
-  const initFluidMesh = () => {
-    const canvas = document.getElementById(
-      "fluid-mesh-canvas",
-    ) as HTMLCanvasElement;
-    if (!canvas) return;
+  let ctx: gsap.Context | null = null;
+  let canvasAnimationId: number | null = null;
+  let resizeObserver: ResizeObserver | null = null;
 
-    if (animationId) cancelAnimationFrame(animationId);
-    if (resizeListener) window.removeEventListener("resize", resizeListener);
+  const init = () => {
+    // 1. Cleanup existing context
+    if (ctx) ctx.revert();
+    if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+    if (resizeObserver) resizeObserver.disconnect();
 
-    const ctx = canvas.getContext("2d");
-    let width = 0;
-    let height = 0;
+    const container = document.getElementById("fluid-mesh-container");
+    if (!container) return; // Should not happen
 
-    // Blobs
-    const blobs = [
-      { x: 0, y: 0, r: 0, vx: 1, vy: 0.5, color: "" },
-      { x: 0, y: 0, r: 0, vx: -0.5, vy: 1, color: "" },
-      { x: 0, y: 0, r: 0, vx: -1, vy: -0.5, color: "" },
-      { x: 0, y: 0, r: 0, vx: 0.8, vy: -0.8, color: "" },
-    ];
+    // 2. Create new GSAP Context scoped to this component
+    ctx = gsap.context(() => {
+      // --- Canvas Logic ---
+      const canvas = document.getElementById(
+        "particle-stream-canvas",
+      ) as HTMLCanvasElement;
 
-    const initBlobs = () => {
-      blobs.forEach((blob, i) => {
-        blob.x = Math.random() * width;
-        blob.y = Math.random() * height;
-        blob.r = Math.min(width, height) * (0.3 + Math.random() * 0.2);
-        // Random velocities
-        blob.vx = (Math.random() - 0.5) * 1.5;
-        blob.vy = (Math.random() - 0.5) * 1.5;
+      if (canvas) {
+        const ctx2d = canvas.getContext("2d");
+        if (ctx2d) {
+          let width = container.clientWidth;
+          let height = container.clientHeight;
+
+          // Use ResizeObserver for more robust resizing in pinned containers
+          resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+              width = entry.contentRect.width;
+              height = entry.contentRect.height;
+              canvas.width = width;
+              canvas.height = height;
+            }
+          });
+          resizeObserver.observe(container);
+
+          // Initial set
+          canvas.width = width;
+          canvas.height = height;
+
+          const particles: any[] = [];
+          const particleCount = 40;
+
+          // Create particles
+          for (let i = 0; i < particleCount; i++) {
+            particles.push({
+              x: Math.random() * width,
+              y: Math.random() * height,
+              size: Math.random() * 2 + 0.5,
+              speed: Math.random() * 0.4 + 0.1,
+              alpha: Math.random() * 0.5 + 0.1,
+            });
+          }
+
+          const animateCanvas = () => {
+            ctx2d.clearRect(0, 0, width, height);
+
+            // Robust color extraction
+            const isDark = document.documentElement.classList.contains("dark");
+            // Try to get primary color or fallback to black/white
+            const style = getComputedStyle(document.documentElement);
+            const primary = style.getPropertyValue("--primary").trim();
+            let fillStyle = isDark
+              ? "rgba(255, 255, 255, 0.3)"
+              : "rgba(0, 0, 0, 0.3)";
+
+            if (primary) {
+              fillStyle = `hsla(${primary} / 0.3)`;
+            }
+
+            ctx2d.fillStyle = fillStyle;
+
+            particles.forEach((p) => {
+              p.y -= p.speed;
+              if (p.y < 0) {
+                p.y = height;
+                p.x = Math.random() * width;
+              }
+              ctx2d.globalAlpha = p.alpha;
+              ctx2d.beginPath();
+              ctx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+              // ctx2d.fill();
+              // Fill is expensive if state changes rapidly, but fine here
+              ctx2d.fill();
+            });
+
+            canvasAnimationId = requestAnimationFrame(animateCanvas);
+          };
+          animateCanvas();
+        }
+      }
+
+      // --- DOM Elements Logic ---
+      // Ensure they start invisible then fade in
+      gsap.set(".float-asset", { opacity: 0, y: 30 }); // Initial set ensuring it overrides CSS
+
+      gsap.to(".float-asset", {
+        opacity: (i) => [0.6, 0.5, 0.7, 0.4][i],
+        y: 0,
+        duration: 1.5,
+        stagger: 0.2,
+        ease: "power2.out",
+        delay: 0.2, // Slight delay to ensure layout
       });
-    };
 
-    const resize = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-
-      // Re-calc specific sizes if needed
-      blobs.forEach((b) => {
-        b.r = Math.min(width, height) * (0.4 + Math.random() * 0.2);
-      });
-    };
-
-    const animate = () => {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, width, height);
-
-      // Check theme for blend mode
-      const isDark = document.documentElement.classList.contains("dark");
-      ctx.globalCompositeOperation = isDark ? "screen" : "multiply";
-
-      // Get styles once per frame (dynamic for theme switching)
-      const style = getComputedStyle(document.documentElement);
-      const primary = style.getPropertyValue("--primary").trim();
-      const accent = style.getPropertyValue("--accent").trim();
-
-      // Update positions
-      blobs.forEach((blob) => {
-        blob.x += blob.vx;
-        blob.y += blob.vy;
-
-        // Bounce
-        if (blob.x < -blob.r) blob.vx = Math.abs(blob.vx);
-        if (blob.x > width + blob.r) blob.vx = -Math.abs(blob.vx);
-        if (blob.y < -blob.r) blob.vy = Math.abs(blob.vy);
-        if (blob.y > height + blob.r) blob.vy = -Math.abs(blob.vy);
+      // Continuous Float
+      gsap.utils.toArray(".float-asset").forEach((el: any, i) => {
+        gsap.to(el, {
+          y: "-=20",
+          rotation: i % 2 === 0 ? 5 : -5,
+          duration: gsap.utils.random(4, 7),
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: i * 0.5 + 1.5, // Start after reveal
+        });
       });
 
-      blobs.forEach((blob, i) => {
-        const grd = ctx.createRadialGradient(
-          blob.x,
-          blob.y,
-          0,
-          blob.x,
-          blob.y,
-          blob.r,
-        );
+      // Mouse Parallax with safety check
+      container.addEventListener("mousemove", (e) => {
+        const rect = container.getBoundingClientRect();
+        // Calculate mouse relative to container center
+        const mouseX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+        const mouseY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
 
-        const baseColor = i % 2 === 0 ? `hsl(${primary})` : `hsl(${accent})`;
-
-        // Adjust opacity for blend modes
-        // Screen needs lower opacity to avoid whitewash, Multiply can handle it
-        const opacity = isDark ? 0.4 : 0.15;
-
-        grd.addColorStop(0, baseColor.replace(")", ` / ${opacity})`)); // Center
-        grd.addColorStop(1, baseColor.replace(")", " / 0)")); // Edge
-
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2);
-        ctx.fill();
+        gsap.utils.toArray(".float-asset").forEach((el: any) => {
+          const speed = parseFloat(el.getAttribute("data-speed") || "10");
+          gsap.to(el, {
+            x: mouseX * speed,
+            y: mouseY * speed,
+            duration: 1,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
+        });
       });
-
-      ctx.globalCompositeOperation = "source-over";
-
-      animationId = requestAnimationFrame(animate);
-    };
-
-    resizeListener = resize;
-    window.addEventListener("resize", resize);
-    resize();
-    initBlobs();
-    animate();
+    }, container); // Scope to container
   };
 
-  document.addEventListener("astro:page-load", initFluidMesh);
+  // Run on page load and view transitions
+  document.addEventListener("astro:page-load", init);
+
+  // Fallback for first load if astro:page-load misses (rare but happens in some dev modes)
+  if (
+    document.readyState === "complete" ||
+    document.readyState === "interactive"
+  ) {
+    // Small timeout to ensure DOM is ready
+    setTimeout(() => {
+      if (!ctx) init();
+    }, 0);
+  }
+
+  // Cleanup
   document.addEventListener("astro:before-swap", () => {
-    if (animationId) cancelAnimationFrame(animationId);
-    if (resizeListener) window.removeEventListener("resize", resizeListener);
+    if (ctx) ctx.revert();
+    if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+    if (resizeObserver) resizeObserver.disconnect();
+    ctx = null;
+    resizeObserver = null;
   });
 </script>
+
+<style>
+  .animate-spin-slow {
+    animation: spin 10s linear infinite;
+  }
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

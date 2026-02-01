@@ -1,0 +1,130 @@
+<div
+    class="absolute inset-0 w-full h-full -z-10 overflow-hidden pointer-events-none select-none bg-background"
+    id="ambience-container"
+>
+    <!-- Texture Overlay (Grain) -> Makes it feel physical/premium -->
+    <div
+        class="absolute inset-0 z-10 opacity-[0.03] mix-blend-overlay"
+        style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"
+    >
+    </div>
+
+    <!-- Orb 1: Primary (Top Left) -->
+    <div
+        class="glow-orb absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] rounded-full bg-primary/20 blur-[100px] mix-blend-normal dark:bg-primary/5 dark:mix-blend-screen"
+        data-speed="0.05"
+    >
+    </div>
+
+    <!-- Orb 2: Accent (Bottom Right) -->
+    <div
+        class="glow-orb absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] rounded-full bg-accent/25 blur-[120px] mix-blend-normal dark:bg-accent/5 dark:mix-blend-screen"
+        data-speed="0.08"
+    >
+    </div>
+
+    <!-- Orb 3: Subtlety (Center-Right Floating) -> Adds Depth -->
+    <div
+        class="glow-orb absolute top-[40%] right-[20%] w-[30vw] h-[30vw] max-w-[400px] max-h-[400px] rounded-full bg-primary/15 blur-[80px] mix-blend-normal dark:bg-primary/5 dark:mix-blend-screen"
+        data-speed="0.03"
+    >
+    </div>
+</div>
+
+<script>
+    import gsap from "gsap";
+
+    const initAmbience = () => {
+        const container = document.getElementById("ambience-container");
+        if (!container) return; // Guard
+
+        // 1. Organic "Breathing" Motion
+        gsap.utils.toArray(".glow-orb").forEach((orb: any, i) => {
+            gsap.to(orb, {
+                x: "random(-50, 50)",
+                y: "random(-50, 50)",
+                scale: "random(0.9, 1.1)",
+                duration: gsap.utils.random(10, 20),
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut",
+                delay: i * 2, // Desync them so it looks natural
+            });
+        });
+
+        // 2. Subtle Parallax on Mouse Move (The "Premium" Feel)
+        const onMouseMove = (e: MouseEvent) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2; // -1 to 1
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            gsap.utils.toArray(".glow-orb").forEach((orb: any) => {
+                const speed = parseFloat(
+                    orb.getAttribute("data-speed") || "0.05",
+                );
+                gsap.to(orb, {
+                    x: x * 100 * speed, // Subtle shift against movement
+                    y: y * 100 * speed,
+                    duration: 2,
+                    ease: "power2.out",
+                    overwrite: "auto", // Don't fight the breathing animation too hard, actually we need to be careful here.
+                    // To mix both: we should probably animate a wrapper or use simple "xPercent" vs "x" if we wanted complex mixing.
+                    // But for simple ambient, overwriting "x" is fine as long as we don't kill the "scale".
+                    // Actually, let's purely start with Breathing, and maybe leave parallax out or keep it VERY subtle on a transform wrapper
+                    // GSAP is smart enough to merge if we use different properties vs same.
+                    // Simplification: Let's stick to Breathing for now to ensure stability, or use xPercent for breathing and x for mouse.
+                });
+            });
+        };
+
+        // Let's refine: Use xPercent for breathing, x for parallax helps avoid conflict
+        gsap.utils.toArray(".glow-orb").forEach((orb: any, i) => {
+            // Kill previous if any (though astro swap handles context usually, explicit is good)
+            gsap.killTweensOf(orb);
+
+            // Breathing (Scale & minimal drift)
+            gsap.to(orb, {
+                scale: "random(0.85, 1.15)",
+                rotation: "random(-20, 20)",
+                duration: gsap.utils.random(15, 25),
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut",
+                delay: i * 3,
+            });
+
+            // Drifting Position (xPercent/yPercent)
+            gsap.to(orb, {
+                xPercent: "random(-20, 20)",
+                yPercent: "random(-20, 20)",
+                duration: gsap.utils.random(20, 30),
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut",
+                delay: i * 2,
+            });
+        });
+
+        // Mouse Parallax (x/y pixels)
+        window.addEventListener("mousemove", (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+
+            gsap.utils.toArray(".glow-orb").forEach((orb: any) => {
+                const speed = parseFloat(
+                    orb.getAttribute("data-speed") || "0.05",
+                );
+                // Animate x/y (separate from xPercent/yPercent)
+                gsap.to(orb, {
+                    x: x * 300 * speed, // 300px range * speed factor
+                    y: y * 300 * speed,
+                    duration: 3,
+                    ease: "power3.out",
+                });
+            });
+        });
+    };
+
+    // Initialize on load and swap
+    document.addEventListener("astro:page-load", initAmbience);
+    if (document.readyState === "complete") initAmbience();
+</script>

@@ -1,4 +1,7 @@
 ---
+import { Image } from "astro:assets";
+import logo from "../../assets/favicon.svg";
+
 interface Props {
   class?: string;
 }
@@ -10,16 +13,21 @@ const { class: className } = Astro.props;
   <!-- Outer Glow Rings -->
   <div class="absolute inset-0 rounded-full border border-primary/20 scale-150 animate-pulse-slow"></div>
   <div class="absolute inset-0 rounded-full border border-primary/10 scale-[2.5] animate-pulse-slow delay-700"></div>
-  
+
   <!-- Central Glass Core -->
   <div class="relative w-32 h-32 rounded-full glass-card border-2 border-primary/50 flex items-center justify-center shadow-[0_0_50px_hsl(var(--primary)/0.3)]">
     <!-- Inner Spinning Element -->
     <div class="absolute inset-2 rounded-full border-t-2 border-primary animate-spin-slow"></div>
-    
-    <!-- TweetBatch Symbol (Minimalist) -->
-    <svg viewBox="0 0 24 24" class="w-16 h-16 text-primary drop-shadow-[0_0_10px_hsl(var(--primary)/0.8)]" fill="currentColor">
-      <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/>
-    </svg>
+
+    <!-- TweetBatch Symbol (Custom Logo) -->
+    <div class="bird-perspective">
+      <Image
+        id="engine-bird"
+        src={logo}
+        alt="TweetBatch"
+        class="size-20 drop-shadow-[0_0_10px_hsl(var(--primary)/0.8)]"
+      />
+    </div>
   </div>
 </div>
 
@@ -30,16 +38,114 @@ const { class: className } = Astro.props;
     -webkit-backdrop-filter: blur(12px);
   }
 
+  .bird-perspective {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+  }
+
+  #engine-bird {
+    transform-style: preserve-3d;
+    will-change: transform, filter;
+  }
+
   @keyframes pulse-slow {
     0%, 100% { transform: scale(1.5); opacity: 0.2; }
     50% { transform: scale(1.7); opacity: 0.4; }
   }
-  
+
   .animate-pulse-slow {
     animation: pulse-slow 4s ease-in-out infinite;
   }
-  
+
   .animate-spin-slow {
     animation: spin 8s linear infinite;
   }
 </style>
+
+<script>
+  import gsap from "gsap";
+
+  // Initialize bird animation with GSAP
+  const initBirdAnimation = () => {
+    const bird = document.getElementById("engine-bird");
+    if (!bird) return;
+
+    // Create animation context for proper cleanup
+    const ctx = gsap.context(() => {
+      // Set initial state
+      gsap.set(bird, {
+        transformOrigin: "center center",
+      });
+
+      // Breathing scale effect
+      gsap.to(bird, {
+        scale: 1.15,
+        duration: 3,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      // 3D rotation on Y-axis (offset timing for organic feel)
+      gsap.to(bird, {
+        rotationY: 8,
+        duration: 5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.5,
+      });
+
+      // 3D rotation on X-axis
+      gsap.to(bird, {
+        rotationX: -5,
+        duration: 6,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.8,
+      });
+
+      // Floating motion (vertical)
+      gsap.to(bird, {
+        y: -12,
+        duration: 4,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.25,
+      });
+
+      // Floating motion (horizontal)
+      gsap.to(bird, {
+        x: 5,
+        duration: 4.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.15,
+      });
+    });
+
+    // Return cleanup function
+    return () => ctx.revert();
+  };
+
+  // Initialize with IntersectionObserver for performance
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          initBirdAnimation();
+          observer.disconnect();
+        }
+      });
+    },
+    { threshold: 0.1 }
+  );
+
+  const container = document.getElementById("engine-core-container");
+  if (container) {
+    observer.observe(container);
+  }
+</script>

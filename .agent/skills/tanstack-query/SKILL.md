@@ -271,7 +271,7 @@ export function useAddTodo() {
   })
 }
 
-// Usage:
+// Usage: Simple TodoList
 function TodoList() {
   const { data, isPending, isError, error } = useTodos()
   const { mutate } = useAddTodo()

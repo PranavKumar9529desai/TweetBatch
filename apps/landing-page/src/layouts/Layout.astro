@@ -3,7 +3,6 @@ import "@repo/ui/globals.css";
 import "../styles/global.css";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import FlightLoader from "../components/loader/FlightLoader.astro";
 
 interface Props {
 	title: string;
@@ -48,7 +47,6 @@ const {
 	<body
 		class="bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground"
 	>
-		<!-- <FlightLoader /> -->
 		<Navbar />
 		<slot />
 		<Footer />

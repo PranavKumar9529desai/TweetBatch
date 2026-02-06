@@ -16,6 +16,9 @@ export default defineConfig({
       brotliSize: true,
     }),
   ],
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
   build: {
     rollupOptions: {
       output: {

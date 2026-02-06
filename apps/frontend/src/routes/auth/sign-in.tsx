@@ -182,6 +182,14 @@ function SignInPage() {
         >
           Continue with Email
         </AuthButton>
+        <div className="text-center">
+          <Link
+            to="/auth/forgot-password"
+            className="text-sm text-muted-foreground hover:text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </form>
 
       {/* Sign Up Link */}

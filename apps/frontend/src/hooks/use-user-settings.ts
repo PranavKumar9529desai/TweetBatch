@@ -47,6 +47,7 @@ export function useUpdateProfile() {
       const data = await response.json();
 
       if (!data.success) {
+        // @ts-expect-error error type
         throw new Error(data.error || "Failed to update profile");
       }
 
@@ -92,7 +93,7 @@ export function useChangePassword() {
   return useMutation({
     mutationFn: async (params: {
       newPassword: string;
-      currentPassword?: string;
+      currentPassword: string;
       revokeOtherSessions?: boolean;
     }) => {
       const { error } = await authClient.changePassword({

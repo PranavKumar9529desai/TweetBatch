@@ -210,7 +210,7 @@ function SecurityTab() {
     changePasswordMutation.mutate(
       {
         newPassword,
-        currentPassword: currentPassword || undefined,
+        currentPassword: currentPassword,
         revokeOtherSessions: true,
       },
       {
